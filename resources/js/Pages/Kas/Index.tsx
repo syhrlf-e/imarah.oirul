@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Head, Link, router, useForm } from "@inertiajs/react";
+import { AnimatePresence, motion } from "framer-motion";
 import AppLayout from "@/Layouts/AppLayout";
 import { PaginatedResponse, Transaction, User } from "@/types";
 import { formatRupiah, parseRupiah } from "@/utils/formatter";
@@ -11,8 +12,6 @@ import {
     ChevronLeft,
     ChevronRight,
     Search,
-    Filter,
-    ArrowUpDown,
     SlidersHorizontal,
     Wallet,
     ArrowDownRight,
@@ -20,7 +19,19 @@ import {
     Activity,
     Save,
     Loader2,
+    ChevronDown,
 } from "lucide-react";
+
+const CATEGORY_OPTIONS = [
+    { value: "", label: "Semua Kategori" },
+    { value: "zakat_fitrah", label: "Zakat Fitrah" },
+    { value: "zakat_maal", label: "Zakat Maal" },
+    { value: "infaq", label: "Infaq / Sedekah" },
+    { value: "infaq_tromol", label: "Infaq Tromol" },
+    { value: "operasional", label: "Operasional" },
+    { value: "gaji", label: "Gaji" },
+    { value: "lainnya", label: "Lainnya" },
+];
 
 interface Props {
     transactions: PaginatedResponse<Transaction>;
@@ -30,6 +41,7 @@ interface Props {
     filters?: {
         type?: string;
         category?: string;
+        search?: string;
     };
     summary: {
         pemasukan_bulan_ini: number;
@@ -47,12 +59,86 @@ export default function KasIndex({
     summary,
     month,
     year,
+    filters,
 }: Props) {
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState(filters?.search ?? "");
+    const [typeFilter, setTypeFilter] = useState(filters?.type ?? "");
+    const [categoryFilter, setCategoryFilter] = useState(
+        filters?.category ?? "",
+    );
     const [sortOrder, setSortOrder] = useState<"terbaru" | "terlama">(
         "terbaru",
     );
-    const [sortAlpha, setSortAlpha] = useState<"a-z" | "z-a">("a-z");
+    const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Swipe direction: 1 = forward (right→left), -1 = backward (left→right)
+    const TYPE_ORDER = ["", "in", "out"];
+    const navDirRef = useRef<1 | -1>(1);
+
+    // --- Single filter function — always server-side partial reload ---
+    const applyFilters = useCallback(
+        (params: {
+            search?: string;
+            type?: string;
+            category?: string;
+            page?: number;
+        }) => {
+            router.get(
+                route("kas.index"),
+                {
+                    search: params.search ?? search,
+                    type: params.type ?? typeFilter,
+                    category: params.category ?? categoryFilter,
+                    ...(params.page ? { page: params.page } : {}),
+                },
+                {
+                    only: ["transactions"],
+                    preserveScroll: true,
+                    preserveState: true,
+                    replace: true,
+                },
+            );
+        },
+        [search, typeFilter, categoryFilter],
+    );
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setSearch(val);
+        if (searchTimer.current) clearTimeout(searchTimer.current);
+        searchTimer.current = setTimeout(() => {
+            applyFilters({ search: val });
+        }, 350);
+    };
+
+    const handleTypeChange = (newType: string) => {
+        const oldIdx = TYPE_ORDER.indexOf(typeFilter);
+        const newIdx = TYPE_ORDER.indexOf(newType);
+        navDirRef.current = newIdx >= oldIdx ? 1 : -1;
+        setTypeFilter(newType);
+        applyFilters({ type: newType, page: 1 });
+    };
+
+    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const val = e.target.value;
+        setCategoryFilter(val);
+        applyFilters({ category: val, page: 1 });
+    };
+
+    const handlePageNav = (direction: 1 | -1, url: string | null) => {
+        if (!url) return;
+        navDirRef.current = direction;
+        router.get(
+            url,
+            {},
+            {
+                only: ["transactions"],
+                preserveScroll: true,
+                preserveState: true,
+                replace: true,
+            },
+        );
+    };
 
     const [isAddOpen, setIsAddOpen] = useState(false);
     const isOnline = useNetwork();
@@ -162,22 +248,19 @@ export default function KasIndex({
 
             {/* Stat Cards - Ringkasan Keuangan */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 md:px-6">
-                {/* Total Kas Card (Highlight) */}
-                <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 shadow-lg shadow-slate-900/20 text-white relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all"></div>
-                    <div className="relative z-10 flex flex-col h-full">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-2.5 bg-white/10 rounded-xl backdrop-blur-sm">
-                                <Wallet className="w-5 h-5 text-emerald-400" />
-                            </div>
+                {/* Total Kas Card */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="p-2.5 bg-green-50 rounded-xl">
+                            <Wallet className="w-5 h-5 text-green-600" />
                         </div>
-                        <p className="text-sm font-medium text-slate-300 mb-1">
-                            Total Saldo Kas
-                        </p>
-                        <h4 className="text-2xl font-black tracking-tight mt-auto">
-                            {formatCurrency(summary.saldo_total_kas)}
-                        </h4>
                     </div>
+                    <p className="text-sm font-medium text-slate-500 mb-1">
+                        Total Saldo Kas
+                    </p>
+                    <h4 className="text-2xl font-bold text-slate-900 mt-auto">
+                        {formatCurrency(summary.saldo_total_kas)}
+                    </h4>
                 </div>
 
                 {/* Pemasukan Card */}
@@ -249,9 +332,10 @@ export default function KasIndex({
 
             <div className="border-t border-slate-200 mb-6 md:mx-6"></div>
 
-            {/* Toolbar Area (Search & Sort) */}
+            {/* Toolbar Area (Search & Filters) */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-2 relative z-10">
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-3">
+                    {/* Search */}
                     <div className="relative flex-1">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <Search className="h-4 w-4 text-slate-400" />
@@ -259,55 +343,102 @@ export default function KasIndex({
                         <input
                             type="text"
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Cari transaksi..."
-                            className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 sm:text-sm transition-colors shadow-sm"
+                            onChange={handleSearchChange}
+                            placeholder="Cari keterangan transaksi..."
+                            className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 sm:text-sm transition-colors shadow-sm"
                         />
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setSortAlpha(
-                                    sortAlpha === "a-z" ? "z-a" : "a-z",
-                                )
-                            }
-                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
-                        >
-                            <ArrowUpDown className="w-4 h-4 mr-2 text-slate-400" />
-                            {sortAlpha === "a-z" ? "A-Z" : "Z-A"}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setSortOrder(
-                                    sortOrder === "terbaru"
-                                        ? "terlama"
-                                        : "terbaru",
-                                )
-                            }
-                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
-                        >
-                            <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
-                            {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
-                        </button>
+
+                    {/* Jenis Transaksi Filter */}
+                    <div className="flex items-center gap-1.5 shrink-0 bg-slate-100 rounded-xl p-1">
+                        {(
+                            [
+                                { value: "", label: "Semua" },
+                                { value: "in", label: "Masuk" },
+                                { value: "out", label: "Keluar" },
+                            ] as { value: "" | "in" | "out"; label: string }[]
+                        ).map((opt) => (
+                            <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => handleTypeChange(opt.value)}
+                                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                    typeFilter === opt.value
+                                        ? "bg-white text-slate-800 shadow-sm"
+                                        : "text-slate-500 hover:text-slate-700"
+                                }`}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
                     </div>
+
+                    {/* Kategori Filter */}
+                    <div className="relative shrink-0">
+                        <select
+                            value={categoryFilter}
+                            onChange={handleCategoryChange}
+                            className="w-full sm:w-auto appearance-none pl-3 pr-8 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors shadow-sm cursor-pointer"
+                        >
+                            {CATEGORY_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center">
+                            <ChevronDown className="w-4 h-4 text-slate-400" />
+                        </div>
+                    </div>
+
+                    {/* Urutkan */}
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setSortOrder(
+                                sortOrder === "terbaru" ? "terlama" : "terbaru",
+                            )
+                        }
+                        className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer shrink-0"
+                    >
+                        <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
+                        {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
+                    </button>
                 </div>
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="overflow-x-auto">
+                <div
+                    className="kas-table-scroll overflow-x-auto overflow-y-auto"
+                    style={{
+                        maxHeight: "480px",
+                        scrollbarWidth: "thin",
+                        scrollbarColor: "#CBD5E1 transparent",
+                    }}
+                >
+                    <style>{`
+                        .kas-table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+                        .kas-table-scroll::-webkit-scrollbar-track { background: transparent; }
+                        .kas-table-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+                        .kas-table-scroll::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+                    `}</style>
                     <table className="w-full text-sm text-left">
-                        <thead className="bg-slate-50/80 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
+                        <thead className="sticky top-0 z-10 bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
                             <tr>
-                                <th scope="col" className="px-6 py-4">
+                                <th
+                                    scope="col"
+                                    className="px-6 py-4 whitespace-nowrap"
+                                >
                                     Tanggal
+                                </th>
+                                <th scope="col" className="px-6 py-4">
+                                    Pengimput
                                 </th>
                                 <th scope="col" className="px-6 py-4">
                                     Kategori
                                 </th>
                                 <th scope="col" className="px-6 py-4">
-                                    Keterangan
+                                    Metode
                                 </th>
                                 <th
                                     scope="col"
@@ -316,7 +447,7 @@ export default function KasIndex({
                                     Nominal
                                 </th>
                                 <th scope="col" className="px-6 py-4">
-                                    Metode
+                                    Keterangan
                                 </th>
                                 <th scope="col" className="px-6 py-4">
                                     Status
@@ -329,171 +460,255 @@ export default function KasIndex({
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100/80">
-                            {transactions.data.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan={7}
-                                        className="px-6 py-12 text-center text-slate-500"
-                                    >
-                                        <div className="flex flex-col items-center justify-center">
-                                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
-                                                <Search className="w-8 h-8 text-slate-300" />
-                                            </div>
-                                            <p className="font-medium text-slate-600">
-                                                Belum ada data transaksi
-                                            </p>
-                                            <p className="text-xs text-slate-400 mt-1">
-                                                Transaksi yang ditambahkan akan
-                                                muncul di sini.
-                                            </p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : (
-                                transactions.data.map((item) => (
-                                    <tr
-                                        key={item.id}
-                                        className="bg-white hover:bg-slate-50/80 transition-colors group"
-                                    >
-                                        <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium">
-                                            {new Date(
-                                                item.created_at,
-                                            ).toLocaleDateString("id-ID", {
-                                                day: "2-digit",
-                                                month: "short",
-                                                year: "numeric",
-                                            })}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 capitalize border border-slate-200">
-                                                {item.category.replace(
-                                                    /_/g,
-                                                    " ",
-                                                )}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 max-w-xs">
-                                            <div
-                                                className="truncate text-slate-700 font-medium"
-                                                title={item.notes}
-                                            >
-                                                {item.notes || "-"}
-                                            </div>
-                                            <div className="text-xs text-slate-400 mt-0.5 flex items-center">
-                                                <span className="w-4 h-4 rounded-full bg-slate-200 inline-flex items-center justify-center text-[8px] mr-1.5 font-bold text-slate-500">
-                                                    {item.user?.name.charAt(0)}
-                                                </span>
-                                                {item.user?.name}
-                                            </div>
-                                        </td>
+                        <AnimatePresence mode="wait" initial={false}>
+                            <motion.tbody
+                                key={`${transactions.current_page}-${typeFilter}`}
+                                className="divide-y divide-slate-100/80"
+                                initial={{
+                                    x: navDirRef.current * 40,
+                                    opacity: 0,
+                                }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{
+                                    x: navDirRef.current * -40,
+                                    opacity: 0,
+                                }}
+                                transition={{ duration: 0.18, ease: "easeOut" }}
+                            >
+                                {transactions.data.length === 0 ? (
+                                    <tr>
                                         <td
-                                            className={`px-6 py-4 whitespace-nowrap text-right font-bold ${item.type === "in" ? "text-emerald-600" : "text-red-500"}`}
+                                            colSpan={8}
+                                            className="px–6 py-12 text-center text-slate-500"
                                         >
-                                            {item.type === "in" ? "+" : "-"}{" "}
-                                            {formatRupiah(item.amount)}
-                                        </td>
-                                        <td className="px-6 py-4 capitalize text-slate-600">
-                                            {item.payment_method || "-"}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            {item.verified_at ? (
-                                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/50">
-                                                    <CheckCircle className="w-3 h-3 mr-1" />
-                                                    Terverifikasi
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200/50">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse"></span>
-                                                    Pending
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                            <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                {isBendaharaOrAdmin &&
-                                                    !item.verified_at && (
-                                                        <button
-                                                            onClick={() =>
-                                                                handleVerify(
-                                                                    item.id,
-                                                                )
-                                                            }
-                                                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                                                            title="Verifikasi Transaksi"
-                                                        >
-                                                            <CheckCircle
-                                                                size={18}
-                                                            />
-                                                        </button>
-                                                    )}
-                                                {isSuperAdmin && (
-                                                    <button
-                                                        onClick={() =>
-                                                            handleDelete(
-                                                                item.id,
-                                                            )
-                                                        }
-                                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                        title="Hapus Transaksi"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                )}
+                                            <div className="flex flex-col items-center justify-center">
+                                                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                                                    <Search className="w-8 h-8 text-slate-300" />
+                                                </div>
+                                                <p className="font-medium text-slate-600">
+                                                    Belum ada data transaksi
+                                                </p>
+                                                <p className="text-xs text-slate-400 mt-1">
+                                                    Transaksi yang ditambahkan
+                                                    akan muncul di sini.
+                                                </p>
                                             </div>
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
+                                ) : (
+                                    transactions.data.map((item) => (
+                                        <tr
+                                            key={item.id}
+                                            className="bg-white hover:bg-slate-50/80 transition-colors group"
+                                        >
+                                            {/* Tanggal + Jam */}
+                                            <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium text-sm">
+                                                <div>
+                                                    {new Date(
+                                                        item.created_at,
+                                                    ).toLocaleDateString(
+                                                        "id-ID",
+                                                        {
+                                                            day: "2-digit",
+                                                            month: "short",
+                                                            year: "numeric",
+                                                        },
+                                                    )}
+                                                </div>
+                                                <div className="text-xs text-slate-400 mt-0.5">
+                                                    {new Date(
+                                                        item.created_at,
+                                                    ).toLocaleTimeString(
+                                                        "id-ID",
+                                                        {
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                        },
+                                                    )}
+                                                </div>
+                                            </td>
+
+                                            {/* Pengimput */}
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className="text-sm text-slate-700 font-medium">
+                                                    {item.user?.name ?? "-"}
+                                                </span>
+                                            </td>
+
+                                            {/* Kategori */}
+                                            <td className="px-6 py-4">
+                                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 capitalize border border-slate-200">
+                                                    {item.category.replace(
+                                                        /_/g,
+                                                        " ",
+                                                    )}
+                                                </span>
+                                            </td>
+
+                                            {/* Metode */}
+                                            <td className="px-6 py-4 capitalize text-slate-600 text-sm">
+                                                {item.payment_method || "-"}
+                                            </td>
+
+                                            {/* Nominal */}
+                                            <td
+                                                className={`px-6 py-4 whitespace-nowrap text-right font-bold text-sm ${
+                                                    item.type === "in"
+                                                        ? "text-emerald-600"
+                                                        : "text-red-500"
+                                                }`}
+                                            >
+                                                {item.type === "in" ? "+" : "-"}{" "}
+                                                {formatRupiah(item.amount)}
+                                            </td>
+
+                                            {/* Keterangan */}
+                                            <td className="px-6 py-4 min-w-[200px]">
+                                                <p className="text-slate-600 text-sm whitespace-normal break-words">
+                                                    {item.notes || "-"}
+                                                </p>
+                                            </td>
+
+                                            {/* Status */}
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {item.verified_at ? (
+                                                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/50">
+                                                        <CheckCircle className="w-3 h-3 mr-1" />
+                                                        Terverifikasi
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200/50">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse"></span>
+                                                        Pending
+                                                    </span>
+                                                )}
+                                            </td>
+
+                                            {/* Aksi */}
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                                <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    {isBendaharaOrAdmin &&
+                                                        !item.verified_at && (
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleVerify(
+                                                                        item.id,
+                                                                    )
+                                                                }
+                                                                className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                                                title="Verifikasi Transaksi"
+                                                            >
+                                                                <CheckCircle
+                                                                    size={18}
+                                                                />
+                                                            </button>
+                                                        )}
+                                                    {isSuperAdmin && (
+                                                        <button
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    item.id,
+                                                                )
+                                                            }
+                                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                            title="Hapus Transaksi"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </motion.tbody>
+                        </AnimatePresence>
                     </table>
                 </div>
 
-                {/* Pagination */}
-                {transactions.data.length > 0 && (
-                    <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="text-sm text-slate-500 font-medium">
-                            Menampilkan{" "}
-                            <span className="text-slate-900 font-semibold">
-                                {transactions.from || 0}
-                            </span>{" "}
-                            -{" "}
-                            <span className="text-slate-900 font-semibold">
-                                {transactions.to || 0}
-                            </span>{" "}
-                            dari{" "}
-                            <span className="text-slate-900 font-semibold">
-                                {transactions.total || 0}
+                {/* Pagination (satu untuk semua mode — server-side) */}
+                {transactions.last_page > 1 && (
+                    <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        {/* Info */}
+                        <span className="text-sm text-slate-500">
+                            <span className="font-semibold text-slate-800">
+                                {transactions.total}
                             </span>{" "}
                             data
-                        </div>
-                        <div className="flex space-x-2">
-                            {transactions.prev_page_url ? (
-                                <Link
-                                    href={transactions.prev_page_url || "#"}
-                                    preserveScroll
-                                    className={`p-2 rounded-lg transition-colors ${!transactions.prev_page_url ? "text-slate-300 cursor-not-allowed" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
-                                >
-                                    <ChevronLeft className="w-5 h-5" />
-                                </Link>
-                            ) : (
-                                <span className="p-2 border border-slate-200 rounded-lg text-slate-300 bg-slate-50/50 cursor-not-allowed">
-                                    <ChevronLeft size={16} />
-                                </span>
-                            )}
-                            {transactions.next_page_url ? (
-                                <Link
-                                    href={transactions.next_page_url || "#"}
-                                    preserveScroll
-                                    className={`p-2 rounded-lg transition-colors ${!transactions.next_page_url ? "text-slate-300 cursor-not-allowed" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
-                                >
-                                    <ChevronRight className="w-5 h-5" />
-                                </Link>
-                            ) : (
-                                <span className="p-2 border border-slate-200 rounded-lg text-slate-300 bg-slate-50/50 cursor-not-allowed">
-                                    <ChevronRight size={16} />
-                                </span>
-                            )}
+                            {" · Halaman "}
+                            <span className="font-semibold text-slate-800">
+                                {transactions.current_page}
+                            </span>{" "}
+                            dari{" "}
+                            <span className="font-semibold text-slate-800">
+                                {transactions.last_page}
+                            </span>
+                        </span>
+
+                        {/* Prev / Page Numbers / Next */}
+                        <div className="flex items-center gap-1.5">
+                            {/* Prev */}
+                            <button
+                                type="button"
+                                disabled={!transactions.prev_page_url}
+                                onClick={() =>
+                                    handlePageNav(
+                                        -1,
+                                        transactions.prev_page_url,
+                                    )
+                                }
+                                className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                            </button>
+
+                            {/* Page numbers: prev, current, next */}
+                            {[
+                                transactions.current_page - 1,
+                                transactions.current_page,
+                                transactions.current_page + 1,
+                            ]
+                                .filter(
+                                    (p) =>
+                                        p >= 1 && p <= transactions.last_page,
+                                )
+                                .map((p) => (
+                                    <button
+                                        key={p}
+                                        type="button"
+                                        onClick={() => {
+                                            if (p === transactions.current_page)
+                                                return;
+                                            handlePageNav(
+                                                p > transactions.current_page
+                                                    ? 1
+                                                    : -1,
+                                                p > transactions.current_page
+                                                    ? transactions.next_page_url
+                                                    : transactions.prev_page_url,
+                                            );
+                                        }}
+                                        className={`w-8 h-8 rounded-lg text-sm font-medium border transition-colors ${
+                                            p === transactions.current_page
+                                                ? "bg-emerald-600 text-white border-emerald-600 cursor-default"
+                                                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                                        }`}
+                                    >
+                                        {p}
+                                    </button>
+                                ))}
+
+                            {/* Next */}
+                            <button
+                                type="button"
+                                disabled={!transactions.next_page_url}
+                                onClick={() =>
+                                    handlePageNav(1, transactions.next_page_url)
+                                }
+                                className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            >
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
                         </div>
                     </div>
                 )}

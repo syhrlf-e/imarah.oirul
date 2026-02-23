@@ -23,20 +23,38 @@ class TransactionController extends Controller
     {
         $this->authorize('viewAny', Transaction::class);
 
-        $month = $request->get('month', date('m'));
-        $year = $request->get('year', date('Y'));
+        $month    = $request->get('month', date('m'));
+        $year     = $request->get('year', date('Y'));
+        $type     = $request->get('type');
+        $category = $request->get('category');
+        $search   = $request->get('search');
 
-        $transactions = Transaction::with(['donatur', 'tromolBox', 'creator', 'verifier'])
+        // 5 per page when filtered by type, 10 for "Semua"
+        $perPage = $type ? 5 : 10;
+
+        $transactions = Transaction::with(['creator', 'verifier'])
+            ->when($type,     fn ($q) => $q->where('type', $type))
+            ->when($category, fn ($q) => $q->where('category', $category))
+            ->when($search,   fn ($q) => $q->where('notes', 'ilike', "%{$search}%"))
             ->latest()
-            ->paginate(10);
+            ->paginate($perPage)
+            ->withQueryString()
+            ->through(fn ($t) => array_merge($t->toArray(), [
+                'user' => $t->creator,
+            ]));
 
         $summaryData = $this->transactionService->getSummary($month, $year);
 
         return Inertia::render('Kas/Index', [
             'transactions' => $transactions,
-            'summary' => $summaryData['summary'],
-            'month' => $month,
-            'year' => $year,
+            'summary'      => $summaryData['summary'],
+            'month'        => $month,
+            'year'         => $year,
+            'filters'      => [
+                'type'     => $type,
+                'category' => $category,
+                'search'   => $search,
+            ],
         ]);
     }
 
