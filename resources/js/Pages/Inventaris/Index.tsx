@@ -2,7 +2,16 @@ import React, { useState } from "react";
 import AppLayout from "@/Layouts/AppLayout";
 import { Head, useForm, router } from "@inertiajs/react";
 import { PageProps } from "@/types";
-import { Plus, Edit2, Trash2, Box, Info } from "lucide-react";
+import {
+    Plus,
+    Edit2,
+    Trash2,
+    Box,
+    Info,
+    Search,
+    ArrowUpDown,
+    SlidersHorizontal,
+} from "lucide-react";
 
 interface User {
     id: string;
@@ -34,6 +43,11 @@ export default function InventarisIndex({
     auth,
     items,
 }: PageProps<{ items: PaginationData }>) {
+    const [search, setSearch] = useState("");
+    const [sortOrder, setSortOrder] = useState<"terbaru" | "terlama">(
+        "terbaru",
+    );
+    const [sortAlpha, setSortAlpha] = useState<"a-z" | "z-a">("a-z");
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
 
@@ -119,13 +133,13 @@ export default function InventarisIndex({
     };
 
     return (
-        <AppLayout title="Inventaris">
+        <AppLayout title="Pengelola Inventaris">
             <Head title="Inventaris Masjid" />
 
             {/* Header Section */}
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                    <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
                         Inventaris
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
@@ -140,6 +154,51 @@ export default function InventarisIndex({
                     <Plus className="w-5 h-5 mr-2" />
                     Tambah Barang
                 </button>
+            </div>
+
+            <div className="mb-2 relative z-10 bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Search className="h-4 w-4 text-slate-400" />
+                        </div>
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 sm:text-sm transition-colors shadow-sm"
+                            placeholder="Cari nama barang..."
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setSortAlpha(
+                                    sortAlpha === "a-z" ? "z-a" : "a-z",
+                                )
+                            }
+                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                        >
+                            <ArrowUpDown className="w-4 h-4 mr-2 text-slate-400" />
+                            {sortAlpha === "a-z" ? "A-Z" : "Z-A"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setSortOrder(
+                                    sortOrder === "terbaru"
+                                        ? "terlama"
+                                        : "terbaru",
+                                )
+                            }
+                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                        >
+                            <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
+                            {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {/* Data Table */}

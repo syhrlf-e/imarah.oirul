@@ -1,8 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import AppLayout from "@/Layouts/AppLayout";
 import { Head, Link } from "@inertiajs/react";
 import { PageProps } from "@/types";
-import { Box, QrCode, MapPin, Activity, Plus, History } from "lucide-react";
+import {
+    Box,
+    QrCode,
+    MapPin,
+    Activity,
+    Plus,
+    History,
+    Search,
+    ArrowUpDown,
+    SlidersHorizontal,
+} from "lucide-react";
 
 interface TromolBox {
     id: string;
@@ -18,14 +28,19 @@ export default function TromolIndex({
     auth,
     tromolBoxes,
 }: PageProps<{ tromolBoxes: TromolBox[] }>) {
+    const [search, setSearch] = useState("");
+    const [sortOrder, setSortOrder] = useState<"terbaru" | "terlama">(
+        "terbaru",
+    );
+    const [sortAlpha, setSortAlpha] = useState<"a-z" | "z-a">("a-z");
     return (
-        <AppLayout title="Tromol">
+        <AppLayout title="Pengelola Tromol">
             <Head title="Daftar Kotak Tromol" />
 
             {/* Header Section */}
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                    <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
                         Kotak Tromol & Amal
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
@@ -43,7 +58,51 @@ export default function TromolIndex({
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="mb-2 relative z-10 bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Search className="h-4 w-4 text-slate-400" />
+                        </div>
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 sm:text-sm transition-colors shadow-sm"
+                            placeholder="Cari kotak tromol..."
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setSortAlpha(
+                                    sortAlpha === "a-z" ? "z-a" : "a-z",
+                                )
+                            }
+                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                        >
+                            <ArrowUpDown className="w-4 h-4 mr-2 text-slate-400" />
+                            {sortAlpha === "a-z" ? "A-Z" : "Z-A"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setSortOrder(
+                                    sortOrder === "terbaru"
+                                        ? "terlama"
+                                        : "terbaru",
+                                )
+                            }
+                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                        >
+                            <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
+                            {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {tromolBoxes.map((box) => (
                     <div
                         key={box.id}
@@ -82,13 +141,14 @@ export default function TromolIndex({
                                                 ) : (
                                                     <>
                                                         <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mr-1.5"></span>{" "}
-                                                        Tidak Aktif
+                                                        Nonaktif
                                                     </>
                                                 )}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
+                                {/* Action dropdown or buttons could go here */}
                             </div>
 
                             <div className="mt-auto space-y-3 bg-slate-50/50 p-4 rounded-xl border border-slate-100">

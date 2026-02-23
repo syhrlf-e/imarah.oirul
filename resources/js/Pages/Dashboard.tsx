@@ -177,7 +177,7 @@ export default function Dashboard({
                 {/* Greeting Header Section */}
                 <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 md:px-6">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900 tracking-tight mb-1">
+                        <h1 className="text-2xl font-semibold text-slate-900 tracking-tight mb-1">
                             Assalamu'alaikum, {auth.user.name}! 👋
                         </h1>
                         <p className="text-slate-500 text-sm font-medium">

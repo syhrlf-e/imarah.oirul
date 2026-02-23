@@ -9,6 +9,9 @@ import {
     Calendar as CalendarIcon,
     MapPin,
     Clock,
+    Search,
+    ArrowUpDown,
+    SlidersHorizontal,
 } from "lucide-react";
 
 interface User {
@@ -42,6 +45,11 @@ export default function AgendaIndex({
     auth,
     agendas,
 }: PageProps<{ agendas: PaginationData }>) {
+    const [search, setSearch] = useState("");
+    const [sortOrder, setSortOrder] = useState<"terbaru" | "terlama">(
+        "terbaru",
+    );
+    const [sortAlpha, setSortAlpha] = useState<"a-z" | "z-a">("a-z");
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editingAgenda, setEditingAgenda] = useState<Agenda | null>(null);
 
@@ -156,13 +164,13 @@ export default function AgendaIndex({
     };
 
     return (
-        <AppLayout title="Agenda">
+        <AppLayout title="Pengelola Agenda">
             <Head title="Agenda Masjid" />
 
             {/* Header Section */}
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                    <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
                         Agenda Masjid
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
@@ -183,9 +191,53 @@ export default function AgendaIndex({
                 )}
             </div>
 
+            <div className="mb-2 relative z-10 bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Search className="h-4 w-4 text-slate-400" />
+                        </div>
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 sm:text-sm transition-colors shadow-sm"
+                            placeholder="Cari agenda kegiatan..."
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setSortAlpha(
+                                    sortAlpha === "a-z" ? "z-a" : "a-z",
+                                )
+                            }
+                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                        >
+                            <ArrowUpDown className="w-4 h-4 mr-2 text-slate-400" />
+                            {sortAlpha === "a-z" ? "A-Z" : "Z-A"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setSortOrder(
+                                    sortOrder === "terbaru"
+                                        ? "terlama"
+                                        : "terbaru",
+                                )
+                            }
+                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                        >
+                            <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
+                            {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
+                        </button>
+                    </div>
+                </div>
+            </div>
             {/* Grid vs Table View - Switch to a beautiful Card Grid for Agendas */}
             {agendas.data.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {agendas.data.map((agenda) => (
                         <div
                             key={agenda.id}

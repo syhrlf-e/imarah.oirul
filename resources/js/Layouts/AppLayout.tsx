@@ -108,105 +108,6 @@ export default function AppLayout({ title, children }: Props) {
                         Dashboard
                     </Link>
 
-                    {/* Zakat Collapsible */}
-                    {["super_admin", "bendahara", "petugas_zakat"].includes(
-                        auth.user.role,
-                    ) && (
-                        <div>
-                            <button
-                                onClick={() => setIsZakatOpen(!isZakatOpen)}
-                                className={`group w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
-                                    isActive("/zakat") && !isZakatOpen
-                                        ? "bg-emerald-50 text-emerald-700"
-                                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                                }`}
-                            >
-                                <div className="flex items-center">
-                                    <UserCircle
-                                        className={`w-5 h-5 mr-3 transition-colors ${isActive("/zakat") && !isZakatOpen ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
-                                    />
-                                    Zakat
-                                </div>
-                                <ChevronRight
-                                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isZakatOpen ? "rotate-90" : ""}`}
-                                />
-                            </button>
-
-                            <div
-                                className={`overflow-hidden transition-all duration-300 ease-in-out ${isZakatOpen ? "max-h-48 opacity-100 mt-1" : "max-h-0 opacity-0"}`}
-                            >
-                                <div className="pl-11 pr-3 py-1 space-y-1 relative before:absolute before:inset-y-0 before:left-5 before:w-px before:bg-slate-200">
-                                    <Link
-                                        href="/zakat/muzakki"
-                                        className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${isActive("/zakat/muzakki") ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
-                                    >
-                                        Muzakki
-                                    </Link>
-                                    <Link
-                                        href="/zakat/mustahiq"
-                                        className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${isActive("/zakat/mustahiq") ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
-                                    >
-                                        Mustahiq
-                                    </Link>
-                                    <Link
-                                        href="/zakat/transaksi"
-                                        className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${isActive("/zakat/transaksi") ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
-                                    >
-                                        Transaksi
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Tromol Collapsible */}
-                    {["super_admin", "bendahara", "petugas_zakat"].includes(
-                        auth.user.role,
-                    ) && (
-                        <div>
-                            <button
-                                onClick={() => setIsTromolOpen(!isTromolOpen)}
-                                className={`group w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
-                                    isActive("/tromol") && !isTromolOpen
-                                        ? "bg-emerald-50 text-emerald-700"
-                                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                                }`}
-                            >
-                                <div className="flex items-center">
-                                    <Box
-                                        className={`w-5 h-5 mr-3 transition-colors ${isActive("/tromol") && !isTromolOpen ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
-                                    />
-                                    Tromol
-                                </div>
-                                <ChevronRight
-                                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isTromolOpen ? "rotate-90" : ""}`}
-                                />
-                            </button>
-                            <div
-                                className={`overflow-hidden transition-all duration-300 ease-in-out ${isTromolOpen ? "max-h-32 opacity-100 mt-1" : "max-h-0 opacity-0"}`}
-                            >
-                                <div className="pl-11 pr-3 py-1 space-y-1 relative before:absolute before:inset-y-0 before:left-5 before:w-px before:bg-slate-200">
-                                    <Link
-                                        href="/tromol"
-                                        className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${url === "/tromol" ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
-                                    >
-                                        Daftar Kotak
-                                    </Link>
-                                    <Link
-                                        href="/tromol/history"
-                                        className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${isActive("/tromol/history") ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
-                                    >
-                                        Riwayat
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="mt-8 mb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                        Administrasi
-                    </div>
-
                     {/* Kas Masjid & Inventaris (Admin & Bendahara only) */}
                     {["super_admin", "bendahara"].includes(auth.user.role) && (
                         <>
@@ -268,9 +169,112 @@ export default function AppLayout({ title, children }: Props) {
                         Laporan
                     </Link>
 
+                    {/* ZISWAF / Baitul Mal */}
+                    {["super_admin", "bendahara", "petugas_zakat"].includes(
+                        auth.user.role,
+                    ) && (
+                        <>
+                            <div className="mt-6 mb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                Penerimaan & ZISWAF
+                            </div>
+
+                            {/* Zakat Collapsible */}
+                            <div>
+                                <button
+                                    onClick={() => setIsZakatOpen(!isZakatOpen)}
+                                    className={`group w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                        isActive("/zakat") && !isZakatOpen
+                                            ? "bg-emerald-50 text-emerald-700"
+                                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                    }`}
+                                >
+                                    <div className="flex items-center">
+                                        <UserCircle
+                                            className={`w-5 h-5 mr-3 transition-colors ${isActive("/zakat") && !isZakatOpen ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                                        />
+                                        Zakat
+                                    </div>
+                                    <ChevronRight
+                                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isZakatOpen ? "rotate-90" : ""}`}
+                                    />
+                                </button>
+
+                                <div
+                                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isZakatOpen ? "max-h-48 opacity-100 mt-1" : "max-h-0 opacity-0"}`}
+                                >
+                                    <div className="pl-11 pr-3 py-1 space-y-1 relative before:absolute before:inset-y-0 before:left-5 before:w-px before:bg-slate-200">
+                                        <Link
+                                            href="/zakat/muzakki"
+                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${isActive("/zakat/muzakki") ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                        >
+                                            Muzakki
+                                        </Link>
+                                        <Link
+                                            href="/zakat/mustahiq"
+                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${isActive("/zakat/mustahiq") ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                        >
+                                            Mustahiq
+                                        </Link>
+                                        <Link
+                                            href="/zakat/transaksi"
+                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${isActive("/zakat/transaksi") ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                        >
+                                            Transaksi
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Tromol Collapsible */}
+                            <div>
+                                <button
+                                    onClick={() =>
+                                        setIsTromolOpen(!isTromolOpen)
+                                    }
+                                    className={`group w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                        isActive("/tromol") && !isTromolOpen
+                                            ? "bg-emerald-50 text-emerald-700"
+                                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                    }`}
+                                >
+                                    <div className="flex items-center">
+                                        <Box
+                                            className={`w-5 h-5 mr-3 transition-colors ${isActive("/tromol") && !isTromolOpen ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                                        />
+                                        Tromol
+                                    </div>
+                                    <ChevronRight
+                                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isTromolOpen ? "rotate-90" : ""}`}
+                                    />
+                                </button>
+                                <div
+                                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isTromolOpen ? "max-h-32 opacity-100 mt-1" : "max-h-0 opacity-0"}`}
+                                >
+                                    <div className="pl-11 pr-3 py-1 space-y-1 relative before:absolute before:inset-y-0 before:left-5 before:w-px before:bg-slate-200">
+                                        <Link
+                                            href="/tromol"
+                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${url === "/tromol" ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                        >
+                                            Daftar Kotak
+                                        </Link>
+                                        <Link
+                                            href="/tromol/history"
+                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${isActive("/tromol/history") ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                        >
+                                            Riwayat
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
                     {/* Pengaturan hanya Super Admin & Bendahara */}
                     {["super_admin", "bendahara"].includes(auth.user.role) && (
-                        <div className="mt-auto pt-4 border-t border-slate-200">
+                        <>
+                            <div className="mt-6 mb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                Sistem
+                            </div>
                             <Link
                                 href="/settings"
                                 className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
@@ -284,7 +288,7 @@ export default function AppLayout({ title, children }: Props) {
                                 />
                                 Pengaturan
                             </Link>
-                        </div>
+                        </>
                     )}
                 </nav>
             </aside>

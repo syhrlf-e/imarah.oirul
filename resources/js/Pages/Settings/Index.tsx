@@ -32,13 +32,13 @@ export default function SettingsIndex({
     };
 
     return (
-        <AppLayout title="Pengaturan">
+        <AppLayout title="Pengelola Pengaturan">
             <Head title="Pengaturan Sistem" />
 
             {/* Header Section */}
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center">
+                    <h1 className="text-2xl font-semibold text-slate-900 tracking-tight flex items-center">
                         <Settings className="w-6 h-6 mr-2.5 text-slate-700" />
                         Pengaturan Sistem
                     </h1>

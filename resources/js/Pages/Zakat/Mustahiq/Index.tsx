@@ -16,6 +16,8 @@ import {
     Upload,
     FileSpreadsheet,
     X,
+    ArrowUpDown,
+    SlidersHorizontal,
 } from "lucide-react";
 
 interface Mustahiq {
@@ -72,6 +74,10 @@ const ASHNAF_STYLES: Record<string, string> = {
 export default function Index({ mustahiqs, filters }: Props) {
     const [search, setSearch] = useState(filters.search || "");
     const [ashnafFilter, setAshnafFilter] = useState(filters.ashnaf || "");
+    const [sortOrder, setSortOrder] = useState<"terbaru" | "terlama">(
+        "terbaru",
+    );
+    const [sortAlpha, setSortAlpha] = useState<"a-z" | "z-a">("a-z");
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingMustahiq, setEditingMustahiq] = useState<Mustahiq | null>(
         null,
@@ -151,13 +157,13 @@ export default function Index({ mustahiqs, filters }: Props) {
     };
 
     return (
-        <AppLayout title="Zakat">
+        <AppLayout title="Pengelola Zakat">
             <Head title="Manajemen Mustahiq" />
 
             {/* Header Section */}
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                    <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
                         Data Mustahiq
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
@@ -185,55 +191,88 @@ export default function Index({ mustahiqs, filters }: Props) {
                 </div>
             </div>
 
-            {/* Main Content Area */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                {/* Filters */}
-                <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-4">
-                    <div className="relative w-full max-w-md">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-slate-400" />
+            <div className="mb-2 relative z-10 bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+                <div className="flex flex-col lg:flex-row flex-wrap gap-4">
+                    <div className="flex-1 flex flex-col sm:flex-row gap-4">
+                        <div className="relative w-full sm:flex-1">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <Search className="h-4 w-4 text-slate-400" />
+                            </div>
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 sm:text-sm transition-colors shadow-sm"
+                                placeholder="Cari nama jamaah atau alamat..."
+                            />
                         </div>
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 sm:text-sm transition-colors shadow-sm"
-                            placeholder="Cari nama jamaah atau alamat..."
-                        />
-                    </div>
-                    <div className="relative w-full sm:w-48">
-                        <select
-                            value={ashnafFilter}
-                            onChange={(e) => setAshnafFilter(e.target.value)}
-                            className="block w-full px-4 py-2 pr-10 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 sm:text-sm transition-colors shadow-sm text-slate-700 appearance-none font-medium cursor-pointer"
-                        >
-                            <option value="">Semua Kategori</option>
-                            {Object.entries(ASHNAF_LABELS).map(
-                                ([value, label]) => (
-                                    <option key={value} value={value}>
-                                        {label}
-                                    </option>
-                                ),
-                            )}
-                        </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
-                            <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
+                        <div className="relative w-full sm:w-48 shrink-0">
+                            <select
+                                value={ashnafFilter}
+                                onChange={(e) =>
+                                    setAshnafFilter(e.target.value)
+                                }
+                                className="block w-full px-4 py-2.5 pr-10 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 sm:text-sm transition-colors shadow-sm text-slate-700 appearance-none font-medium cursor-pointer"
                             >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M19 9l-7 7-7-7"
-                                ></path>
-                            </svg>
+                                <option value="">Semua Kategori</option>
+                                {Object.entries(ASHNAF_LABELS).map(
+                                    ([value, label]) => (
+                                        <option key={value} value={value}>
+                                            {label}
+                                        </option>
+                                    ),
+                                )}
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
+                                <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M19 9l-7 7-7-7"
+                                    ></path>
+                                </svg>
+                            </div>
                         </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setSortAlpha(
+                                    sortAlpha === "a-z" ? "z-a" : "a-z",
+                                )
+                            }
+                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                        >
+                            <ArrowUpDown className="w-4 h-4 mr-2 text-slate-400" />
+                            {sortAlpha === "a-z" ? "A-Z" : "Z-A"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setSortOrder(
+                                    sortOrder === "terbaru"
+                                        ? "terlama"
+                                        : "terbaru",
+                                )
+                            }
+                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                        >
+                            <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
+                            {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
+                        </button>
                     </div>
                 </div>
+            </div>
 
+            {/* Main Content Area */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 {/* Table */}
                 <div className="overflow-x-auto">
                     <table className="min-w-full text-sm text-left">

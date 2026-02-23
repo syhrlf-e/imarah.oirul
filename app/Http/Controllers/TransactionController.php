@@ -19,17 +19,32 @@ class TransactionController extends Controller
         $this->transactionService = $transactionService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Transaction::class);
+
+        $month = $request->get('month', date('m'));
+        $year = $request->get('year', date('Y'));
 
         $transactions = Transaction::with(['donatur', 'tromolBox', 'creator', 'verifier'])
             ->latest()
             ->paginate(10);
 
+        $summaryData = $this->transactionService->getSummary($month, $year);
+
         return Inertia::render('Kas/Index', [
             'transactions' => $transactions,
+            'summary' => $summaryData['summary'],
+            'month' => $month,
+            'year' => $year,
         ]);
+    }
+
+    public function create()
+    {
+        $this->authorize('create', Transaction::class);
+
+        return Inertia::render('Kas/Create');
     }
 
     public function store(StoreTransactionRequest $request)

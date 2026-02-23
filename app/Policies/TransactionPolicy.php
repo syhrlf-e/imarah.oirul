@@ -32,7 +32,7 @@ class TransactionPolicy
         // Petugas Zakat only allowed for 'in' transactions, but policy create check
         // is usually generic. We might handle specific 'in/out' check in controller/request
         // For now, allow both if they have permission to create *some* transaction.
-        return in_array($user->role, ['bendahara', 'petugas_zakat']);
+        return in_array($user->role, ['super_admin', 'bendahara', 'petugas_zakat']);
     }
 
     /**

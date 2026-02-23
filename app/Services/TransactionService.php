@@ -65,14 +65,6 @@ class TransactionService
         return $transaction;
     }
 
-    /**
-     * Soft delete a transaction.
-     *
-     * @param  Transaction  $transaction
-     * @param  User  $actor
-     * @param  string  $reason
-     * @return void
-     */
     public function softDelete(Transaction $transaction, User $actor, string $reason): void
     {
         $oldValues = $transaction->toArray();
@@ -81,5 +73,54 @@ class TransactionService
 
         // Log the deletion with the reason in new_values
         $this->activityLogService->log($actor, 'delete', $transaction, $oldValues, ['reason' => $reason]);
+    }
+
+    /**
+     * Get transaction summary and breakdown.
+     *
+     * @param string|int $month
+     * @param string|int $year
+     * @return array
+     */
+    public function getSummary($month, $year): array
+    {
+        // Query Rekap Bulanan
+        $query = Transaction::whereMonth('created_at', $month)
+                            ->whereYear('created_at', $year);
+
+        // Agregasi Bulanan
+        $pemasukan = (clone $query)->where('type', 'in')->sum('amount');
+        $pengeluaran = (clone $query)->where('type', 'out')->sum('amount');
+        $saldo_akhir_bulan = $pemasukan - $pengeluaran;
+
+        // Breakdown per Kategori (Pemasukan)
+        $pemasukan_by_category = (clone $query)->where('type', 'in')
+            ->selectRaw('category, SUM(amount) as total')
+            ->groupBy('category')
+            ->get();
+
+        // Breakdown per Kategori (Pengeluaran)
+        $pengeluaran_by_category = (clone $query)->where('type', 'out')
+            ->selectRaw('category, SUM(amount) as total')
+            ->groupBy('category')
+            ->get();
+
+        // Saldo Kas Keseluruhan (Sepanjang Waktu)
+        $total_pemasukan_all = Transaction::where('type', 'in')->sum('amount');
+        $total_pengeluaran_all = Transaction::where('type', 'out')->sum('amount');
+        $saldo_total = $total_pemasukan_all - $total_pengeluaran_all;
+
+        return [
+            'summary' => [
+                'pemasukan_bulan_ini' => $pemasukan,
+                'pengeluaran_bulan_ini' => $pengeluaran,
+                'saldo_akhir_bulan' => $saldo_akhir_bulan,
+                'saldo_total_kas' => $saldo_total,
+            ],
+            'breakdown' => [
+                'pemasukan' => $pemasukan_by_category,
+                'pengeluaran' => $pengeluaran_by_category,
+            ]
+        ];
     }
 }

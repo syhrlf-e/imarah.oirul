@@ -3,11 +3,7 @@ import AppLayout from "@/Layouts/AppLayout";
 import { Head, router } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import {
-    ArrowDownRight,
-    ArrowUpRight,
-    Wallet,
     PieChart,
-    Activity,
     Building,
     TrendingDown,
     TrendingUp,
@@ -79,13 +75,13 @@ export default function LaporanIndex({
     };
 
     return (
-        <AppLayout title="Laporan">
+        <AppLayout title="Pengelola Laporan">
             <Head title="Laporan Keuangan" />
 
             {/* Header Section */}
-            <div className="mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div className="mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6 md:px-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                    <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
                         Laporan Keuangan
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
@@ -95,7 +91,7 @@ export default function LaporanIndex({
                 </div>
 
                 {/* Filter Controls */}
-                <div className="flex flex-col sm:flex-row items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
+                <div className="mb-2 relative z-10 flex flex-col sm:flex-row items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
                     <div className="flex items-center space-x-2 w-full sm:w-auto">
                         <div className="relative flex-1 sm:flex-none">
                             <select
@@ -143,93 +139,6 @@ export default function LaporanIndex({
                     >
                         Terapkan
                     </button>
-                </div>
-            </div>
-
-            {/* Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {/* Total Kas Card (Highlight) */}
-                <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 shadow-lg shadow-slate-900/20 text-white relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all"></div>
-                    <div className="relative z-10 flex flex-col h-full">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-2.5 bg-white/10 rounded-xl backdrop-blur-sm">
-                                <Wallet className="w-5 h-5 text-emerald-400" />
-                            </div>
-                        </div>
-                        <p className="text-sm font-medium text-slate-300 mb-1">
-                            Total Saldo Kas
-                        </p>
-                        <h4 className="text-2xl font-black tracking-tight mt-auto">
-                            {formatCurrency(summary.saldo_total_kas)}
-                        </h4>
-                    </div>
-                </div>
-
-                {/* Pemasukan Card */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2.5 bg-emerald-50 rounded-xl">
-                            <ArrowDownRight className="w-5 h-5 text-emerald-600" />
-                        </div>
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-500">
-                            {getMonthName(month as string)}
-                        </span>
-                    </div>
-                    <p className="text-sm font-medium text-slate-500 mb-1">
-                        Total Pemasukan
-                    </p>
-                    <h4 className="text-2xl font-bold text-slate-900 mt-auto">
-                        {formatCurrency(summary.pemasukan_bulan_ini)}
-                    </h4>
-                </div>
-
-                {/* Pengeluaran Card */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2.5 bg-red-50 rounded-xl">
-                            <ArrowUpRight className="w-5 h-5 text-red-600" />
-                        </div>
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-500">
-                            {getMonthName(month as string)}
-                        </span>
-                    </div>
-                    <p className="text-sm font-medium text-slate-500 mb-1">
-                        Total Pengeluaran
-                    </p>
-                    <h4 className="text-2xl font-bold text-slate-900 mt-auto">
-                        {formatCurrency(summary.pengeluaran_bulan_ini)}
-                    </h4>
-                </div>
-
-                {/* Surplus/Defisit Card */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                        <div
-                            className={`p-2.5 rounded-xl ${summary.saldo_akhir_bulan >= 0 ? "bg-blue-50" : "bg-orange-50"}`}
-                        >
-                            {summary.saldo_akhir_bulan >= 0 ? (
-                                <Activity className={`w-5 h-5 text-blue-600`} />
-                            ) : (
-                                <Activity
-                                    className={`w-5 h-5 text-orange-600`}
-                                />
-                            )}
-                        </div>
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-500">
-                            {getMonthName(month as string)}
-                        </span>
-                    </div>
-                    <p className="text-sm font-medium text-slate-500 mb-1">
-                        {summary.saldo_akhir_bulan >= 0 ? "Surplus" : "Defisit"}{" "}
-                        Bersih
-                    </p>
-                    <h4
-                        className={`text-2xl font-bold mt-auto ${summary.saldo_akhir_bulan >= 0 ? "text-blue-600" : "text-orange-600"}`}
-                    >
-                        {summary.saldo_akhir_bulan > 0 ? "+" : ""}
-                        {formatCurrency(summary.saldo_akhir_bulan)}
-                    </h4>
                 </div>
             </div>
 
