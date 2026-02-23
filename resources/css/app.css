@@ -25,3 +25,34 @@
         background: transparent;
     }
 }
+
+/* ================================================
+   Anti-Web Behavior (PWA Native Feel)
+   ================================================ */
+
+/* Mencegah text selection seperti webpage */
+* {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Kecuali elemen input */
+input,
+textarea,
+[contenteditable] {
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+/* Mencegah overscroll bounce berasa browser */
+html,
+body {
+    overscroll-behavior: none;
+}
+
+/* Cursor default berasa app bukan webpage */
+button,
+[role="button"] {
+    cursor: pointer;
+}

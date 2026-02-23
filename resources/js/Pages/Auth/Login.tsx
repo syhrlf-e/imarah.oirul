@@ -38,7 +38,7 @@ export default function Login({
                 </div>
             )}
 
-            <div className="mb-8">
+            <div className="mb-8 text-left">
                 <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">
                     Selamat Datang 👋
                 </h2>
@@ -135,7 +135,7 @@ export default function Login({
 
             <div className="mt-8 text-center text-xs text-slate-400">
                 <p>
-                    © {new Date().getFullYear()} E-Masjid. Hak Cipta Dilindungi.
+                    © {new Date().getFullYear()} Imarah. Hak Cipta Dilindungi.
                 </p>
             </div>
         </GuestLayout>

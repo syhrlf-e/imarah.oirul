@@ -16,25 +16,25 @@ class UserSeeder extends Seeder
     {
         $users = [
             [
-                'name' => 'Ust. Fulan',
+                'name' => 'Ust. Lorem',
                 'email' => 'super_admin@masjid.com',
                 'password' => env('SEEDER_SUPER_ADMIN_PASSWORD', 'password'),
                 'role' => 'super_admin',
             ],
             [
-                'name' => 'Bpk. Fulan',
+                'name' => 'Bpk. Lorem',
                 'email' => 'bendahara@masjid.com',
                 'password' => env('SEEDER_BENDAHARA_PASSWORD', 'password'),
                 'role' => 'bendahara',
             ],
             [
-                'name' => 'Bpk. Fulan',
+                'name' => 'Bpk. Lorem',
                 'email' => 'petugas@masjid.com',
                 'password' => env('SEEDER_PETUGAS_PASSWORD', 'password'),
                 'role' => 'petugas_zakat',
             ],
             [
-                'name' => 'Warga (Viewer)',
+                'name' => 'Bpk. Lorem (Viewer)',
                 'email' => 'viewer@masjid.com',
                 'password' => env('SEEDER_VIEWER_PASSWORD', 'password'),
                 'role' => 'viewer',

@@ -1,6 +1,6 @@
 #!/bin/bash
-# E-Masjid Auto Deploy Script
-cd /var/www/emasjid
+# Imarah Auto Deploy Script
+cd /var/www/imarah
 
 echo "$(date) - Deploy started" >> /var/www/deploy.log
 

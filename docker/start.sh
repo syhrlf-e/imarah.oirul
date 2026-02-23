@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "--- E-Masjid Production Startup ---"
+echo "--- Imarah Production Startup ---"
 
 # Create .env from environment variables if it doesn't exist
 if [ ! -f .env ]; then

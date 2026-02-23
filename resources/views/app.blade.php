@@ -12,12 +12,12 @@
 
         <!-- PWA: Android / Chrome -->
         <meta name="mobile-web-app-capable" content="yes">
-        <meta name="application-name" content="E-Masjid">
+        <meta name="application-name" content="Imarah">
 
         <!-- PWA: iOS / Safari -->
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
-        <meta name="apple-mobile-web-app-title" content="E-Masjid">
+        <meta name="apple-mobile-web-app-title" content="Imarah">
         <link rel="apple-touch-icon" href="/images/icon-192.png">
 
         <!-- PWA: Microsoft (Edge/Windows) -->

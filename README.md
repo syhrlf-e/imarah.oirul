@@ -1,6 +1,6 @@
-# 🕌 E-Masjid
+# 🕌 Imarah
 
-**E-Masjid** adalah sebuah sistem informasi manajemen masjid yang elegan dan mutakhir, dirancang secara komprehensif untuk membantu dewan kemakmuran masjid (DKM) dalam mengurus berbagai aspek rutinitas operasional dan administrasi jamaah.
+**Imarah** adalah sebuah sistem informasi manajemen masjid yang elegan dan mutakhir, dirancang secara komprehensif untuk membantu dewan kemakmuran masjid (DKM) dalam mengurus berbagai aspek rutinitas operasional dan administrasi jamaah.
 
 Aplikasi ini dikembangkan modern menggunakan **Laravel 11**, **React + TypeScript**, **Inertia.js**, dan dipercantik dengan balutan **Tailwind CSS**.
 
@@ -23,8 +23,8 @@ Aplikasi ini dikembangkan modern menggunakan **Laravel 11**, **React + TypeScrip
 
 ```bash
 # 1. Klon repositori ini
-git clone https://github.com/syhrlf-e/E-masjid.git
-cd manajemen_masjid
+git clone https://github.com/syhrlf-e/imarah.git
+cd imarah
 
 # 2. Instal pustaka PHP dan NPM
 composer install

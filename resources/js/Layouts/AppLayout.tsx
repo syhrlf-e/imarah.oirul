@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     LayoutDashboard,
     Wallet,
@@ -18,6 +19,7 @@ import {
     Bell,
 } from "lucide-react";
 import { User, PageProps } from "@/types";
+import BottomNav from "@/Components/BottomNav";
 
 interface Props {
     title?: string;
@@ -47,20 +49,20 @@ export default function AppLayout({ title, children }: Props) {
     const isActive = (route: string) => url.startsWith(route);
 
     return (
-        <div className="h-screen bg-slate-50 font-sans flex text-slate-900 overflow-hidden">
+        <div className="h-screen bg-slate-100 font-sans flex text-slate-900 overflow-hidden text-sm">
             {/* PWA Window Controls Overlay - Drag Region */}
             <div className="pwa-titlebar-drag"></div>
             {/* Overlay for mobile sidebar */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+                    className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden transition-opacity"
                     onClick={toggleSidebar}
                 ></div>
             )}
 
             {/* Sidebar */}
             <aside
-                className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:translate-x-0 lg:static lg:inset-auto flex flex-col ${
+                className={`fixed inset-y-0 left-0 z-50 w-72 bg-white transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col md:translate-x-0 md:static md:inset-auto md:my-4 md:ml-4 md:rounded-2xl md:shadow-sm ${
                     isSidebarOpen
                         ? "translate-x-0 shadow-2xl"
                         : "-translate-x-full"
@@ -71,16 +73,16 @@ export default function AppLayout({ title, children }: Props) {
                     <div className="flex items-center gap-3">
                         <div>
                             <h1 className="text-xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                                E-Masjid
+                                Imarah
                             </h1>
                             <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
-                                Management System
+                                Sistem manajemen masjid
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={toggleSidebar}
-                        className="lg:hidden ml-auto p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                        className="md:hidden ml-auto p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
                     >
                         <X size={20} />
                     </button>
@@ -290,17 +292,17 @@ export default function AppLayout({ title, children }: Props) {
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
                 {/* Top Desktop/Mobile Header */}
-                <header className="flex-none z-30 bg-white border-b border-slate-200 relative shadow-sm">
+                <header className="flex-none z-30 bg-white border-b border-slate-200 md:border-none relative shadow-sm md:mt-4 md:mx-4 md:rounded-2xl">
                     <div className="flex items-center justify-between h-[70px] px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center">
                             <button
                                 onClick={toggleSidebar}
-                                className="lg:hidden p-2 -ml-2 mr-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                                className="md:hidden p-2 -ml-2 mr-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
                             >
                                 <Menu size={24} />
                             </button>
                             {title && (
-                                <h1 className="text-lg font-bold text-slate-900 tracking-tight hidden lg:block">
+                                <h1 className="text-lg font-bold text-slate-900 tracking-tight hidden md:block">
                                     {title}
                                 </h1>
                             )}
@@ -365,85 +367,26 @@ export default function AppLayout({ title, children }: Props) {
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
-                    <div className="w-full">{children}</div>
+                <div className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-24 md:p-4 relative flex flex-col">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={url}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="w-full flex-1 flex flex-col lg:min-h-0"
+                        >
+                            {children}
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
             </main>
 
-            {/* Mobile Bottom Navigation */}
-            <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] border-t border-slate-100 z-50 pb-safe">
-                <div className="flex justify-around items-center h-16 px-2">
-                    <Link
-                        href="/dashboard"
-                        className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isActive("/dashboard") ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
-                    >
-                        <Home
-                            size={22}
-                            className={
-                                isActive("/dashboard")
-                                    ? "fill-emerald-100 stroke-2"
-                                    : "stroke-2"
-                            }
-                        />
-                        <span className="text-[10px] font-semibold">
-                            Beranda
-                        </span>
-                    </Link>
-
-                    {["super_admin", "bendahara", "petugas_zakat"].includes(
-                        auth.user.role,
-                    ) && (
-                        <Link
-                            href="/zakat"
-                            className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isActive("/zakat") ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
-                        >
-                            <UserCircle
-                                size={22}
-                                className={
-                                    isActive("/zakat")
-                                        ? "fill-emerald-100 stroke-2"
-                                        : "stroke-2"
-                                }
-                            />
-                            <span className="text-[10px] font-semibold">
-                                Zakat
-                            </span>
-                        </Link>
-                    )}
-
-                    {["super_admin", "bendahara"].includes(auth.user.role) && (
-                        <Link
-                            href="/kas"
-                            className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isActive("/kas") ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
-                        >
-                            <Wallet
-                                size={22}
-                                className={
-                                    isActive("/kas")
-                                        ? "fill-emerald-100 stroke-2"
-                                        : "stroke-2"
-                                }
-                            />
-                            <span className="text-[10px] font-semibold">
-                                Kas
-                            </span>
-                        </Link>
-                    )}
-
-                    <button
-                        onClick={toggleSidebar}
-                        className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isSidebarOpen ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
-                    >
-                        <Menu
-                            size={22}
-                            className={
-                                isSidebarOpen ? "stroke-2" : "stroke-[1.5]"
-                            }
-                        />
-                        <span className="text-[10px] font-semibold">Menu</span>
-                    </button>
-                </div>
-            </nav>
+            <BottomNav
+                isSidebarOpen={isSidebarOpen}
+                toggleSidebar={toggleSidebar}
+            />
         </div>
     );
 }
