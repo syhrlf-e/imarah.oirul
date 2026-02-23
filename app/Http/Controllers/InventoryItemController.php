@@ -22,12 +22,21 @@ class InventoryItemController extends Controller
     {
         $this->authorize('viewAny', InventoryItem::class);
 
-        $items = InventoryItem::with('creator:id,name')
-            ->latest()
-            ->paginate(10);
+        $query = InventoryItem::with('creator:id,name');
+
+        if (request('search')) {
+            $query->where('item_name', 'like', '%' . request('search') . '%');
+        }
+
+        if (request('condition') && request('condition') !== 'semua') {
+            $query->where('condition', request('condition'));
+        }
+
+        $items = $query->latest()->paginate(8)->withQueryString();
 
         return Inertia::render('Inventaris/Index', [
             'items' => $items,
+            'filters' => request()->only(['search', 'condition']),
         ]);
     }
 
@@ -43,8 +52,6 @@ class InventoryItemController extends Controller
                 ...$request->validated(),
                 'created_by' => auth()->id(),
             ]);
-
-            activity()->on($item)->log('created');
         });
 
         return redirect()->back()->with('success', 'Barang inventaris berhasil ditambahkan.');
@@ -59,7 +66,6 @@ class InventoryItemController extends Controller
 
         DB::transaction(function () use ($request, $inventoryItem) {
             $inventoryItem->update($request->validated());
-            activity()->on($inventoryItem)->log('updated');
         });
 
         return redirect()->back()->with('success', 'Barang inventaris berhasil diperbarui.');
@@ -74,7 +80,6 @@ class InventoryItemController extends Controller
 
         DB::transaction(function () use ($inventoryItem) {
             $inventoryItem->delete();
-            activity()->on($inventoryItem)->log('deleted');
         });
 
         return redirect()->back()->with('success', 'Barang inventaris berhasil dihapus.');

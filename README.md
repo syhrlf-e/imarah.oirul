@@ -10,7 +10,9 @@ Aplikasi ini dikembangkan modern menggunakan **Laravel 11**, **React + TypeScrip
 - **💰 Manajemen Kas (Tromol)**: Sistem pembukuan (keluar/masuk) kas masjid dengan rapi dan mendetail.
 - **☪️ Modul ZakatTerintegrasi**: Administrasi penerimaan zakat (Fitrah & Maal) dari **Muzakki**, sekaligus catatan pendistribusian dana zakat kepada **Mustahiq** yang dapat difilter berdasarkan Ashnaf.
 - **📅 Manajemen Agenda**: Pencatatan rencana kegiatan taklim, ibadah rutin, serta peringatan hari besar Islam.
+- **📦 Pengelola Inventaris**: Pendataan barang, fasilitas, dan aset masjid yang interaktif dengan filter multi-kondisi.
 - **🔐 Otentikasi dan Dasbor Eksekutif**: Gerbang keanggotaan tertutup (_Login/Register_) dengan rekayasa antarmuka _Guest_ bernuansa estetis.
+- **🎨 UI/UX Terpoles Sempurna**: Animasi _dropdown_ kustom yang mulus (_Framer Motion_), penyelarasan tabel responsif tingkat piksel, serta pencarian _real-time_ berlapis _debounce_.
 
 ## 🚀 Prasyarat Instalasi
 

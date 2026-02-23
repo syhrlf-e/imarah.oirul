@@ -22,11 +22,25 @@ class StoreInventoryItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'item_name' => ['required', 'string', 'max:255'],
+            'item_name' => [
+                'required', 
+                'string', 
+                'max:255',
+                'regex:/^[a-zA-Z0-9\s.,!?\-\'"]*$/'
+            ],
             'quantity' => ['required', 'integer', 'min:1'],
             'condition' => ['required', 'in:baik,rusak_ringan,rusak_berat'],
-            'location' => ['nullable', 'string', 'max:255'],
-            'notes' => ['nullable', 'string'],
+            'location' => [
+                'nullable', 
+                'string', 
+                'max:255',
+                'regex:/^[a-zA-Z0-9\s.,!?\-\'"]*$/'
+            ],
+            'notes' => [
+                'nullable', 
+                'string',
+                'regex:/^[a-zA-Z0-9\s.,!?\-\'"]*$/'
+            ],
         ];
     }
 }

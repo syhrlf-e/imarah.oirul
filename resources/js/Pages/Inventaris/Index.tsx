@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import AppLayout from "@/Layouts/AppLayout";
 import { Head, useForm, router } from "@inertiajs/react";
 import { PageProps } from "@/types";
@@ -9,9 +9,12 @@ import {
     Box,
     Info,
     Search,
-    ArrowUpDown,
-    SlidersHorizontal,
+    ChevronDown,
+    Filter,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface User {
     id: string;
@@ -37,17 +40,24 @@ interface PaginationData {
     total: number;
     from: number;
     to: number;
+    prev_page_url: string | null;
+    next_page_url: string | null;
 }
 
 export default function InventarisIndex({
     auth,
     items,
-}: PageProps<{ items: PaginationData }>) {
-    const [search, setSearch] = useState("");
-    const [sortOrder, setSortOrder] = useState<"terbaru" | "terlama">(
-        "terbaru",
+    filters,
+}: PageProps<{
+    items: PaginationData;
+    filters?: { search?: string; condition?: string };
+}>) {
+    const [search, setSearch] = useState(filters?.search || "");
+    const [conditionFilter, setConditionFilter] = useState(
+        filters?.condition || "semua",
     );
-    const [sortAlpha, setSortAlpha] = useState<"a-z" | "z-a">("a-z");
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
 
@@ -58,11 +68,12 @@ export default function InventarisIndex({
         put,
         delete: destroy,
         reset,
+        clearErrors,
         errors,
         processing,
     } = useForm({
         item_name: "",
-        quantity: 1,
+        quantity: "" as number | string,
         condition: "baik",
         location: "",
         notes: "",
@@ -71,6 +82,14 @@ export default function InventarisIndex({
     const openAddModal = () => {
         setEditingItem(null);
         reset();
+        clearErrors();
+        setData({
+            item_name: "",
+            quantity: "" as number | string,
+            condition: "baik",
+            location: "",
+            notes: "",
+        });
         setIsAddOpen(true);
     };
 
@@ -91,7 +110,55 @@ export default function InventarisIndex({
         setTimeout(() => {
             setEditingItem(null);
             reset();
+            clearErrors();
+            setData({
+                item_name: "",
+                quantity: "" as number | string,
+                condition: "baik",
+                location: "",
+                notes: "",
+            });
         }, 200);
+    };
+
+    const applyFilters = useCallback(
+        (params: { search?: string; condition?: string; page?: number }) => {
+            router.get(
+                route("inventaris.index"),
+                {
+                    search: params.search ?? search,
+                    condition: params.condition ?? conditionFilter,
+                    ...(params.page ? { page: params.page } : {}),
+                },
+                {
+                    only: ["items", "filters"],
+                    preserveScroll: true,
+                    preserveState: true,
+                    replace: true,
+                },
+            );
+        },
+        [search, conditionFilter],
+    );
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearch(value);
+
+        if (searchTimer.current) {
+            clearTimeout(searchTimer.current);
+        }
+
+        searchTimer.current = setTimeout(() => {
+            applyFilters({ search: value, page: 1 });
+        }, 500);
+    };
+
+    const handlePageNav = (direction: number, url: string | null) => {
+        if (!url) return;
+        const urlObj = new URL(url);
+        const page = urlObj.searchParams.get("page");
+        applyFilters({ page: page ? parseInt(page) : 1 });
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -121,9 +188,9 @@ export default function InventarisIndex({
     };
 
     const conditionStyles = {
-        baik: "bg-emerald-50 text-emerald-700 border-emerald-200/50",
-        rusak_ringan: "bg-amber-50 text-amber-700 border-amber-200/50",
-        rusak_berat: "bg-red-50 text-red-700 border-red-200/50",
+        baik: "bg-white text-emerald-600 border-emerald-300 font-medium",
+        rusak_ringan: "bg-white text-amber-600 border-amber-300 font-medium",
+        rusak_berat: "bg-white text-red-600 border-red-300 font-medium",
     };
 
     const conditionLabels = {
@@ -137,7 +204,7 @@ export default function InventarisIndex({
             <Head title="Inventaris Masjid" />
 
             {/* Header Section */}
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6">
+            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6 shrink-0">
                 <div>
                     <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
                         Inventaris
@@ -156,7 +223,7 @@ export default function InventarisIndex({
                 </button>
             </div>
 
-            <div className="mb-2 relative z-10 bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+            <div className="mb-2 relative z-20 bg-white rounded-2xl shadow-sm border border-slate-200 p-4 shrink-0">
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="relative flex-1">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -165,56 +232,128 @@ export default function InventarisIndex({
                         <input
                             type="text"
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            onChange={handleSearchChange}
                             className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 sm:text-sm transition-colors shadow-sm"
                             placeholder="Cari nama barang..."
                         />
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+
+                    {/* Kondisi Filter Dropdown - Custom UI */}
+                    <div className="relative shrink-0 z-50">
+                        {/* Invisible overlay for closing dropdown */}
+                        {isFilterOpen && (
+                            <div
+                                className="fixed inset-0 z-40"
+                                onClick={() => setIsFilterOpen(false)}
+                            ></div>
+                        )}
+
                         <button
                             type="button"
-                            onClick={() =>
-                                setSortAlpha(
-                                    sortAlpha === "a-z" ? "z-a" : "a-z",
-                                )
-                            }
-                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                            onClick={() => setIsFilterOpen(!isFilterOpen)}
+                            className="relative z-50 inline-flex items-center justify-between w-full sm:w-[180px] px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
                         >
-                            <ArrowUpDown className="w-4 h-4 mr-2 text-slate-400" />
-                            {sortAlpha === "a-z" ? "A-Z" : "Z-A"}
+                            <span className="flex items-center">
+                                <Filter className="w-4 h-4 mr-2 text-slate-400" />
+                                <span className="truncate">
+                                    {conditionFilter === "semua" ||
+                                    !conditionFilter
+                                        ? "Semua Kondisi"
+                                        : conditionLabels[
+                                              conditionFilter as keyof typeof conditionLabels
+                                          ]}
+                                </span>
+                            </span>
+                            <ChevronDown
+                                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ml-2 ${isFilterOpen ? "rotate-180" : ""}`}
+                            />
                         </button>
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setSortOrder(
-                                    sortOrder === "terbaru"
-                                        ? "terlama"
-                                        : "terbaru",
-                                )
-                            }
-                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
-                        >
-                            <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
-                            {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
-                        </button>
+
+                        <AnimatePresence>
+                            {isFilterOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="absolute right-0 mt-2 w-full sm:w-48 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-[60] p-1"
+                                >
+                                    {[
+                                        {
+                                            value: "semua",
+                                            label: "Semua Kondisi",
+                                        },
+                                        { value: "baik", label: "Baik" },
+                                        {
+                                            value: "rusak_ringan",
+                                            label: "Rusak Ringan",
+                                        },
+                                        {
+                                            value: "rusak_berat",
+                                            label: "Rusak Berat",
+                                        },
+                                    ].map((opt) => (
+                                        <button
+                                            key={opt.value}
+                                            type="button"
+                                            onClick={() => {
+                                                setConditionFilter(opt.value);
+                                                setIsFilterOpen(false);
+                                                applyFilters({
+                                                    condition: opt.value,
+                                                    page: 1,
+                                                });
+                                            }}
+                                            className={`w-full text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                                (conditionFilter || "semua") ===
+                                                opt.value
+                                                    ? "bg-emerald-50 text-emerald-700 font-semibold"
+                                                    : "text-slate-600 hover:bg-slate-50"
+                                            }`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </div>
             </div>
 
             {/* Data Table */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm text-left align-middle">
-                        <thead className="bg-slate-50/80 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-1 min-h-0">
+                <div
+                    className="inventaris-table-scroll overflow-x-auto overflow-y-auto rounded-t-2xl flex-1 min-h-0"
+                    style={{
+                        scrollbarWidth: "thin",
+                        scrollbarColor: "#CBD5E1 transparent",
+                    }}
+                >
+                    <style>{`
+                        .inventaris-table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+                        .inventaris-table-scroll::-webkit-scrollbar-track { background: transparent; }
+                        .inventaris-table-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+                        .inventaris-table-scroll::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+                    `}</style>
+                    <table className="w-full text-sm text-left align-middle table-fixed">
+                        <thead className="sticky top-0 z-10 bg-slate-50 shadow-sm text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
                             <tr>
-                                <th className="px-6 py-4">Nama Barang</th>
-                                <th className="px-6 py-4 text-center">
+                                <th className="px-6 py-4 w-[15%]">Tanggal</th>
+                                <th className="px-6 py-4 w-[20%]">
+                                    Nama Barang
+                                </th>
+                                <th className="px-6 py-4 text-center w-[12%]">
                                     Jumlah
                                 </th>
-                                <th className="px-6 py-4">Kondisi</th>
-                                <th className="px-6 py-4">Lokasi</th>
-                                <th className="px-6 py-4">Keterangan</th>
-                                <th className="px-6 py-4 text-right">Aksi</th>
+                                <th className="px-6 py-4 w-[13%]">Kondisi</th>
+                                <th className="px-6 py-4 w-[15%]">Lokasi</th>
+                                <th className="px-6 py-4 w-[15%]">
+                                    Keterangan
+                                </th>
+                                <th className="px-6 py-4 text-right w-[10%]">
+                                    Aksi
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100/80">
@@ -224,24 +363,38 @@ export default function InventarisIndex({
                                         key={item.id}
                                         className="bg-white hover:bg-slate-50/80 transition-colors group"
                                     >
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 mr-3">
-                                                    <Box size={16} />
-                                                </div>
-                                                <span className="font-semibold text-slate-700">
-                                                    {item.item_name}
-                                                </span>
+                                        <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium text-sm">
+                                            <div>
+                                                {new Date(
+                                                    item.created_at,
+                                                ).toLocaleDateString("id-ID", {
+                                                    day: "2-digit",
+                                                    month: "short",
+                                                    year: "numeric",
+                                                })}
+                                            </div>
+                                            <div className="text-xs text-slate-400 mt-0.5">
+                                                {new Date(
+                                                    item.created_at,
+                                                ).toLocaleTimeString("id-ID", {
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                })}
                                             </div>
                                         </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="font-semibold text-slate-700">
+                                                {item.item_name}
+                                            </span>
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center">
-                                            <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 rounded-md bg-slate-100 text-slate-700 font-bold text-xs">
+                                            <span className="text-slate-700 font-medium">
                                                 {item.quantity}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span
-                                                className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${conditionStyles[item.condition]}`}
+                                                className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs border ${conditionStyles[item.condition]}`}
                                             >
                                                 {
                                                     conditionLabels[
@@ -287,7 +440,7 @@ export default function InventarisIndex({
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={6}
+                                        colSpan={7}
                                         className="px-6 py-12 text-center text-slate-500"
                                     >
                                         <div className="flex flex-col items-center justify-center">
@@ -306,59 +459,83 @@ export default function InventarisIndex({
                 </div>
 
                 {/* Pagination */}
-                {items.links && items.links.length > 3 && (
-                    <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="text-sm text-slate-500 font-medium">
-                            Menampilkan{" "}
-                            <span className="text-slate-900">
-                                {items.from || 0}
-                            </span>{" "}
-                            -{" "}
-                            <span className="text-slate-900">
-                                {items.to || 0}
-                            </span>{" "}
-                            dari{" "}
-                            <span className="text-slate-900">
-                                {items.total || 0}
-                            </span>
-                        </div>
-                        <div className="flex justify-center space-x-1">
-                            {items.links.map((link, idx) =>
-                                link.url ? (
-                                    <button
-                                        key={idx}
-                                        onClick={() =>
-                                            router.get(link.url as string)
-                                        }
-                                        className={`px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors ${
-                                            link.active
-                                                ? "bg-slate-800 text-white border-slate-800"
-                                                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <span className="text-sm text-slate-500">
+                        <span className="font-semibold text-slate-800">
+                            {items.total}
+                        </span>{" "}
+                        data
+                        {" · Halaman "}
+                        <span className="font-semibold text-slate-800">
+                            {items.current_page}
+                        </span>{" "}
+                        dari{" "}
+                        <span className="font-semibold text-slate-800">
+                            {items.last_page}
+                        </span>
+                    </span>
+
+                    <div className="flex items-center gap-1.5">
+                        <button
+                            type="button"
+                            disabled={!items.prev_page_url}
+                            onClick={() =>
+                                handlePageNav(-1, items.prev_page_url)
+                            }
+                            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+
+                        <AnimatePresence mode="popLayout">
+                            {[
+                                items.current_page - 1,
+                                items.current_page,
+                                items.current_page + 1,
+                            ]
+                                .filter((p) => p >= 1 && p <= items.last_page)
+                                .map((p) => (
+                                    <motion.button
+                                        layout
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.8 }}
+                                        transition={{ duration: 0.2 }}
+                                        key={p}
+                                        type="button"
+                                        onClick={() => {
+                                            if (p === items.current_page)
+                                                return;
+                                            handlePageNav(
+                                                p > items.current_page ? 1 : -1,
+                                                p > items.current_page
+                                                    ? items.next_page_url
+                                                    : items.prev_page_url,
+                                            );
+                                        }}
+                                        className={`w-8 h-8 rounded-lg text-sm font-medium border transition-colors ${
+                                            p === items.current_page
+                                                ? "bg-emerald-600 text-white border-emerald-600 cursor-default"
+                                                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
                                         }`}
                                     >
-                                        <div
-                                            dangerouslySetInnerHTML={{
-                                                __html: cleanHtmlEntities(
-                                                    link.label,
-                                                ),
-                                            }}
-                                        ></div>
-                                    </button>
-                                ) : (
-                                    <span
-                                        key={idx}
-                                        className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-400 bg-slate-50 cursor-not-allowed"
-                                        dangerouslySetInnerHTML={{
-                                            __html: cleanHtmlEntities(
-                                                link.label,
-                                            ),
-                                        }}
-                                    ></span>
-                                ),
-                            )}
-                        </div>
+                                        {p}
+                                    </motion.button>
+                                ))}
+                        </AnimatePresence>
+
+                        <button
+                            type="button"
+                            disabled={!items.next_page_url}
+                            onClick={() =>
+                                handlePageNav(1, items.next_page_url)
+                            }
+                            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
                     </div>
-                )}
+                </div>
             </div>
 
             {/* Modal Add/Edit */}
@@ -405,9 +582,14 @@ export default function InventarisIndex({
                                     <input
                                         type="text"
                                         value={data.item_name}
-                                        onChange={(e) =>
-                                            setData("item_name", e.target.value)
-                                        }
+                                        onChange={(e) => {
+                                            const sanitized =
+                                                e.target.value.replace(
+                                                    /[<>()[\]{}]/g,
+                                                    "",
+                                                );
+                                            setData("item_name", sanitized);
+                                        }}
                                         className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm"
                                         placeholder="Misal: Kipas Angin Dinding"
                                         required
@@ -427,13 +609,25 @@ export default function InventarisIndex({
                                             type="number"
                                             min="1"
                                             value={data.quantity}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "quantity",
-                                                    parseInt(e.target.value) ||
-                                                        0,
-                                                )
-                                            }
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                // Allow empty string to completely clear the input
+                                                if (val === "") {
+                                                    setData("quantity", "");
+                                                    return;
+                                                }
+                                                // Parse to int to remove leading zeros, then update state
+                                                const parsed = parseInt(
+                                                    val,
+                                                    10,
+                                                );
+                                                if (
+                                                    !isNaN(parsed) &&
+                                                    parsed >= 0
+                                                ) {
+                                                    setData("quantity", parsed);
+                                                }
+                                            }}
                                             className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm"
                                             required
                                         />
@@ -479,9 +673,14 @@ export default function InventarisIndex({
                                     <input
                                         type="text"
                                         value={data.location}
-                                        onChange={(e) =>
-                                            setData("location", e.target.value)
-                                        }
+                                        onChange={(e) => {
+                                            const sanitized =
+                                                e.target.value.replace(
+                                                    /[<>()[\]{}]/g,
+                                                    "",
+                                                );
+                                            setData("location", sanitized);
+                                        }}
                                         className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm"
                                         placeholder="Misal: Gudang Belakang"
                                     />
@@ -497,9 +696,14 @@ export default function InventarisIndex({
                                     </label>
                                     <textarea
                                         value={data.notes}
-                                        onChange={(e) =>
-                                            setData("notes", e.target.value)
-                                        }
+                                        onChange={(e) => {
+                                            const sanitized =
+                                                e.target.value.replace(
+                                                    /[<>()[\]{}]/g,
+                                                    "",
+                                                );
+                                            setData("notes", sanitized);
+                                        }}
                                         className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm resize-none"
                                         rows={3}
                                         placeholder="Tambahkan informasi detail jika perlu..."

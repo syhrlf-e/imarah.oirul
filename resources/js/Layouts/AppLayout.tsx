@@ -27,7 +27,7 @@ interface Props {
 }
 
 export default function AppLayout({ title, children }: Props) {
-    const { props, url } = usePage<any>();
+    const { props, url, component } = usePage<any>();
     const { auth } = props;
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -374,7 +374,7 @@ export default function AppLayout({ title, children }: Props) {
                 <div className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-24 md:p-4 relative flex flex-col">
                     <AnimatePresence mode="wait">
                         <motion.div
-                            key={url}
+                            key={component}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}

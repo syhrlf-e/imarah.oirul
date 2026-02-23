@@ -28,15 +28,16 @@ class TransactionController extends Controller
         $type     = $request->get('type');
         $category = $request->get('category');
         $search   = $request->get('search');
+        $sort     = $request->get('sort', 'terbaru'); // default terbaru
 
-        // 5 per page when filtered by type, 10 for "Semua"
-        $perPage = $type ? 5 : 10;
+        // Set fixed items per page to 5 for consistent fixed-height layout
+        $perPage = 5;
 
         $transactions = Transaction::with(['creator', 'verifier'])
             ->when($type,     fn ($q) => $q->where('type', $type))
             ->when($category, fn ($q) => $q->where('category', $category))
             ->when($search,   fn ($q) => $q->where('notes', 'ilike', "%{$search}%"))
-            ->latest()
+            ->when($sort === 'terlama', fn($q) => $q->oldest(), fn($q) => $q->latest())
             ->paginate($perPage)
             ->withQueryString()
             ->through(fn ($t) => array_merge($t->toArray(), [
@@ -54,6 +55,7 @@ class TransactionController extends Controller
                 'type'     => $type,
                 'category' => $category,
                 'search'   => $search,
+                'sort'     => $sort,
             ],
         ]);
     }

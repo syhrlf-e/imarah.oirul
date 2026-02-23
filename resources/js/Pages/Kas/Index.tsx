@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { Head, Link, router, useForm } from "@inertiajs/react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/Layouts/AppLayout";
 import { PaginatedResponse, Transaction, User } from "@/types";
 import { formatRupiah, parseRupiah } from "@/utils/formatter";
@@ -16,10 +16,11 @@ import {
     Wallet,
     ArrowDownRight,
     ArrowUpRight,
+    Loader2,
+    Filter,
+    ChevronDown,
     Activity,
     Save,
-    Loader2,
-    ChevronDown,
 } from "lucide-react";
 
 const CATEGORY_OPTIONS = [
@@ -42,6 +43,7 @@ interface Props {
         type?: string;
         category?: string;
         search?: string;
+        sort?: string;
     };
     summary: {
         pemasukan_bulan_ini: number;
@@ -66,14 +68,11 @@ export default function KasIndex({
     const [categoryFilter, setCategoryFilter] = useState(
         filters?.category ?? "",
     );
+    const [isCategoryFilterOpen, setIsCategoryFilterOpen] = useState(false);
     const [sortOrder, setSortOrder] = useState<"terbaru" | "terlama">(
-        "terbaru",
+        filters?.sort === "terlama" ? "terlama" : "terbaru",
     );
     const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    // Swipe direction: 1 = forward (right→left), -1 = backward (left→right)
-    const TYPE_ORDER = ["", "in", "out"];
-    const navDirRef = useRef<1 | -1>(1);
 
     // --- Single filter function — always server-side partial reload ---
     const applyFilters = useCallback(
@@ -81,6 +80,7 @@ export default function KasIndex({
             search?: string;
             type?: string;
             category?: string;
+            sort?: string;
             page?: number;
         }) => {
             router.get(
@@ -89,6 +89,7 @@ export default function KasIndex({
                     search: params.search ?? search,
                     type: params.type ?? typeFilter,
                     category: params.category ?? categoryFilter,
+                    sort: params.sort ?? sortOrder,
                     ...(params.page ? { page: params.page } : {}),
                 },
                 {
@@ -99,7 +100,7 @@ export default function KasIndex({
                 },
             );
         },
-        [search, typeFilter, categoryFilter],
+        [search, typeFilter, categoryFilter, sortOrder],
     );
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,27 +108,23 @@ export default function KasIndex({
         setSearch(val);
         if (searchTimer.current) clearTimeout(searchTimer.current);
         searchTimer.current = setTimeout(() => {
-            applyFilters({ search: val });
+            applyFilters({ search: val, page: 1 });
         }, 350);
     };
 
     const handleTypeChange = (newType: string) => {
-        const oldIdx = TYPE_ORDER.indexOf(typeFilter);
-        const newIdx = TYPE_ORDER.indexOf(newType);
-        navDirRef.current = newIdx >= oldIdx ? 1 : -1;
         setTypeFilter(newType);
         applyFilters({ type: newType, page: 1 });
     };
 
-    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const val = e.target.value;
+    const handleCategoryChange = (val: string) => {
         setCategoryFilter(val);
+        setIsCategoryFilterOpen(false);
         applyFilters({ category: val, page: 1 });
     };
 
     const handlePageNav = (direction: 1 | -1, url: string | null) => {
         if (!url) return;
-        navDirRef.current = direction;
         router.get(
             url,
             {},
@@ -150,6 +147,8 @@ export default function KasIndex({
         post,
         reset,
         errors,
+        setError,
+        clearErrors,
         processing,
     } = useForm({
         type: "in",
@@ -172,7 +171,12 @@ export default function KasIndex({
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
-        const numberVal = parseRupiah(val);
+        let numberVal = parseRupiah(val);
+
+        if (numberVal > 999999999) {
+            numberVal = 999999999;
+        }
+
         setFormData("amount", numberVal);
         setFormattedAmount(formatRupiah(numberVal));
     };
@@ -181,7 +185,7 @@ export default function KasIndex({
         e.preventDefault();
 
         if (formData.amount <= 0) {
-            alert("Nominal harus lebih dari 0");
+            setError("amount", "Nominal harus lebih dari 0");
             return;
         }
 
@@ -247,7 +251,7 @@ export default function KasIndex({
             </div>
 
             {/* Stat Cards - Ringkasan Keuangan */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 md:px-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 md:px-6 shrink-0">
                 {/* Total Kas Card */}
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col">
                     <div className="flex justify-between items-start mb-4">
@@ -333,7 +337,7 @@ export default function KasIndex({
             <div className="border-t border-slate-200 mb-6 md:mx-6"></div>
 
             {/* Toolbar Area (Search & Filters) */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-2 relative z-10">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-2 relative z-20 shrink-0">
                 <div className="flex flex-col sm:flex-row gap-3">
                     {/* Search */}
                     <div className="relative flex-1">
@@ -373,32 +377,79 @@ export default function KasIndex({
                         ))}
                     </div>
 
-                    {/* Kategori Filter */}
-                    <div className="relative shrink-0">
-                        <select
-                            value={categoryFilter}
-                            onChange={handleCategoryChange}
-                            className="w-full sm:w-auto appearance-none pl-3 pr-8 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors shadow-sm cursor-pointer"
+                    {/* Kategori Filter Dropdown - Custom UI */}
+                    <div className="relative shrink-0 z-50">
+                        {/* Invisible overlay for closing dropdown */}
+                        {isCategoryFilterOpen && (
+                            <div
+                                className="fixed inset-0 z-40"
+                                onClick={() => setIsCategoryFilterOpen(false)}
+                            ></div>
+                        )}
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setIsCategoryFilterOpen(!isCategoryFilterOpen)
+                            }
+                            className="relative z-50 inline-flex items-center justify-between w-full sm:w-[200px] px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
                         >
-                            {CATEGORY_OPTIONS.map((opt) => (
-                                <option key={opt.value} value={opt.value}>
-                                    {opt.label}
-                                </option>
-                            ))}
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center">
-                            <ChevronDown className="w-4 h-4 text-slate-400" />
-                        </div>
+                            <span className="flex items-center">
+                                <Filter className="w-4 h-4 mr-2 text-slate-400 shrink-0" />
+                                <span className="truncate">
+                                    {CATEGORY_OPTIONS.find(
+                                        (opt) => opt.value === categoryFilter,
+                                    )?.label || "Semua Kategori"}
+                                </span>
+                            </span>
+                            <ChevronDown
+                                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ml-2 shrink-0 ${isCategoryFilterOpen ? "rotate-180" : ""}`}
+                            />
+                        </button>
+
+                        <AnimatePresence>
+                            {isCategoryFilterOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="absolute right-0 sm:right-auto sm:left-0 mt-2 w-full sm:w-56 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-[60] p-1"
+                                >
+                                    <div className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200">
+                                        {CATEGORY_OPTIONS.map((opt) => (
+                                            <button
+                                                key={opt.value}
+                                                type="button"
+                                                onClick={() =>
+                                                    handleCategoryChange(
+                                                        opt.value,
+                                                    )
+                                                }
+                                                className={`w-full text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                                    categoryFilter === opt.value
+                                                        ? "bg-emerald-50 text-emerald-700 font-semibold"
+                                                        : "text-slate-600 hover:bg-slate-50"
+                                                }`}
+                                            >
+                                                {opt.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
                     {/* Urutkan */}
                     <button
                         type="button"
-                        onClick={() =>
-                            setSortOrder(
-                                sortOrder === "terbaru" ? "terlama" : "terbaru",
-                            )
-                        }
+                        onClick={() => {
+                            const newSort =
+                                sortOrder === "terbaru" ? "terlama" : "terbaru";
+                            setSortOrder(newSort);
+                            applyFilters({ sort: newSort, page: 1 });
+                        }}
                         className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer shrink-0"
                     >
                         <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
@@ -407,11 +458,10 @@ export default function KasIndex({
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-1 min-h-0">
                 <div
-                    className="kas-table-scroll overflow-x-auto overflow-y-auto"
+                    className="kas-table-scroll overflow-x-auto overflow-y-auto rounded-t-2xl flex-1 min-h-0"
                     style={{
-                        maxHeight: "480px",
                         scrollbarWidth: "thin",
                         scrollbarColor: "#CBD5E1 transparent",
                     }}
@@ -422,247 +472,217 @@ export default function KasIndex({
                         .kas-table-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
                         .kas-table-scroll::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
                     `}</style>
-                    <table className="w-full text-sm text-left">
+                    <table className="w-full text-sm text-left table-fixed">
                         <thead className="sticky top-0 z-10 bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
                             <tr>
                                 <th
                                     scope="col"
-                                    className="px-6 py-4 whitespace-nowrap"
+                                    className="px-6 py-4 whitespace-nowrap w-[13%]"
                                 >
                                     Tanggal
                                 </th>
-                                <th scope="col" className="px-6 py-4">
+                                <th scope="col" className="px-6 py-4 w-[16%]">
                                     Pengimput
                                 </th>
-                                <th scope="col" className="px-6 py-4">
+                                <th scope="col" className="px-6 py-4 w-[12%]">
                                     Kategori
                                 </th>
-                                <th scope="col" className="px-6 py-4">
+                                <th scope="col" className="px-6 py-4 w-[10%]">
                                     Metode
                                 </th>
-                                <th
-                                    scope="col"
-                                    className="px-6 py-4 text-right"
-                                >
+                                <th scope="col" className="px-6 py-4 w-[15%]">
                                     Nominal
                                 </th>
-                                <th scope="col" className="px-6 py-4">
+                                <th scope="col" className="px-6 py-4 w-[24%]">
                                     Keterangan
                                 </th>
-                                <th scope="col" className="px-6 py-4">
+                                <th scope="col" className="px-6 py-4 w-[12%]">
                                     Status
                                 </th>
-                                <th
-                                    scope="col"
-                                    className="px-6 py-4 text-right"
-                                >
+                                <th scope="col" className="px-6 py-4 w-[10%]">
                                     Aksi
                                 </th>
                             </tr>
                         </thead>
-                        <AnimatePresence mode="wait" initial={false}>
-                            <motion.tbody
-                                key={`${transactions.current_page}-${typeFilter}`}
-                                className="divide-y divide-slate-100/80"
-                                initial={{
-                                    x: navDirRef.current * 40,
-                                    opacity: 0,
-                                }}
-                                animate={{ x: 0, opacity: 1 }}
-                                exit={{
-                                    x: navDirRef.current * -40,
-                                    opacity: 0,
-                                }}
-                                transition={{ duration: 0.18, ease: "easeOut" }}
-                            >
-                                {transactions.data.length === 0 ? (
-                                    <tr>
-                                        <td
-                                            colSpan={8}
-                                            className="px–6 py-12 text-center text-slate-500"
-                                        >
-                                            <div className="flex flex-col items-center justify-center">
-                                                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
-                                                    <Search className="w-8 h-8 text-slate-300" />
-                                                </div>
-                                                <p className="font-medium text-slate-600">
-                                                    Belum ada data transaksi
-                                                </p>
-                                                <p className="text-xs text-slate-400 mt-1">
-                                                    Transaksi yang ditambahkan
-                                                    akan muncul di sini.
-                                                </p>
+                        <tbody className="divide-y divide-slate-100/80">
+                            {transactions.data.length === 0 ? (
+                                <tr>
+                                    <td
+                                        colSpan={8}
+                                        className="px-6 py-12 text-center text-slate-500"
+                                    >
+                                        <div className="flex flex-col items-center justify-center">
+                                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                                                <Search className="w-8 h-8 text-slate-300" />
+                                            </div>
+                                            <p className="font-medium text-slate-600">
+                                                Belum ada data transaksi
+                                            </p>
+                                            <p className="text-xs text-slate-400 mt-1">
+                                                Transaksi yang ditambahkan akan
+                                                muncul di sini.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : (
+                                transactions.data.map((item) => (
+                                    <tr
+                                        key={item.id}
+                                        className="bg-white hover:bg-slate-50/80 transition-colors group"
+                                    >
+                                        {/* Tanggal + Jam */}
+                                        <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium text-sm">
+                                            <div>
+                                                {new Date(
+                                                    item.created_at,
+                                                ).toLocaleDateString("id-ID", {
+                                                    day: "2-digit",
+                                                    month: "short",
+                                                    year: "numeric",
+                                                })}
+                                            </div>
+                                            <div className="text-xs text-slate-400 mt-0.5">
+                                                {new Date(
+                                                    item.created_at,
+                                                ).toLocaleTimeString("id-ID", {
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                })}
                                             </div>
                                         </td>
-                                    </tr>
-                                ) : (
-                                    transactions.data.map((item) => (
-                                        <tr
-                                            key={item.id}
-                                            className="bg-white hover:bg-slate-50/80 transition-colors group"
-                                        >
-                                            {/* Tanggal + Jam */}
-                                            <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium text-sm">
-                                                <div>
-                                                    {new Date(
-                                                        item.created_at,
-                                                    ).toLocaleDateString(
-                                                        "id-ID",
-                                                        {
-                                                            day: "2-digit",
-                                                            month: "short",
-                                                            year: "numeric",
-                                                        },
-                                                    )}
-                                                </div>
-                                                <div className="text-xs text-slate-400 mt-0.5">
-                                                    {new Date(
-                                                        item.created_at,
-                                                    ).toLocaleTimeString(
-                                                        "id-ID",
-                                                        {
-                                                            hour: "2-digit",
-                                                            minute: "2-digit",
-                                                        },
-                                                    )}
-                                                </div>
-                                            </td>
 
-                                            {/* Pengimput */}
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="text-sm text-slate-700 font-medium">
-                                                    {item.user?.name ?? "-"}
-                                                </span>
-                                            </td>
+                                        {/* Pengimput */}
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="text-sm text-slate-700 font-medium">
+                                                {item.user?.name ?? "-"}
+                                            </span>
+                                        </td>
 
-                                            {/* Kategori */}
-                                            <td className="px-6 py-4">
-                                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 capitalize border border-slate-200">
-                                                    {item.category.replace(
-                                                        /_/g,
-                                                        " ",
-                                                    )}
-                                                </span>
-                                            </td>
-
-                                            {/* Metode */}
-                                            <td className="px-6 py-4 capitalize text-slate-600 text-sm">
-                                                {item.payment_method || "-"}
-                                            </td>
-
-                                            {/* Nominal */}
-                                            <td
-                                                className={`px-6 py-4 whitespace-nowrap text-right font-bold text-sm ${
-                                                    item.type === "in"
-                                                        ? "text-emerald-600"
-                                                        : "text-red-500"
-                                                }`}
-                                            >
-                                                {item.type === "in" ? "+" : "-"}{" "}
-                                                {formatRupiah(item.amount)}
-                                            </td>
-
-                                            {/* Keterangan */}
-                                            <td className="px-6 py-4 min-w-[200px]">
-                                                <p className="text-slate-600 text-sm whitespace-normal break-words">
-                                                    {item.notes || "-"}
-                                                </p>
-                                            </td>
-
-                                            {/* Status */}
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                {item.verified_at ? (
-                                                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/50">
-                                                        <CheckCircle className="w-3 h-3 mr-1" />
-                                                        Terverifikasi
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200/50">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse"></span>
-                                                        Pending
-                                                    </span>
+                                        {/* Kategori */}
+                                        <td className="px-6 py-4">
+                                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 capitalize border border-slate-200">
+                                                {item.category.replace(
+                                                    /_/g,
+                                                    " ",
                                                 )}
-                                            </td>
+                                            </span>
+                                        </td>
 
-                                            {/* Aksi */}
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                                <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    {isBendaharaOrAdmin &&
-                                                        !item.verified_at && (
-                                                            <button
-                                                                onClick={() =>
-                                                                    handleVerify(
-                                                                        item.id,
-                                                                    )
-                                                                }
-                                                                className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                                                                title="Verifikasi Transaksi"
-                                                            >
-                                                                <CheckCircle
-                                                                    size={18}
-                                                                />
-                                                            </button>
-                                                        )}
-                                                    {isSuperAdmin && (
+                                        {/* Metode */}
+                                        <td className="px-6 py-4 capitalize text-slate-600 text-sm">
+                                            {item.payment_method || "-"}
+                                        </td>
+
+                                        {/* Nominal */}
+                                        <td
+                                            className={`px-6 py-4 whitespace-nowrap font-bold text-sm ${
+                                                item.type === "in"
+                                                    ? "text-emerald-600"
+                                                    : "text-red-500"
+                                            }`}
+                                        >
+                                            {item.type === "in" ? "+" : "-"}{" "}
+                                            {formatRupiah(item.amount)}
+                                        </td>
+
+                                        {/* Keterangan */}
+                                        <td className="px-6 py-4 min-w-[200px]">
+                                            <p className="text-slate-600 text-sm whitespace-normal break-words">
+                                                {item.notes || "-"}
+                                            </p>
+                                        </td>
+
+                                        {/* Status */}
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {item.verified_at ? (
+                                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/50">
+                                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                                    Terverifikasi
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200/50">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse"></span>
+                                                    Pending
+                                                </span>
+                                            )}
+                                        </td>
+
+                                        {/* Aksi */}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                {isBendaharaOrAdmin &&
+                                                    !item.verified_at && (
                                                         <button
                                                             onClick={() =>
-                                                                handleDelete(
+                                                                handleVerify(
                                                                     item.id,
                                                                 )
                                                             }
-                                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                            title="Hapus Transaksi"
+                                                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                                            title="Verifikasi Transaksi"
                                                         >
-                                                            <Trash2 size={18} />
+                                                            <CheckCircle
+                                                                size={18}
+                                                            />
                                                         </button>
                                                     )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </motion.tbody>
-                        </AnimatePresence>
+                                                {isSuperAdmin && (
+                                                    <button
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                item.id,
+                                                            )
+                                                        }
+                                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                        title="Hapus Transaksi"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
                     </table>
                 </div>
 
                 {/* Pagination (satu untuk semua mode — server-side) */}
-                {transactions.last_page > 1 && (
-                    <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
-                        {/* Info */}
-                        <span className="text-sm text-slate-500">
-                            <span className="font-semibold text-slate-800">
-                                {transactions.total}
-                            </span>{" "}
-                            data
-                            {" · Halaman "}
-                            <span className="font-semibold text-slate-800">
-                                {transactions.current_page}
-                            </span>{" "}
-                            dari{" "}
-                            <span className="font-semibold text-slate-800">
-                                {transactions.last_page}
-                            </span>
+                <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    {/* Info */}
+                    <span className="text-sm text-slate-500">
+                        <span className="font-semibold text-slate-800">
+                            {transactions.total}
+                        </span>{" "}
+                        data
+                        {" · Halaman "}
+                        <span className="font-semibold text-slate-800">
+                            {transactions.current_page}
+                        </span>{" "}
+                        dari{" "}
+                        <span className="font-semibold text-slate-800">
+                            {transactions.last_page}
                         </span>
+                    </span>
 
-                        {/* Prev / Page Numbers / Next */}
-                        <div className="flex items-center gap-1.5">
-                            {/* Prev */}
-                            <button
-                                type="button"
-                                disabled={!transactions.prev_page_url}
-                                onClick={() =>
-                                    handlePageNav(
-                                        -1,
-                                        transactions.prev_page_url,
-                                    )
-                                }
-                                className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <ChevronLeft className="w-4 h-4" />
-                            </button>
+                    {/* Prev / Page Numbers / Next */}
+                    <div className="flex items-center gap-1.5">
+                        {/* Prev */}
+                        <button
+                            type="button"
+                            disabled={!transactions.prev_page_url}
+                            onClick={() =>
+                                handlePageNav(-1, transactions.prev_page_url)
+                            }
+                            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
 
-                            {/* Page numbers: prev, current, next */}
+                        {/* Page numbers: prev, current, next */}
+                        <AnimatePresence mode="popLayout">
                             {[
                                 transactions.current_page - 1,
                                 transactions.current_page,
@@ -673,7 +693,12 @@ export default function KasIndex({
                                         p >= 1 && p <= transactions.last_page,
                                 )
                                 .map((p) => (
-                                    <button
+                                    <motion.button
+                                        layout
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.8 }}
+                                        transition={{ duration: 0.2 }}
                                         key={p}
                                         type="button"
                                         onClick={() => {
@@ -695,23 +720,23 @@ export default function KasIndex({
                                         }`}
                                     >
                                         {p}
-                                    </button>
+                                    </motion.button>
                                 ))}
+                        </AnimatePresence>
 
-                            {/* Next */}
-                            <button
-                                type="button"
-                                disabled={!transactions.next_page_url}
-                                onClick={() =>
-                                    handlePageNav(1, transactions.next_page_url)
-                                }
-                                className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <ChevronRight className="w-4 h-4" />
-                            </button>
-                        </div>
+                        {/* Next */}
+                        <button
+                            type="button"
+                            disabled={!transactions.next_page_url}
+                            onClick={() =>
+                                handlePageNav(1, transactions.next_page_url)
+                            }
+                            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
                     </div>
-                )}
+                </div>
             </div>
 
             {/* Modal Tambah Transaksi */}
@@ -839,11 +864,18 @@ export default function KasIndex({
                                         className="w-full px-3 py-2 font-mono text-lg font-semibold border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm"
                                         placeholder="Rp 0"
                                     />
-                                    {errors.amount && (
-                                        <p className="mt-1 text-xs text-red-500">
-                                            {errors.amount}
+                                    <div className="flex justify-between items-start mt-1">
+                                        {errors.amount ? (
+                                            <p className="text-xs text-red-500">
+                                                {errors.amount}
+                                            </p>
+                                        ) : (
+                                            <div></div>
+                                        )}
+                                        <p className="text-xs text-slate-400 font-medium">
+                                            *maks Rp. 999.999.999
                                         </p>
-                                    )}
+                                    </div>
                                 </div>
 
                                 {/* Payment Method */}
@@ -881,9 +913,18 @@ export default function KasIndex({
                                     </label>
                                     <textarea
                                         value={formData.notes}
-                                        onChange={(e) =>
-                                            setFormData("notes", e.target.value)
-                                        }
+                                        onChange={(e) => {
+                                            // Sanitize input: Remove potential XSS characters like < > [ ] { }
+                                            const sanitizedValue =
+                                                e.target.value.replace(
+                                                    /[<>()[\]{}]/g,
+                                                    "",
+                                                );
+                                            setFormData(
+                                                "notes",
+                                                sanitizedValue,
+                                            );
+                                        }}
                                         className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm resize-none"
                                         rows={3}
                                         placeholder="Contoh: Infaq Hamba Allah, Bayar Listrik Bulan Juni"
