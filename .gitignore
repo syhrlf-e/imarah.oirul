@@ -24,6 +24,10 @@ Homestead.yaml
 Thumbs.db
 /.brief_project/
 
+# PWA Files
+public/sw.js
+public/workbox-*.js
+
 # Debug / Test output files
 test_output*.txt
 generate_icons.php
