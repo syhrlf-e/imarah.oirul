@@ -12,7 +12,18 @@ import {
     Search,
     ArrowUpDown,
     SlidersHorizontal,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
+import PrimaryButton from "@/Components/PrimaryButton";
+import SecondaryButton from "@/Components/SecondaryButton";
+import DangerButton from "@/Components/DangerButton";
+import TextInput from "@/Components/TextInput";
+import InputLabel from "@/Components/InputLabel";
+import InputError from "@/Components/InputError";
+import FilterBar from "@/Components/FilterBar";
+import PageHeader from "@/Components/PageHeader";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface User {
     id: string;
@@ -33,12 +44,14 @@ interface Agenda {
 
 interface PaginationData {
     data: Agenda[];
-    current_page: number;
-    last_page: number;
     links: { url: string | null; label: string; active: boolean }[];
-    total: number;
     from: number;
     to: number;
+    total: number;
+    current_page: number;
+    last_page: number;
+    prev_page_url: string | null;
+    next_page_url: string | null;
 }
 
 export default function AgendaIndex({
@@ -52,6 +65,15 @@ export default function AgendaIndex({
     const [sortAlpha, setSortAlpha] = useState<"a-z" | "z-a">("a-z");
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editingAgenda, setEditingAgenda] = useState<Agenda | null>(null);
+
+    const handlePageNav = (direction: number, url: string | null) => {
+        if (!url) return;
+        router.get(
+            url,
+            { search, sort: sortAlpha, order: sortOrder },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
 
     const {
         data,
@@ -131,12 +153,7 @@ export default function AgendaIndex({
         }
     };
 
-    const cleanHtmlEntities = (str: string) => {
-        return str
-            .replace(/&laquo;/g, "«")
-            .replace(/&raquo;/g, "»")
-            .replace(/&amp;/g, "&");
-    };
+    // Removed cleanHtmlEntities function as per instruction
 
     const typeStyles = {
         kajian: "bg-blue-50 text-blue-700 border-blue-200/50",
@@ -168,247 +185,310 @@ export default function AgendaIndex({
             <Head title="Agenda Masjid" />
 
             {/* Header Section */}
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6">
-                <div>
-                    <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
-                        Agenda Masjid
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Kelola jadwal kajian, rapat, dan kegiatan komunitas di
-                        masjid.
-                    </p>
-                </div>
-                {["super_admin", "bendahara", "petugas_zakat"].includes(
-                    auth.user.role,
-                ) && (
-                    <button
-                        onClick={openAddModal}
-                        className="inline-flex items-center justify-center px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-200 font-medium"
-                    >
-                        <Plus className="w-5 h-5 mr-2" />
-                        Tambah Agenda
-                    </button>
-                )}
-            </div>
+            <PageHeader
+                title="Agenda Masjid"
+                description="Kelola jadwal kajian, rapat, dan kegiatan komunitas di masjid."
+            >
+                {agendas.data.length > 0 &&
+                    ["super_admin", "bendahara", "petugas_zakat"].includes(
+                        auth.user.role,
+                    ) && (
+                        <PrimaryButton onClick={openAddModal}>
+                            <Plus className="w-5 h-5 mr-2" />
+                            Tambah Agenda
+                        </PrimaryButton>
+                    )}
+            </PageHeader>
 
-            <div className="mb-2 relative z-10 bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="relative flex-1">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-slate-400" />
-                        </div>
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 sm:text-sm transition-colors shadow-sm"
-                            placeholder="Cari agenda kegiatan..."
-                        />
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setSortAlpha(
-                                    sortAlpha === "a-z" ? "z-a" : "a-z",
-                                )
-                            }
-                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
-                        >
-                            <ArrowUpDown className="w-4 h-4 mr-2 text-slate-400" />
-                            {sortAlpha === "a-z" ? "A-Z" : "Z-A"}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setSortOrder(
-                                    sortOrder === "terbaru"
-                                        ? "terlama"
-                                        : "terbaru",
-                                )
-                            }
-                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
-                        >
-                            <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
-                            {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
-                        </button>
-                    </div>
-                </div>
-            </div>
-            {/* Grid vs Table View - Switch to a beautiful Card Grid for Agendas */}
-            {agendas.data.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {agendas.data.map((agenda) => (
-                        <div
-                            key={agenda.id}
-                            className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow group relative flex flex-col h-full"
-                        >
-                            <div className="p-5 flex-1 flex flex-col">
-                                <div className="flex justify-between items-start mb-4">
-                                    <span
-                                        className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${typeStyles[agenda.type]} capitalize`}
+            <FilterBar
+                searchPlaceholder="Cari agenda kegiatan..."
+                searchValue={search}
+                onSearchChange={setSearch}
+            >
+                <button
+                    type="button"
+                    onClick={() =>
+                        setSortAlpha(sortAlpha === "a-z" ? "z-a" : "a-z")
+                    }
+                    className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                >
+                    <ArrowUpDown className="w-4 h-4 mr-2 text-slate-400" />
+                    {sortAlpha === "a-z" ? "A-Z" : "Z-A"}
+                </button>
+                <button
+                    type="button"
+                    onClick={() =>
+                        setSortOrder(
+                            sortOrder === "terbaru" ? "terlama" : "terbaru",
+                        )
+                    }
+                    className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                >
+                    <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
+                    {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
+                </button>
+            </FilterBar>
+            {/* Main Content Area */}
+            <div className="flex-1 min-h-[400px] flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="overflow-auto flex-1">
+                    <table className="min-w-full text-sm text-left align-middle">
+                        <thead className="bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200 sticky top-0 z-20">
+                            <tr>
+                                <th scope="col" className="px-6 py-4">
+                                    Agenda
+                                </th>
+                                <th scope="col" className="px-6 py-4">
+                                    Kategori
+                                </th>
+                                <th scope="col" className="px-6 py-4">
+                                    Waktu
+                                </th>
+                                <th scope="col" className="px-6 py-4">
+                                    Lokasi
+                                </th>
+                                {[
+                                    "super_admin",
+                                    "bendahara",
+                                    "petugas_zakat",
+                                ].includes(auth.user.role) && (
+                                    <th
+                                        scope="col"
+                                        className="px-6 py-4 text-right pr-6"
                                     >
-                                        {agenda.type.replace(/_/g, " ")}
-                                    </span>
-                                    <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        Aksi
+                                    </th>
+                                )}
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100/80">
+                            {agendas.data.length > 0 ? (
+                                agendas.data.map((agenda) => (
+                                    <tr
+                                        key={agenda.id}
+                                        className="bg-white hover:bg-slate-50/80 transition-colors group"
+                                    >
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="font-bold text-slate-800 mb-1">
+                                                {agenda.title}
+                                            </div>
+                                            <div
+                                                className="text-xs text-slate-500 truncate max-w-[200px]"
+                                                title={agenda.description || ""}
+                                            >
+                                                {agenda.description || (
+                                                    <span className="italic">
+                                                        Tidak ada deskripsi
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span
+                                                className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${typeStyles[agenda.type]} capitalize`}
+                                            >
+                                                {agenda.type.replace(/_/g, " ")}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-slate-600">
+                                            <div className="flex items-start">
+                                                <CalendarIcon className="w-4 h-4 mr-2 mt-0.5 text-slate-400 shrink-0" />
+                                                <div>
+                                                    <div className="font-medium text-slate-700">
+                                                        {formatDisplayDate(
+                                                            agenda.start_time,
+                                                        )}
+                                                    </div>
+                                                    <div className="text-xs text-slate-500 mt-0.5">
+                                                        {formatDisplayTime(
+                                                            agenda.start_time,
+                                                        )}
+                                                        {agenda.end_time &&
+                                                            ` - ${formatDisplayTime(agenda.end_time)}`}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-600 max-w-xs">
+                                            {agenda.location ? (
+                                                <div className="flex items-start">
+                                                    <MapPin className="w-4 h-4 mr-2 mt-0.5 text-slate-400 shrink-0" />
+                                                    <span
+                                                        className="truncate"
+                                                        title={agenda.location}
+                                                    >
+                                                        {agenda.location}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-slate-400 italic">
+                                                    Belum diisi
+                                                </span>
+                                            )}
+                                        </td>
                                         {[
                                             "super_admin",
                                             "bendahara",
                                             "petugas_zakat",
                                         ].includes(auth.user.role) && (
-                                            <>
-                                                <button
-                                                    onClick={() =>
-                                                        openEditModal(agenda)
-                                                    }
-                                                    className="p-1.5 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors"
-                                                >
-                                                    <Edit2 size={16} />
-                                                </button>
-                                                {auth.user.role ===
-                                                    "super_admin" && (
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                                <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <button
                                                         onClick={() =>
-                                                            handleDelete(
-                                                                agenda.id,
+                                                            openEditModal(
+                                                                agenda,
                                                             )
                                                         }
-                                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                        className="p-1.5 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                        title="Edit Agenda"
                                                     >
-                                                        <Trash2 size={16} />
+                                                        <Edit2 size={18} />
                                                     </button>
-                                                )}
-                                            </>
+                                                    {auth.user.role ===
+                                                        "super_admin" && (
+                                                        <DangerButton
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    agenda.id,
+                                                                )
+                                                            }
+                                                            className="p-1.5 h-auto text-red-500 bg-transparent shadow-none hover:bg-red-50 rounded-lg transition-colors border-none"
+                                                            title="Hapus Agenda"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </DangerButton>
+                                                    )}
+                                                </div>
+                                            </td>
                                         )}
-                                    </div>
-                                </div>
-
-                                <h3 className="text-lg font-bold text-slate-800 mb-2 leading-tight">
-                                    {agenda.title}
-                                </h3>
-
-                                <p className="text-sm text-slate-500 mb-6 line-clamp-3">
-                                    {agenda.description || (
-                                        <span className="italic text-slate-400">
-                                            Tidak ada deskripsi
-                                        </span>
-                                    )}
-                                </p>
-
-                                <div className="mt-auto space-y-3">
-                                    <div className="flex items-start text-sm text-slate-600">
-                                        <div className="mt-0.5 mr-3 p-1.5 bg-slate-50 rounded-lg text-emerald-600">
-                                            <CalendarIcon size={16} />
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold">
-                                                {formatDisplayDate(
-                                                    agenda.start_time,
-                                                )}
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td
+                                        colSpan={
+                                            [
+                                                "super_admin",
+                                                "bendahara",
+                                                "petugas_zakat",
+                                            ].includes(auth.user.role)
+                                                ? 5
+                                                : 4
+                                        }
+                                        className="py-12"
+                                    >
+                                        <div className="flex flex-col items-center justify-center text-center">
+                                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                                                <CalendarIcon className="w-8 h-8 text-slate-300" />
+                                            </div>
+                                            <h3 className="text-lg font-bold text-slate-800 mb-1">
+                                                Belum ada agenda
+                                            </h3>
+                                            <p className="text-sm text-slate-500 max-w-sm mb-6">
+                                                Jadwal kajian dan kegiatan masih
+                                                kosong. Tambahkan agenda baru
+                                                untuk mulai menginformasikan
+                                                kegiatan ke jamaah.
                                             </p>
-                                            <p className="text-xs text-slate-500 mt-0.5">
-                                                {formatDisplayTime(
-                                                    agenda.start_time,
-                                                )}
-                                                {agenda.end_time &&
-                                                    ` - ${formatDisplayTime(agenda.end_time)}`}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center text-sm text-slate-600">
-                                        <div className="mr-3 p-1.5 bg-slate-50 rounded-lg text-emerald-600">
-                                            <MapPin size={16} />
-                                        </div>
-                                        <span className="truncate flex-1">
-                                            {agenda.location || (
-                                                <span className="italic text-slate-400">
-                                                    Lokasi belum diatur
-                                                </span>
+                                            {[
+                                                "super_admin",
+                                                "bendahara",
+                                                "petugas_zakat",
+                                            ].includes(auth.user.role) && (
+                                                <button
+                                                    onClick={openAddModal}
+                                                    className="inline-flex items-center justify-center px-4 py-2 bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition-colors font-medium border border-green-100"
+                                                >
+                                                    <Plus className="w-4 h-4 mr-2" />
+                                                    Tambah Sekarang
+                                                </button>
                                             )}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
-            ) : (
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center flex flex-col items-center justify-center">
-                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                        <CalendarIcon className="w-8 h-8 text-slate-300" />
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-800 mb-1">
-                        Belum ada agenda
-                    </h3>
-                    <p className="text-sm text-slate-500 max-w-sm mb-6">
-                        Jadwal kajian dan kegiatan masih kosong. Tambahkan
-                        agenda baru untuk mulai menginformasikan kegiatan ke
-                        jamaah.
-                    </p>
-                    {["super_admin", "bendahara", "petugas_zakat"].includes(
-                        auth.user.role,
-                    ) && (
-                        <button
-                            onClick={openAddModal}
-                            className="inline-flex items-center justify-center px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-colors font-medium"
-                        >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Tambah Sekarang
-                        </button>
-                    )}
-                </div>
-            )}
+            </div>
 
             {/* Pagination */}
-            {agendas.links && agendas.links.length > 3 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
-                    <div className="text-sm text-slate-500 font-medium">
-                        Menampilkan{" "}
-                        <span className="text-slate-900">
-                            {agendas.from || 0}
+            {agendas.last_page > 1 && (
+                <div className="px-6 py-4 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 mt-2 shrink-0">
+                    <span className="text-sm text-slate-500">
+                        <span className="font-semibold text-slate-800">
+                            {agendas.total}
                         </span>{" "}
-                        -{" "}
-                        <span className="text-slate-900">
-                            {agendas.to || 0}
+                        data{" · Halaman "}
+                        <span className="font-semibold text-slate-800">
+                            {agendas.current_page}
                         </span>{" "}
                         dari{" "}
-                        <span className="text-slate-900">
-                            {agendas.total || 0}
+                        <span className="font-semibold text-slate-800">
+                            {agendas.last_page}
                         </span>
-                    </div>
-                    <div className="flex justify-center space-x-1">
-                        {agendas.links.map((link, idx) =>
-                            link.url ? (
-                                <button
-                                    key={idx}
-                                    onClick={() =>
-                                        router.get(link.url as string)
-                                    }
-                                    className={`px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors ${
-                                        link.active
-                                            ? "bg-slate-800 text-white border-slate-800"
-                                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                                    }`}
-                                >
-                                    <div
-                                        dangerouslySetInnerHTML={{
-                                            __html: cleanHtmlEntities(
-                                                link.label,
-                                            ),
+                    </span>
+
+                    <div className="flex items-center gap-1.5">
+                        <button
+                            type="button"
+                            disabled={!agendas.prev_page_url}
+                            onClick={() =>
+                                handlePageNav(-1, agendas.prev_page_url)
+                            }
+                            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+
+                        <AnimatePresence mode="popLayout">
+                            {[
+                                agendas.current_page - 1,
+                                agendas.current_page,
+                                agendas.current_page + 1,
+                            ]
+                                .filter((p) => p >= 1 && p <= agendas.last_page)
+                                .map((p) => (
+                                    <motion.button
+                                        layout
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.8 }}
+                                        transition={{ duration: 0.2 }}
+                                        key={p}
+                                        type="button"
+                                        onClick={() => {
+                                            if (p === agendas.current_page)
+                                                return;
+                                            handlePageNav(
+                                                p > agendas.current_page
+                                                    ? 1
+                                                    : -1,
+                                                p > agendas.current_page
+                                                    ? agendas.next_page_url
+                                                    : agendas.prev_page_url,
+                                            );
                                         }}
-                                    ></div>
-                                </button>
-                            ) : (
-                                <span
-                                    key={idx}
-                                    className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-400 bg-slate-50 cursor-not-allowed"
-                                    dangerouslySetInnerHTML={{
-                                        __html: cleanHtmlEntities(link.label),
-                                    }}
-                                ></span>
-                            ),
-                        )}
+                                        className={`w-8 h-8 rounded-lg text-sm font-medium border transition-colors ${
+                                            p === agendas.current_page
+                                                ? "bg-green-600 text-white border-green-600 cursor-default"
+                                                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                                        }`}
+                                    >
+                                        {p}
+                                    </motion.button>
+                                ))}
+                        </AnimatePresence>
+
+                        <button
+                            type="button"
+                            disabled={!agendas.next_page_url}
+                            onClick={() =>
+                                handlePageNav(1, agendas.next_page_url)
+                            }
+                            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
                     </div>
                 </div>
             )}
@@ -455,31 +535,31 @@ export default function AgendaIndex({
                                 className="space-y-4"
                             >
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                                        Judul Agenda *
-                                    </label>
-                                    <input
-                                        type="text"
+                                    <InputLabel
+                                        value="Judul Agenda *"
+                                        className="mb-1.5"
+                                    />
+                                    <TextInput
                                         value={data.title}
                                         onChange={(e) =>
                                             setData("title", e.target.value)
                                         }
-                                        className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm"
                                         placeholder="Misal: Kajian Rutin Ba'da Subuh"
                                         required
+                                        isFocused={isAddOpen || !!editingAgenda}
                                     />
-                                    {errors.title && (
-                                        <p className="text-red-500 text-xs mt-1">
-                                            {errors.title}
-                                        </p>
-                                    )}
+                                    <InputError
+                                        message={errors.title}
+                                        className="mt-1"
+                                    />
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                                            Waktu Mulai *
-                                        </label>
+                                        <InputLabel
+                                            value="Waktu Mulai *"
+                                            className="mb-1.5"
+                                        />
                                         <div className="relative">
                                             <input
                                                 type="datetime-local"
@@ -490,20 +570,20 @@ export default function AgendaIndex({
                                                         e.target.value,
                                                     )
                                                 }
-                                                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm"
+                                                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 text-sm shadow-sm bg-white"
                                                 required
                                             />
                                         </div>
-                                        {errors.start_time && (
-                                            <p className="text-red-500 text-xs mt-1">
-                                                {errors.start_time}
-                                            </p>
-                                        )}
+                                        <InputError
+                                            message={errors.start_time}
+                                            className="mt-1"
+                                        />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                                            Waktu Selesai
-                                        </label>
+                                        <InputLabel
+                                            value="Waktu Selesai"
+                                            className="mb-1.5"
+                                        />
                                         <input
                                             type="datetime-local"
                                             value={data.end_time}
@@ -513,21 +593,21 @@ export default function AgendaIndex({
                                                     e.target.value,
                                                 )
                                             }
-                                            className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm"
+                                            className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 text-sm shadow-sm bg-white"
                                         />
-                                        {errors.end_time && (
-                                            <p className="text-red-500 text-xs mt-1">
-                                                {errors.end_time}
-                                            </p>
-                                        )}
+                                        <InputError
+                                            message={errors.end_time}
+                                            className="mt-1"
+                                        />
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                                            Tipe Kegiatan *
-                                        </label>
+                                        <InputLabel
+                                            value="Tipe Kegiatan *"
+                                            className="mb-1.5"
+                                        />
                                         <select
                                             value={data.type}
                                             onChange={(e) =>
@@ -536,7 +616,7 @@ export default function AgendaIndex({
                                                     e.target.value as any,
                                                 )
                                             }
-                                            className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm"
+                                            className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 text-sm shadow-sm bg-white text-slate-800"
                                         >
                                             <option value="kajian">
                                                 Kajian
@@ -549,18 +629,17 @@ export default function AgendaIndex({
                                                 Lainnya
                                             </option>
                                         </select>
-                                        {errors.type && (
-                                            <p className="text-red-500 text-xs mt-1">
-                                                {errors.type}
-                                            </p>
-                                        )}
+                                        <InputError
+                                            message={errors.type}
+                                            className="mt-1"
+                                        />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                                            Lokasi
-                                        </label>
-                                        <input
-                                            type="text"
+                                        <InputLabel
+                                            value="Lokasi"
+                                            className="mb-1.5"
+                                        />
+                                        <TextInput
                                             value={data.location}
                                             onChange={(e) =>
                                                 setData(
@@ -569,20 +648,19 @@ export default function AgendaIndex({
                                                 )
                                             }
                                             placeholder="Contoh: Masjid Utama / Zoom"
-                                            className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm"
                                         />
-                                        {errors.location && (
-                                            <p className="text-red-500 text-xs mt-1">
-                                                {errors.location}
-                                            </p>
-                                        )}
+                                        <InputError
+                                            message={errors.location}
+                                            className="mt-1"
+                                        />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                                        Deskripsi Kegiatan
-                                    </label>
+                                    <InputLabel
+                                        value="Deskripsi Kegiatan"
+                                        className="mb-1.5"
+                                    />
                                     <textarea
                                         value={data.description}
                                         onChange={(e) =>
@@ -591,35 +669,33 @@ export default function AgendaIndex({
                                                 e.target.value,
                                             )
                                         }
-                                        className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm resize-none"
+                                        className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 text-sm shadow-sm resize-none bg-white placeholder:text-slate-400"
                                         rows={3}
                                         placeholder="Ceritakan detail kegiatan atau tambahkan catatan khusus..."
                                     ></textarea>
-                                    {errors.description && (
-                                        <p className="text-red-500 text-xs mt-1">
-                                            {errors.description}
-                                        </p>
-                                    )}
+                                    <InputError
+                                        message={errors.description}
+                                        className="mt-1"
+                                    />
                                 </div>
                             </form>
                         </div>
 
                         <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex gap-3 shrink-0">
-                            <button
-                                type="button"
+                            <SecondaryButton
                                 onClick={closeModal}
-                                className="flex-1 px-4 py-2 border border-slate-200 bg-white text-slate-700 rounded-xl hover:bg-slate-50 font-medium transition-colors"
+                                className="flex-1 justify-center"
                             >
                                 Batal
-                            </button>
-                            <button
+                            </SecondaryButton>
+                            <PrimaryButton
                                 type="submit"
                                 form="agenda-form"
                                 disabled={processing}
-                                className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-medium transition-colors shadow-sm disabled:opacity-70 flex justify-center items-center"
+                                className="flex-1 justify-center"
                             >
                                 {processing ? "Menyimpan..." : "Simpan Agenda"}
-                            </button>
+                            </PrimaryButton>
                         </div>
                     </div>
                 </div>

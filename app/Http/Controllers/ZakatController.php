@@ -10,6 +10,7 @@ use App\Services\TransactionService;
 use App\Services\ZakatService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class ZakatController extends Controller
@@ -26,11 +27,13 @@ class ZakatController extends Controller
 
     public function index()
     {
+        Gate::authorize('manage-zakat');
         return Inertia::render('Zakat/Index');
     }
 
     public function history()
     {
+        Gate::authorize('manage-zakat');
         // Fetch separate transactions for Zakat Maal and Fitrah
         $transactions = Transaction::query()
             ->with(['donatur', 'creator'])
@@ -78,6 +81,7 @@ class ZakatController extends Controller
 
     public function store(StoreZakatRequest $request)
     {
+        Gate::authorize('manage-zakat');
         $validated = $request->validated();
         $finalAmount = 0;
 
@@ -103,6 +107,7 @@ class ZakatController extends Controller
 
     public function penyaluran()
     {
+        Gate::authorize('manage-zakat');
         $transactions = Transaction::query()
             ->with(['mustahiq', 'creator'])
             ->where('type', 'out')
@@ -131,6 +136,7 @@ class ZakatController extends Controller
 
     public function storePenyaluran(Request $request)
     {
+        Gate::authorize('manage-zakat');
         $validated = $request->validate([
             'mustahiq_id' => 'required|exists:mustahiqs,id',
             'type' => 'required|in:fitrah,maal',

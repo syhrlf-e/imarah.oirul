@@ -11,10 +11,16 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 class MustahiqController extends Controller
 {
+    use AuthorizesRequests;
+
     public function index(): Response
     {
+        $this->authorize('viewAny', Mustahiq::class);
+
         $query = Mustahiq::query();
 
         if (request('search')) {
@@ -44,6 +50,8 @@ class MustahiqController extends Controller
 
     public function store(StoreMustahiqRequest $request): RedirectResponse
     {
+        $this->authorize('create', Mustahiq::class);
+
         Mustahiq::create($request->validated());
 
         return redirect()->back()->with('success', 'Mustahiq berhasil ditambahkan.');
@@ -51,6 +59,8 @@ class MustahiqController extends Controller
 
     public function update(UpdateMustahiqRequest $request, Mustahiq $mustahiq): RedirectResponse
     {
+        $this->authorize('update', $mustahiq);
+
         $mustahiq->update($request->validated());
 
         return redirect()->back()->with('success', 'Data Mustahiq berhasil diperbarui.');
@@ -58,6 +68,8 @@ class MustahiqController extends Controller
 
     public function destroy(Mustahiq $mustahiq): RedirectResponse
     {
+        $this->authorize('delete', $mustahiq);
+
         $mustahiq->delete();
 
         return redirect()->back()->with('success', 'Mustahiq berhasil dihapus.');
@@ -65,6 +77,8 @@ class MustahiqController extends Controller
 
     public function import(Request $request): RedirectResponse
     {
+        $this->authorize('create', Mustahiq::class);
+
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv|max:5120',
         ]);

@@ -43,8 +43,6 @@ class AgendaController extends Controller
                 ...$request->validated(),
                 'created_by' => auth()->id(),
             ]);
-
-            activity()->on($agenda)->log('created');
         });
 
         return redirect()->back()->with('success', 'Agenda berhasil ditambahkan.');
@@ -59,7 +57,6 @@ class AgendaController extends Controller
 
         DB::transaction(function () use ($request, $agenda) {
             $agenda->update($request->validated());
-            activity()->on($agenda)->log('updated');
         });
 
         return redirect()->back()->with('success', 'Agenda berhasil diperbarui.');
@@ -74,7 +71,6 @@ class AgendaController extends Controller
 
         DB::transaction(function () use ($agenda) {
             $agenda->delete();
-            activity()->on($agenda)->log('deleted');
         });
 
         return redirect()->back()->with('success', 'Agenda berhasil dihapus.');

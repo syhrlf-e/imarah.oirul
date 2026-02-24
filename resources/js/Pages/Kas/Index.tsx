@@ -24,6 +24,10 @@ import {
     Activity,
     Save,
 } from "lucide-react";
+import FilterBar from "@/Components/FilterBar";
+import PageHeader from "@/Components/PageHeader";
+import KasSummaryCards from "@/Components/KasSummaryCards";
+import DataTable, { ColumnDef } from "@/Components/DataTable";
 
 const CATEGORY_OPTIONS = [
     { value: "", label: "Semua Kategori" },
@@ -236,131 +240,43 @@ export default function KasIndex({
             <Head title="Kas Masjid" />
 
             {/* Header Section */}
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6">
-                <div>
-                    <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
-                        Kas Masjid
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Kelola dan pantau seluruh pemasukan serta pengeluaran
-                        operasional masjid.
-                    </p>
-                </div>
+            <PageHeader
+                title="Kas Masjid"
+                description="Kelola dan pantau seluruh pemasukan serta pengeluaran operasional masjid."
+            >
                 {isBendaharaOrAdmin && (
                     <button
                         onClick={openAddModal}
-                        className="inline-flex items-center justify-center px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-200 font-medium"
+                        className="inline-flex items-center justify-center px-4 py-2.5 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-sm font-medium cursor-pointer"
                     >
                         <Plus className="w-5 h-5 mr-2" />
                         Tambah Transaksi
                     </button>
                 )}
-            </div>
+            </PageHeader>
 
             {/* Stat Cards - Ringkasan Keuangan */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 md:px-6 shrink-0">
-                {/* Total Kas Card */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2.5 bg-green-50 rounded-xl">
-                            <Wallet className="w-5 h-5 text-green-600" />
-                        </div>
-                    </div>
-                    <p className="text-sm font-medium text-slate-500 mb-1">
-                        Total Saldo Kas
-                    </p>
-                    <h4 className="text-2xl font-bold text-slate-900 mt-auto">
-                        {formatCurrency(summary.saldo_total_kas)}
-                    </h4>
-                </div>
-
-                {/* Pemasukan Card */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2.5 bg-emerald-50 rounded-xl">
-                            <TrendingUp className="w-5 h-5 text-emerald-600" />
-                        </div>
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-500">
-                            {getMonthName(month)}
-                        </span>
-                    </div>
-                    <p className="text-sm font-medium text-slate-500 mb-1">
-                        Pemasukan Bulan Ini
-                    </p>
-                    <h4 className="text-2xl font-bold text-slate-900 mt-auto">
-                        {formatCurrency(summary.pemasukan_bulan_ini)}
-                    </h4>
-                </div>
-
-                {/* Pengeluaran Card */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2.5 bg-red-50 rounded-xl">
-                            <TrendingDown className="w-5 h-5 text-red-600" />
-                        </div>
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-500">
-                            {getMonthName(month)}
-                        </span>
-                    </div>
-                    <p className="text-sm font-medium text-slate-500 mb-1">
-                        Pengeluaran Bulan Ini
-                    </p>
-                    <h4 className="text-2xl font-bold text-slate-900 mt-auto">
-                        {formatCurrency(summary.pengeluaran_bulan_ini)}
-                    </h4>
-                </div>
-
-                {/* Surplus/Defisit Card */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col">
-                    <div className="flex justify-between items-start mb-4">
-                        <div
-                            className={`p-2.5 rounded-xl ${summary.saldo_akhir_bulan >= 0 ? "bg-blue-50" : "bg-orange-50"}`}
-                        >
-                            {summary.saldo_akhir_bulan >= 0 ? (
-                                <Activity className={`w-5 h-5 text-blue-600`} />
-                            ) : (
-                                <Activity
-                                    className={`w-5 h-5 text-orange-600`}
-                                />
-                            )}
-                        </div>
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-500">
-                            {getMonthName(month)}
-                        </span>
-                    </div>
-                    <p className="text-sm font-medium text-slate-500 mb-1">
-                        {summary.saldo_akhir_bulan >= 0 ? "Surplus" : "Defisit"}{" "}
-                        Bersih
-                    </p>
-                    <h4
-                        className={`text-2xl font-bold mt-auto ${summary.saldo_akhir_bulan >= 0 ? "text-blue-600" : "text-orange-600"}`}
-                    >
-                        {summary.saldo_akhir_bulan > 0 ? "+" : ""}
-                        {formatCurrency(summary.saldo_akhir_bulan)}
-                    </h4>
-                </div>
-            </div>
+            <KasSummaryCards
+                totalSaldo={summary.saldo_total_kas}
+                pemasukanBulanIni={summary.pemasukan_bulan_ini}
+                pengeluaranBulanIni={summary.pengeluaran_bulan_ini}
+                surplusDefisit={summary.saldo_akhir_bulan}
+                monthLabel={getMonthName(month)}
+                className="mb-8 md:px-6 shrink-0"
+            />
 
             <div className="border-t border-slate-200 mb-6 md:mx-6"></div>
 
             {/* Toolbar Area (Search & Filters) */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-2 relative z-20 shrink-0">
-                <div className="flex flex-col sm:flex-row gap-3">
-                    {/* Search */}
-                    <div className="relative flex-1">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-slate-400" />
-                        </div>
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={handleSearchChange}
-                            placeholder="Cari keterangan transaksi..."
-                            className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 sm:text-sm transition-colors shadow-sm"
-                        />
-                    </div>
-
-                    {/* Jenis Transaksi Filter */}
+            <FilterBar
+                searchPlaceholder="Cari keterangan transaksi..."
+                searchValue={search}
+                onSearchChange={(val) =>
+                    handleSearchChange({
+                        target: { value: val },
+                    } as React.ChangeEvent<HTMLInputElement>)
+                }
+                addon={
                     <div className="flex items-center gap-1.5 shrink-0 bg-slate-100 rounded-xl p-1 relative">
                         {(
                             [
@@ -375,14 +291,14 @@ export default function KasIndex({
                                 onClick={() => handleTypeChange(opt.value)}
                                 className={`relative px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors z-10 ${
                                     typeFilter === opt.value
-                                        ? "text-emerald-700"
+                                        ? "text-green-700"
                                         : "text-slate-500 hover:text-slate-700"
                                 }`}
                             >
                                 {typeFilter === opt.value && (
                                     <motion.div
                                         layoutId="activeFilterTab"
-                                        className="absolute inset-0 bg-white border border-emerald-500 rounded-lg shadow-sm -z-10"
+                                        className="absolute inset-0 bg-white border border-green-500 rounded-lg shadow-sm -z-10"
                                         transition={{
                                             type: "spring",
                                             stiffness: 400,
@@ -394,288 +310,245 @@ export default function KasIndex({
                             </button>
                         ))}
                     </div>
-
-                    {/* Kategori Filter Dropdown - Custom UI */}
-                    <div className="relative shrink-0 z-50">
-                        {/* Invisible overlay for closing dropdown */}
-                        {isCategoryFilterOpen && (
-                            <div
-                                className="fixed inset-0 z-40"
-                                onClick={() => setIsCategoryFilterOpen(false)}
-                            ></div>
-                        )}
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setIsCategoryFilterOpen(!isCategoryFilterOpen)
-                            }
-                            className="relative z-50 inline-flex items-center justify-between w-full sm:w-[200px] px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
-                        >
-                            <span className="flex items-center">
-                                <Filter className="w-4 h-4 mr-2 text-slate-400 shrink-0" />
-                                <span className="truncate">
-                                    {CATEGORY_OPTIONS.find(
-                                        (opt) => opt.value === categoryFilter,
-                                    )?.label || "Semua Kategori"}
-                                </span>
-                            </span>
-                            <ChevronDown
-                                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ml-2 shrink-0 ${isCategoryFilterOpen ? "rotate-180" : ""}`}
-                            />
-                        </button>
-
-                        <AnimatePresence>
-                            {isCategoryFilterOpen && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 10 }}
-                                    transition={{ duration: 0.15 }}
-                                    className="absolute right-0 sm:right-auto sm:left-0 mt-2 w-full sm:w-56 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-[60] p-1"
-                                >
-                                    <div className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200">
-                                        {CATEGORY_OPTIONS.map((opt) => (
-                                            <button
-                                                key={opt.value}
-                                                type="button"
-                                                onClick={() =>
-                                                    handleCategoryChange(
-                                                        opt.value,
-                                                    )
-                                                }
-                                                className={`w-full text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                                                    categoryFilter === opt.value
-                                                        ? "bg-emerald-50 text-emerald-700 font-semibold"
-                                                        : "text-slate-600 hover:bg-slate-50"
-                                                }`}
-                                            >
-                                                {opt.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-
-                    {/* Urutkan */}
+                }
+            >
+                {/* Kategori Filter Dropdown */}
+                <div className="relative shrink-0 z-50">
+                    {isCategoryFilterOpen && (
+                        <div
+                            className="fixed inset-0 z-40"
+                            onClick={() => setIsCategoryFilterOpen(false)}
+                        ></div>
+                    )}
                     <button
                         type="button"
-                        onClick={() => {
-                            const newSort =
-                                sortOrder === "terbaru" ? "terlama" : "terbaru";
-                            setSortOrder(newSort);
-                            applyFilters({ sort: newSort, page: 1 });
-                        }}
-                        className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer shrink-0"
+                        onClick={() =>
+                            setIsCategoryFilterOpen(!isCategoryFilterOpen)
+                        }
+                        className="relative z-50 inline-flex items-center justify-between w-full sm:w-[200px] px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
                     >
-                        <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
-                        {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
+                        <span className="flex items-center">
+                            <Filter className="w-4 h-4 mr-2 text-slate-400 shrink-0" />
+                            <span className="truncate">
+                                {CATEGORY_OPTIONS.find(
+                                    (opt) => opt.value === categoryFilter,
+                                )?.label || "Semua Kategori"}
+                            </span>
+                        </span>
+                        <ChevronDown
+                            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ml-2 shrink-0 ${isCategoryFilterOpen ? "rotate-180" : ""}`}
+                        />
                     </button>
-                </div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-1 min-h-0">
-                <div
-                    className="kas-table-scroll overflow-x-auto overflow-y-auto rounded-t-2xl flex-1 min-h-0"
-                    style={{
-                        scrollbarWidth: "thin",
-                        scrollbarColor: "#CBD5E1 transparent",
-                    }}
-                >
-                    <style>{`
-                        .kas-table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-                        .kas-table-scroll::-webkit-scrollbar-track { background: transparent; }
-                        .kas-table-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
-                        .kas-table-scroll::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
-                    `}</style>
-                    <table className="w-full text-sm text-left table-fixed">
-                        <thead className="sticky top-0 z-10 bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
-                            <tr>
-                                <th
-                                    scope="col"
-                                    className="px-6 py-4 whitespace-nowrap w-[13%]"
-                                >
-                                    Tanggal
-                                </th>
-                                <th scope="col" className="px-6 py-4 w-[16%]">
-                                    Pengimput
-                                </th>
-                                <th scope="col" className="px-6 py-4 w-[12%]">
-                                    Kategori
-                                </th>
-                                <th scope="col" className="px-6 py-4 w-[10%]">
-                                    Metode
-                                </th>
-                                <th scope="col" className="px-6 py-4 w-[15%]">
-                                    Nominal
-                                </th>
-                                <th scope="col" className="px-6 py-4 w-[24%]">
-                                    Keterangan
-                                </th>
-                                <th scope="col" className="px-6 py-4 w-[12%]">
-                                    Status
-                                </th>
-                                <th scope="col" className="px-6 py-4 w-[10%]">
-                                    Aksi
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100/80">
-                            {transactions.data.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan={8}
-                                        className="px-6 py-12 text-center text-slate-500"
-                                    >
-                                        <div className="flex flex-col items-center justify-center">
-                                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
-                                                <Search className="w-8 h-8 text-slate-300" />
-                                            </div>
-                                            <p className="font-medium text-slate-600">
-                                                Belum ada data transaksi
-                                            </p>
-                                            <p className="text-xs text-slate-400 mt-1">
-                                                Transaksi yang ditambahkan akan
-                                                muncul di sini.
-                                            </p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : (
-                                transactions.data.map((item) => (
-                                    <tr
-                                        key={item.id}
-                                        className="bg-white hover:bg-slate-50/80 transition-colors group"
-                                    >
-                                        {/* Tanggal + Jam */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium text-sm">
-                                            <div>
-                                                {new Date(
-                                                    item.created_at,
-                                                ).toLocaleDateString("id-ID", {
-                                                    day: "2-digit",
-                                                    month: "short",
-                                                    year: "numeric",
-                                                })}
-                                            </div>
-                                            <div className="text-xs text-slate-400 mt-0.5">
-                                                {new Date(
-                                                    item.created_at,
-                                                ).toLocaleTimeString("id-ID", {
-                                                    hour: "2-digit",
-                                                    minute: "2-digit",
-                                                })}
-                                            </div>
-                                        </td>
-
-                                        {/* Pengimput */}
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="text-sm text-slate-700 font-medium">
-                                                {item.user?.name ?? "-"}
-                                            </span>
-                                        </td>
-
-                                        {/* Kategori */}
-                                        <td className="px-6 py-4">
-                                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 capitalize border border-slate-200">
-                                                {item.category.replace(
-                                                    /_/g,
-                                                    " ",
-                                                )}
-                                            </span>
-                                        </td>
-
-                                        {/* Metode */}
-                                        <td className="px-6 py-4 capitalize text-slate-600 text-sm">
-                                            {item.payment_method || "-"}
-                                        </td>
-
-                                        {/* Nominal */}
-                                        <td
-                                            className={`px-6 py-4 whitespace-nowrap font-bold text-sm ${
-                                                item.type === "in"
-                                                    ? "text-emerald-600"
-                                                    : "text-red-500"
+                    <AnimatePresence>
+                        {isCategoryFilterOpen && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                transition={{ duration: 0.15 }}
+                                className="absolute right-0 sm:right-auto sm:left-0 mt-2 w-full sm:w-56 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-[60] p-1"
+                            >
+                                <div className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200">
+                                    {CATEGORY_OPTIONS.map((opt) => (
+                                        <button
+                                            key={opt.value}
+                                            type="button"
+                                            onClick={() =>
+                                                handleCategoryChange(opt.value)
+                                            }
+                                            className={`w-full text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
+                                                categoryFilter === opt.value
+                                                    ? "bg-green-50 text-green-700 font-semibold"
+                                                    : "text-slate-600 hover:bg-slate-50"
                                             }`}
                                         >
-                                            {item.type === "in" ? "+" : "-"}{" "}
-                                            {formatRupiah(item.amount)}
-                                        </td>
-
-                                        {/* Keterangan */}
-                                        <td className="px-6 py-4 min-w-[200px]">
-                                            <p className="text-slate-600 text-sm whitespace-normal break-words">
-                                                {item.notes || "-"}
-                                            </p>
-                                        </td>
-
-                                        {/* Status */}
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            {item.verified_at ? (
-                                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/50">
-                                                    <CheckCircle className="w-3 h-3 mr-1" />
-                                                    Terverifikasi
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200/50">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse"></span>
-                                                    Pending
-                                                </span>
-                                            )}
-                                        </td>
-
-                                        {/* Aksi */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                            <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                {isBendaharaOrAdmin &&
-                                                    !item.verified_at && (
-                                                        <button
-                                                            onClick={() =>
-                                                                handleVerify(
-                                                                    item.id,
-                                                                )
-                                                            }
-                                                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                                                            title="Verifikasi Transaksi"
-                                                        >
-                                                            <CheckCircle
-                                                                size={18}
-                                                            />
-                                                        </button>
-                                                    )}
-                                                {isSuperAdmin && (
-                                                    <button
-                                                        onClick={() =>
-                                                            handleDelete(
-                                                                item.id,
-                                                            )
-                                                        }
-                                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                        title="Hapus Transaksi"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
+                {/* Urutkan */}
+                <button
+                    type="button"
+                    onClick={() => {
+                        const newSort =
+                            sortOrder === "terbaru" ? "terlama" : "terbaru";
+                        setSortOrder(newSort);
+                        applyFilters({ sort: newSort, page: 1 });
+                    }}
+                    className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer shrink-0"
+                >
+                    <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
+                    {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
+                </button>
+            </FilterBar>
 
-                {/* Pagination (satu untuk semua mode — server-side) */}
-                <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <DataTable
+                className="flex-1 min-h-[400px]"
+                tableFixed
+                columns={
+                    [
+                        {
+                            key: "tanggal",
+                            header: "Tanggal",
+                            width: "w-[13%]",
+                            cellClassName:
+                                "whitespace-nowrap text-slate-600 font-medium text-sm",
+                            render: (item) => (
+                                <>
+                                    <div>
+                                        {new Date(
+                                            item.created_at,
+                                        ).toLocaleDateString("id-ID", {
+                                            day: "2-digit",
+                                            month: "short",
+                                            year: "numeric",
+                                        })}
+                                    </div>
+                                    <div className="text-xs text-slate-400 mt-0.5">
+                                        {new Date(
+                                            item.created_at,
+                                        ).toLocaleTimeString("id-ID", {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}
+                                    </div>
+                                </>
+                            ),
+                        },
+                        {
+                            key: "pengimput",
+                            header: "Pengimput",
+                            width: "w-[16%]",
+                            cellClassName: "whitespace-nowrap",
+                            render: (item) => (
+                                <span className="text-sm text-slate-700 font-medium">
+                                    {item.user?.name ?? "-"}
+                                </span>
+                            ),
+                        },
+                        {
+                            key: "kategori",
+                            header: "Kategori",
+                            width: "w-[12%]",
+                            render: (item) => (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 capitalize border border-slate-200">
+                                    {item.category.replace(/_/g, " ")}
+                                </span>
+                            ),
+                        },
+                        {
+                            key: "metode",
+                            header: "Metode",
+                            width: "w-[10%]",
+                            cellClassName: "capitalize text-slate-600 text-sm",
+                            render: (item) => item.payment_method || "-",
+                        },
+                        {
+                            key: "nominal",
+                            header: "Nominal",
+                            width: "w-[15%]",
+                            cellClassName: (item) =>
+                                `whitespace-nowrap font-bold text-sm ${
+                                    item.type === "in"
+                                        ? "text-green-600"
+                                        : "text-red-500"
+                                }`,
+                            render: (item) =>
+                                `${item.type === "in" ? "+" : "-"} ${formatRupiah(item.amount)}`,
+                        },
+                        {
+                            key: "keterangan",
+                            header: "Keterangan",
+                            width: "w-[24%]",
+                            render: (item) => (
+                                <p className="text-slate-600 text-sm whitespace-normal break-words">
+                                    {item.notes || "-"}
+                                </p>
+                            ),
+                        },
+                        {
+                            key: "status",
+                            header: "Status",
+                            width: "w-[12%]",
+                            cellClassName: "whitespace-nowrap",
+                            render: (item) =>
+                                item.verified_at ? (
+                                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-green-50 text-green-700 border border-green-200/50">
+                                        <CheckCircle className="w-3 h-3 mr-1" />
+                                        Terverifikasi
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200/50">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse" />
+                                        Pending
+                                    </span>
+                                ),
+                        },
+                        {
+                            key: "aksi",
+                            header: "Aksi",
+                            width: "w-[10%]",
+                            cellClassName: "whitespace-nowrap text-sm",
+                            render: (item) => (
+                                <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {isBendaharaOrAdmin &&
+                                        !item.verified_at && (
+                                            <button
+                                                onClick={() =>
+                                                    handleVerify(item.id)
+                                                }
+                                                className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                                title="Verifikasi Transaksi"
+                                            >
+                                                <CheckCircle size={18} />
+                                            </button>
+                                        )}
+                                    {isSuperAdmin && (
+                                        <button
+                                            onClick={() =>
+                                                handleDelete(item.id)
+                                            }
+                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                            title="Hapus Transaksi"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    )}
+                                </div>
+                            ),
+                        },
+                    ] satisfies ColumnDef<(typeof transactions.data)[0]>[]
+                }
+                data={transactions.data}
+                keyExtractor={(row) => row.id}
+                emptyState={
+                    <div className="flex flex-col items-center justify-center text-slate-400 py-2">
+                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                            <Search className="w-8 h-8 text-slate-300" />
+                        </div>
+                        <p className="font-medium text-slate-600">
+                            Belum ada data transaksi
+                        </p>
+                        <p className="text-xs text-slate-400 mt-1">
+                            Transaksi yang ditambahkan akan muncul di sini.
+                        </p>
+                    </div>
+                }
+            />
+
+            {/* Pagination - Muncul dinamis hanya jika lebih dari 1 halaman */}
+            {transactions.last_page > 1 && (
+                <div className="px-6 py-4 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 mt-2 shrink-0">
                     {/* Info */}
                     <span className="text-sm text-slate-500">
                         <span className="font-semibold text-slate-800">
                             {transactions.total}
                         </span>{" "}
-                        data
-                        {" · Halaman "}
+                        data{" · Halaman "}
                         <span className="font-semibold text-slate-800">
                             {transactions.current_page}
                         </span>{" "}
@@ -699,7 +572,7 @@ export default function KasIndex({
                             <ChevronLeft className="w-4 h-4" />
                         </button>
 
-                        {/* Page numbers: prev, current, next */}
+                        {/* Page numbers */}
                         <AnimatePresence mode="popLayout">
                             {[
                                 transactions.current_page - 1,
@@ -733,7 +606,7 @@ export default function KasIndex({
                                         }}
                                         className={`w-8 h-8 rounded-lg text-sm font-medium border transition-colors ${
                                             p === transactions.current_page
-                                                ? "bg-emerald-600 text-white border-emerald-600 cursor-default"
+                                                ? "bg-green-600 text-white border-green-600 cursor-default"
                                                 : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
                                         }`}
                                     >
@@ -755,7 +628,7 @@ export default function KasIndex({
                         </button>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Modal Tambah Transaksi */}
             {isAddOpen && (

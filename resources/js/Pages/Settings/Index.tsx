@@ -10,6 +10,7 @@ import {
     Calculator,
     Save,
 } from "lucide-react";
+import PageHeader from "@/Components/PageHeader";
 
 export default function SettingsIndex({
     auth,
@@ -36,17 +37,10 @@ export default function SettingsIndex({
             <Head title="Pengaturan Sistem" />
 
             {/* Header Section */}
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6">
-                <div>
-                    <h1 className="text-2xl font-semibold text-slate-900 tracking-tight flex items-center">
-                        <Settings className="w-6 h-6 mr-2.5 text-slate-700" />
-                        Pengaturan Sistem
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Kelola profil masjid dan parameter dasar aplikasi.
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                title="Pengaturan Sistem"
+                description="Kelola profil masjid dan parameter dasar aplikasi."
+            />
 
             <div className="max-w-4xl">
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -54,7 +48,7 @@ export default function SettingsIndex({
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                         <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
                             <h3 className="text-lg font-bold text-slate-800 flex items-center">
-                                <Building2 className="w-5 h-5 mr-2 text-emerald-600" />
+                                <Building2 className="w-5 h-5 mr-2 text-green-600" />
                                 Profil Masjid Utama
                             </h3>
                             <p className="text-sm text-slate-500 mt-1">
@@ -78,7 +72,7 @@ export default function SettingsIndex({
                                                 masjid_name: e.target.value,
                                             })
                                         }
-                                        className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm transition-colors"
+                                        className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 text-sm shadow-sm transition-colors"
                                         placeholder="Misal: Masjid Jami' Al-Ikhlas"
                                     />
                                     {errors?.["settings.masjid_name"] && (
@@ -106,7 +100,7 @@ export default function SettingsIndex({
                                                         e.target.value,
                                                 })
                                             }
-                                            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm transition-colors"
+                                            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 text-sm shadow-sm transition-colors"
                                             placeholder="Misal: 081234567890"
                                         />
                                     </div>
@@ -134,7 +128,7 @@ export default function SettingsIndex({
                                                         e.target.value,
                                                 })
                                             }
-                                            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm transition-colors resize-none"
+                                            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 text-sm shadow-sm transition-colors resize-none"
                                             rows={3}
                                             placeholder="Masukkan alamat lengkap masjid..."
                                         />
@@ -191,7 +185,7 @@ export default function SettingsIndex({
                                                         e.target.value,
                                                 })
                                             }
-                                            className="w-full pl-12 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm transition-colors font-medium text-slate-900"
+                                            className="w-full pl-12 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 text-sm shadow-sm transition-colors font-medium text-slate-900"
                                         />
                                     </div>
                                     <p className="text-xs text-slate-500 mt-2 flex items-center">
@@ -227,7 +221,7 @@ export default function SettingsIndex({
                         <button
                             type="submit"
                             disabled={processing}
-                            className="inline-flex items-center justify-center px-6 py-2.5 bg-emerald-600 border border-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-200 font-medium disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="inline-flex items-center justify-center px-6 py-2.5 bg-green-500 border border-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-sm font-medium disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {processing ? (
                                 <>Menyimpan...</>

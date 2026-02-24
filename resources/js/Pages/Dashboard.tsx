@@ -24,6 +24,7 @@ import {
 import { useState, useEffect, useRef } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
+import KasSummaryCards from "@/Components/KasSummaryCards";
 import {
     AreaChart,
     Area,
@@ -184,70 +185,14 @@ export default function Dashboard({
                     {/* Left Section: Stats & Chart */}
                     <div className="lg:col-span-3 flex flex-col gap-6 lg:min-h-0">
                         {/* Top Stats Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 shrink-0">
-                            {/* Total Kas Card */}
-                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="p-2.5 bg-emerald-50 rounded-xl">
-                                        <Wallet className="w-5 h-5 text-emerald-600" />
-                                    </div>
-                                </div>
-                                <p className="text-sm font-medium text-slate-500 mb-1">
-                                    Total Saldo Kas
-                                </p>
-                                {loading ? (
-                                    <div className="h-8 w-32 bg-slate-100 rounded animate-pulse mt-auto"></div>
-                                ) : (
-                                    <h4 className="text-2xl font-bold text-slate-900 mt-auto">
-                                        {formatRupiah(totalSaldo)}
-                                    </h4>
-                                )}
-                            </div>
-
-                            {/* Pemasukan Card */}
-                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="p-2.5 bg-emerald-50 rounded-xl">
-                                        <TrendingUp className="w-5 h-5 text-emerald-600" />
-                                    </div>
-                                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-500">
-                                        {dayjs().format("MMM YYYY")}
-                                    </span>
-                                </div>
-                                <p className="text-sm font-medium text-slate-500 mb-1">
-                                    Pemasukan Bulan Ini
-                                </p>
-                                {loading ? (
-                                    <div className="h-8 w-28 bg-slate-100 rounded animate-pulse mt-auto"></div>
-                                ) : (
-                                    <h4 className="text-2xl font-bold text-slate-900 mt-auto">
-                                        {formatRupiah(pemasukanBulanIni)}
-                                    </h4>
-                                )}
-                            </div>
-
-                            {/* Pengeluaran Card */}
-                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="p-2.5 bg-red-50 rounded-xl">
-                                        <TrendingDown className="w-5 h-5 text-red-600" />
-                                    </div>
-                                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-500">
-                                        {dayjs().format("MMM YYYY")}
-                                    </span>
-                                </div>
-                                <p className="text-sm    font-medium text-slate-500 mb-1">
-                                    Pengeluaran Bulan Ini
-                                </p>
-                                {loading ? (
-                                    <div className="h-8 w-28 bg-slate-100 rounded animate-pulse mt-auto"></div>
-                                ) : (
-                                    <h4 className="text-2xl font-bold text-slate-900 mt-auto">
-                                        {formatRupiah(pengeluaranBulanIni)}
-                                    </h4>
-                                )}
-                            </div>
-                        </div>
+                        <KasSummaryCards
+                            totalSaldo={totalSaldo}
+                            pemasukanBulanIni={pemasukanBulanIni}
+                            pengeluaranBulanIni={pengeluaranBulanIni}
+                            loading={loading}
+                            formatter={formatRupiah}
+                            className="shrink-0"
+                        />
 
                         {/* 6-Month Chart Trend */}
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col flex-1 lg:min-h-0">

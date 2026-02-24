@@ -81,7 +81,7 @@ class MuzakkiTest extends TestCase
     /** @test */
     public function it_can_soft_delete_muzakki()
     {
-        $user = User::factory()->create(['role' => 'bendahara']);
+        $user = User::factory()->create(['role' => 'super_admin']);
         $muzakki = Donatur::factory()->create();
 
         $response = $this->actingAs($user)->delete(route('zakat.muzakki.destroy', $muzakki->id));

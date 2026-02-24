@@ -12,9 +12,15 @@ import {
     ChevronRight,
     ArrowUpDown,
     SlidersHorizontal,
+    Activity,
 } from "lucide-react";
+import FilterBar from "@/Components/FilterBar";
+import PageHeader from "@/Components/PageHeader";
+import Pagination from "@/Components/Pagination";
+import DataTable, { ColumnDef } from "@/Components/DataTable";
 import { formatRupiah } from "@/utils/formatter";
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Transaction {
     id: string;
@@ -32,18 +38,15 @@ interface Muzakki {
     name: string;
 }
 
-interface Meta {
-    links: { url: string | null; label: string; active: boolean }[];
-    from: number;
-    to: number;
-    total: number;
-}
-
 interface Props {
     transactions: {
         data: Transaction[];
-        links: any[]; // Or a specific array type if needed
-        meta: Meta;
+        links: any[];
+        from: number;
+        to: number;
+        total: number;
+        current_page: number;
+        last_page: number;
         prev_page_url: string | null;
         next_page_url: string | null;
     };
@@ -57,6 +60,15 @@ export default function Index({ transactions, muzakkis }: Props) {
     );
     const [sortAlpha, setSortAlpha] = useState<"a-z" | "z-a">("a-z");
     const [isFormOpen, setIsFormOpen] = useState(false);
+
+    const handlePageNav = (direction: number, url: string | null) => {
+        if (!url) return;
+        router.get(
+            url,
+            { search, sort: sortAlpha, order: sortOrder },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
 
     const categoryLabel = (cat: string) => {
         return cat === "zakat_maal" ? "Zakat Maal" : "Zakat Fitrah";
@@ -90,259 +102,222 @@ export default function Index({ transactions, muzakkis }: Props) {
             <Head title="Penerimaan Zakat" />
 
             {/* Header Section */}
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6">
-                <div>
-                    <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
-                        Penerimaan Zakat
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Pencatatan pemasukan Zakat Maal dan Zakat Fitrah dari
-                        para jamaah.
-                    </p>
-                </div>
+            <PageHeader
+                title="Penerimaan Zakat"
+                description="Pencatatan pemasukan Zakat Maal dan Zakat Fitrah dari para jamaah."
+            >
                 {transactions.data.length > 0 && (
                     <button
                         onClick={() => setIsFormOpen(true)}
-                        className="inline-flex items-center justify-center px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-200 font-medium"
+                        className="inline-flex items-center justify-center px-4 py-2.5 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-sm font-medium cursor-pointer"
                     >
                         <Plus className="w-5 h-5 mr-2" />
                         Catat Penerimaan
                     </button>
                 )}
-            </div>
+            </PageHeader>
 
-            <div className="mb-2 relative z-10 bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="relative flex-1">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-slate-400" />
-                        </div>
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 sm:text-sm transition-colors shadow-sm"
-                            placeholder="Cari penerimaan..."
-                        />
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setSortAlpha(
-                                    sortAlpha === "a-z" ? "z-a" : "a-z",
-                                )
-                            }
-                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
-                        >
-                            <ArrowUpDown className="w-4 h-4 mr-2 text-slate-400" />
-                            {sortAlpha === "a-z" ? "A-Z" : "Z-A"}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setSortOrder(
-                                    sortOrder === "terbaru"
-                                        ? "terlama"
-                                        : "terbaru",
-                                )
-                            }
-                            className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
-                        >
-                            <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
-                            {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <FilterBar
+                searchPlaceholder="Cari penerimaan..."
+                searchValue={search}
+                onSearchChange={setSearch}
+            >
+                <button
+                    type="button"
+                    onClick={() =>
+                        setSortAlpha(sortAlpha === "a-z" ? "z-a" : "a-z")
+                    }
+                    className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                >
+                    <ArrowUpDown className="w-4 h-4 mr-2 text-slate-400" />
+                    {sortAlpha === "a-z" ? "A-Z" : "Z-A"}
+                </button>
+                <button
+                    type="button"
+                    onClick={() =>
+                        setSortOrder(
+                            sortOrder === "terbaru" ? "terlama" : "terbaru",
+                        )
+                    }
+                    className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                >
+                    <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
+                    {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
+                </button>
+            </FilterBar>
 
             {/* Main Content Area */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                {/* Table */}
-                <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm text-left align-middle">
-                        <thead className="bg-slate-50/80 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
-                            <tr>
-                                <th scope="col" className="px-6 py-4">
-                                    Tanggal Penerimaan
-                                </th>
-                                <th scope="col" className="px-6 py-4">
-                                    Nama Muzakki
-                                </th>
-                                <th scope="col" className="px-6 py-4">
-                                    Jenis Zakat
-                                </th>
-                                <th scope="col" className="px-6 py-4">
-                                    Metode Bayar
-                                </th>
-                                <th scope="col" className="px-6 py-4">
-                                    Keterangan
-                                </th>
-                                <th
-                                    scope="col"
-                                    className="px-6 py-4 text-right"
+            <DataTable
+                className="flex-1 min-h-[400px]"
+                tableFixed
+                columns={
+                    [
+                        {
+                            key: "tanggal",
+                            header: "Tanggal Penerimaan",
+                            cellClassName:
+                                "whitespace-nowrap text-slate-600 font-medium",
+                            render: (trx) => trx.created_at,
+                        },
+                        {
+                            key: "muzakki",
+                            header: "Nama Muzakki",
+                            cellClassName: "whitespace-nowrap",
+                            render: (trx) => (
+                                <div className="flex items-center">
+                                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold mr-3">
+                                        {trx.donatur_name
+                                            .charAt(0)
+                                            .toUpperCase()}
+                                    </div>
+                                    <span className="font-bold text-slate-800">
+                                        {trx.donatur_name}
+                                    </span>
+                                </div>
+                            ),
+                        },
+                        {
+                            key: "jenis",
+                            header: "Jenis Zakat",
+                            cellClassName: "whitespace-nowrap",
+                            render: (trx) => (
+                                <span
+                                    className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold border ${
+                                        trx.category === "zakat_maal"
+                                            ? "bg-blue-50 text-blue-700 border-blue-200/50"
+                                            : "bg-green-50 text-green-700 border-green-200/50"
+                                    }`}
                                 >
-                                    Nominal
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100/80">
-                            {transactions.data.length > 0 ? (
-                                transactions.data.map((trx) => (
-                                    <tr
-                                        key={trx.id}
-                                        className="bg-white hover:bg-slate-50/80 transition-colors group"
+                                    {categoryLabel(trx.category)}
+                                </span>
+                            ),
+                        },
+                        {
+                            key: "metode",
+                            header: "Metode Bayar",
+                            cellClassName: "whitespace-nowrap",
+                            render: (trx) => (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 capitalize border border-slate-200">
+                                    {paymentLabel(trx.payment_method)}
+                                </span>
+                            ),
+                        },
+                        {
+                            key: "keterangan",
+                            header: "Keterangan",
+                            cellClassName: "text-slate-600 max-w-xs truncate",
+                            render: (trx) =>
+                                trx.notes || (
+                                    <span className="italic text-slate-400">
+                                        -
+                                    </span>
+                                ),
+                        },
+                        {
+                            key: "nominal",
+                            header: "Nominal",
+                            headerClassName: "text-right",
+                            cellClassName:
+                                "whitespace-nowrap text-right font-bold text-green-600 text-base",
+                            render: (trx) => formatRupiah(trx.amount),
+                        },
+                    ] satisfies ColumnDef<(typeof transactions.data)[0]>[]
+                }
+                data={transactions.data}
+                keyExtractor={(row) => row.id}
+                emptyState={
+                    <EmptyState
+                        message="Belum ada riwayat penerimaan zakat yang tercatat."
+                        actionLabel="Catat Penerimaan Perdana"
+                        onAction={() => setIsFormOpen(true)}
+                    />
+                }
+            />
+
+            {/* Pagination */}
+            {transactions.last_page > 1 && (
+                <div className="px-6 py-4 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 mt-2 shrink-0">
+                    <span className="text-sm text-slate-500">
+                        <span className="font-semibold text-slate-800">
+                            {transactions.total}
+                        </span>{" "}
+                        data{" · Halaman "}
+                        <span className="font-semibold text-slate-800">
+                            {transactions.current_page}
+                        </span>{" "}
+                        dari{" "}
+                        <span className="font-semibold text-slate-800">
+                            {transactions.last_page}
+                        </span>
+                    </span>
+
+                    <div className="flex items-center gap-1.5">
+                        <button
+                            type="button"
+                            disabled={!transactions.prev_page_url}
+                            onClick={() =>
+                                handlePageNav(-1, transactions.prev_page_url)
+                            }
+                            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+
+                        <AnimatePresence mode="popLayout">
+                            {[
+                                transactions.current_page - 1,
+                                transactions.current_page,
+                                transactions.current_page + 1,
+                            ]
+                                .filter(
+                                    (p) =>
+                                        p >= 1 && p <= transactions.last_page,
+                                )
+                                .map((p) => (
+                                    <motion.button
+                                        layout
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.8 }}
+                                        transition={{ duration: 0.2 }}
+                                        key={p}
+                                        type="button"
+                                        onClick={() => {
+                                            if (p === transactions.current_page)
+                                                return;
+                                            handlePageNav(
+                                                p > transactions.current_page
+                                                    ? 1
+                                                    : -1,
+                                                p > transactions.current_page
+                                                    ? transactions.next_page_url
+                                                    : transactions.prev_page_url,
+                                            );
+                                        }}
+                                        className={`w-8 h-8 rounded-lg text-sm font-medium border transition-colors ${
+                                            p === transactions.current_page
+                                                ? "bg-green-600 text-white border-green-600 cursor-default"
+                                                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                                        }`}
                                     >
-                                        <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium">
-                                            {trx.created_at}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold mr-3">
-                                                    {trx.donatur_name
-                                                        .charAt(0)
-                                                        .toUpperCase()}
-                                                </div>
-                                                <span className="font-bold text-slate-800">
-                                                    {trx.donatur_name}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span
-                                                className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold border ${
-                                                    trx.category ===
-                                                    "zakat_maal"
-                                                        ? "bg-blue-50 text-blue-700 border-blue-200/50"
-                                                        : "bg-emerald-50 text-emerald-700 border-emerald-200/50"
-                                                }`}
-                                            >
-                                                {categoryLabel(trx.category)}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 capitalize border border-slate-200">
-                                                {paymentLabel(
-                                                    trx.payment_method,
-                                                )}
-                                            </span>
-                                        </td>
-                                        <td
-                                            className="px-6 py-4 text-slate-600 max-w-xs truncate"
-                                            title={trx.notes || ""}
-                                        >
-                                            {trx.notes || (
-                                                <span className="italic text-slate-400">
-                                                    -
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right font-bold text-emerald-600 text-base">
-                                            {formatRupiah(trx.amount)}
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={6} className="py-12">
-                                        <EmptyState
-                                            message="Belum ada riwayat penerimaan zakat yang tercatat."
-                                            actionLabel="Catat Penerimaan Perdana"
-                                            onAction={() => setIsFormOpen(true)}
-                                        />
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                        {p}
+                                    </motion.button>
+                                ))}
+                        </AnimatePresence>
 
-                {/* Pagination */}
-                {transactions.data.length > 0 && transactions.meta && (
-                    <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="text-sm text-slate-500 font-medium">
-                            Menampilkan{" "}
-                            <span className="text-slate-900 font-semibold">
-                                {transactions.meta.from || 0}
-                            </span>{" "}
-                            -{" "}
-                            <span className="text-slate-900 font-semibold">
-                                {transactions.meta.to || 0}
-                            </span>{" "}
-                            dari{" "}
-                            <span className="text-slate-900 font-semibold">
-                                {transactions.meta.total || 0}
-                            </span>{" "}
-                            data
-                        </div>
-                        <div className="flex space-x-2">
-                            {transactions.prev_page_url ? (
-                                <Link
-                                    href={transactions.prev_page_url}
-                                    className="p-2 border border-slate-200 rounded-lg hover:bg-white text-slate-600 bg-slate-50 transition-colors shadow-sm"
-                                >
-                                    <ChevronLeft size={16} />
-                                </Link>
-                            ) : (
-                                <span className="p-2 border border-slate-200 rounded-lg text-slate-300 bg-slate-50/50 cursor-not-allowed">
-                                    <ChevronLeft size={16} />
-                                </span>
-                            )}
-
-                            <div className="hidden sm:flex space-x-1 mx-2">
-                                {transactions.meta.links &&
-                                    transactions.meta.links
-                                        .filter(
-                                            (l) =>
-                                                !l.label.includes("Previous") &&
-                                                !l.label.includes("Next") &&
-                                                cleanHtmlEntities(l.label) !==
-                                                    "",
-                                        )
-                                        .map((link, idx) =>
-                                            link.url ? (
-                                                <Link
-                                                    key={idx}
-                                                    href={link.url}
-                                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                                        link.active
-                                                            ? "bg-slate-800 text-white"
-                                                            : "text-slate-600 hover:bg-slate-200 bg-slate-100/50"
-                                                    }`}
-                                                >
-                                                    {cleanHtmlEntities(
-                                                        link.label,
-                                                    )}
-                                                </Link>
-                                            ) : (
-                                                <span
-                                                    key={idx}
-                                                    className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400"
-                                                >
-                                                    {cleanHtmlEntities(
-                                                        link.label,
-                                                    )}
-                                                </span>
-                                            ),
-                                        )}
-                            </div>
-
-                            {transactions.next_page_url ? (
-                                <Link
-                                    href={transactions.next_page_url}
-                                    className="p-2 border border-slate-200 rounded-lg hover:bg-white text-slate-600 bg-slate-50 transition-colors shadow-sm"
-                                >
-                                    <ChevronRight size={16} />
-                                </Link>
-                            ) : (
-                                <span className="p-2 border border-slate-200 rounded-lg text-slate-300 bg-slate-50/50 cursor-not-allowed">
-                                    <ChevronRight size={16} />
-                                </span>
-                            )}
-                        </div>
+                        <button
+                            type="button"
+                            disabled={!transactions.next_page_url}
+                            onClick={() =>
+                                handlePageNav(1, transactions.next_page_url)
+                            }
+                            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             <ZakatForm
                 isOpen={isFormOpen}

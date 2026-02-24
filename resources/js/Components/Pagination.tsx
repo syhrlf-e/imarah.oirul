@@ -1,4 +1,4 @@
-import { Link } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface LinkItem {
@@ -7,92 +7,118 @@ interface LinkItem {
     active: boolean;
 }
 
-interface Props {
+interface Meta {
     links: LinkItem[];
+    from: number;
+    to: number;
+    total: number;
 }
 
-export default function Pagination({ links }: Props) {
-    if (links.length <= 1) return null;
+interface PaginationProps {
+    meta: Meta;
+    prevPageUrl: string | null;
+    nextPageUrl: string | null;
+    cleanHtmlEntities?: (str: string) => string;
+}
+
+export default function Pagination({
+    meta,
+    prevPageUrl,
+    nextPageUrl,
+    cleanHtmlEntities = (str: string) =>
+        str
+            .replace(/&laquo;/g, "«")
+            .replace(/&raquo;/g, "»")
+            .replace(/&amp;/g, "&")
+            .replace(/Previous/g, "")
+            .replace(/Next/g, ""),
+}: PaginationProps) {
+    if (!meta || meta.total === 0) return null;
 
     return (
-        <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-            <div className="flex flex-1 justify-between sm:hidden">
-                {links[0].url ? (
-                    <Link
-                        href={links[0].url}
-                        className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                    >
-                        Previous
-                    </Link>
-                ) : (
-                    <span className="relative inline-flex items-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-400">
-                        Previous
-                    </span>
-                )}
-
-                {links[links.length - 1].url ? (
-                    <Link
-                        href={links[links.length - 1].url!}
-                        className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                    >
-                        Next
-                    </Link>
-                ) : (
-                    <span className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-400">
-                        Next
-                    </span>
-                )}
+        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-slate-500 font-medium">
+                Menampilkan{" "}
+                <span className="text-slate-900 font-semibold">
+                    {meta.from || 0}
+                </span>{" "}
+                -{" "}
+                <span className="text-slate-900 font-semibold">
+                    {meta.to || 0}
+                </span>{" "}
+                dari{" "}
+                <span className="text-slate-900 font-semibold">
+                    {meta.total || 0}
+                </span>{" "}
+                data
             </div>
 
-            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                <div>{/* Optional: Show "Showing X to Y of Z results" */}</div>
-                <div>
-                    <nav
-                        className="isolate inline-flex -space-x-px rounded-md shadow-sm"
-                        aria-label="Pagination"
+            <div className="flex space-x-2">
+                {prevPageUrl ? (
+                    <button
+                        onClick={() => router.get(prevPageUrl)}
+                        className="p-2 border border-slate-200 rounded-lg hover:bg-white text-slate-600 bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                        aria-label="Halaman Sebelumnya"
                     >
-                        {links.map((link, key) => {
-                            let label = link.label;
-                            if (label.includes("&laquo;"))
-                                return (
-                                    <Link
-                                        key={key}
-                                        href={link.url || "#"}
-                                        className={`relative inline-flex items-center rounded-l-md px-2 py-2 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${!link.url ? "pointer-events-none text-gray-400" : "text-gray-400"}`}
-                                        dangerouslySetInnerHTML={{
-                                            __html: "<span class='sr-only'>Previous</span><svg class='h-5 w-5' viewBox='0 0 20 20' fill='currentColor' aria-hidden='true'><path fill-rule='evenodd' d='M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z' clip-rule='evenodd' /></svg>",
-                                        }}
-                                    />
-                                );
-                            if (label.includes("&raquo;"))
-                                return (
-                                    <Link
-                                        key={key}
-                                        href={link.url || "#"}
-                                        className={`relative inline-flex items-center rounded-r-md px-2 py-2 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${!link.url ? "pointer-events-none text-gray-400" : "text-gray-400"}`}
-                                        dangerouslySetInnerHTML={{
-                                            __html: "<span class='sr-only'>Next</span><svg class='h-5 w-5' viewBox='0 0 20 20' fill='currentColor' aria-hidden='true'><path fill-rule='evenodd' d='M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z' clip-rule='evenodd' /></svg>",
-                                        }}
-                                    />
-                                );
+                        <ChevronLeft size={16} />
+                    </button>
+                ) : (
+                    <span className="p-2 border border-slate-200 rounded-lg text-slate-300 bg-slate-50/50 cursor-not-allowed">
+                        <ChevronLeft size={16} />
+                    </span>
+                )}
 
-                            return (
-                                <Link
-                                    key={key}
-                                    href={link.url || "#"}
-                                    className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300 focus:z-20 focus:outline-offset-0 ${
+                <div className="hidden sm:flex space-x-1 mx-2">
+                    {meta.links
+                        .filter(
+                            (l) =>
+                                !l.label.includes("Previous") &&
+                                !l.label.includes("Next") &&
+                                cleanHtmlEntities(l.label) !== "",
+                        )
+                        .map((link, idx) =>
+                            link.url ? (
+                                <button
+                                    key={idx}
+                                    onClick={() =>
+                                        router.get(link.url as string)
+                                    }
+                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                                         link.active
-                                            ? "z-10 bg-emerald-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
-                                            : "text-gray-900 hover:bg-gray-50"
-                                    } ${!link.url && "pointer-events-none text-gray-400"}`}
-                                    dangerouslySetInnerHTML={{
-                                        __html: link.label,
-                                    }}
-                                />
-                            );
-                        })}
-                    </nav>
+                                            ? "bg-slate-800 text-white"
+                                            : "text-slate-600 hover:bg-slate-200 bg-slate-100/50"
+                                    }`}
+                                >
+                                    {cleanHtmlEntities(link.label)}
+                                </button>
+                            ) : (
+                                <span
+                                    key={idx}
+                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+                                        link.active
+                                            ? "bg-slate-800 text-white"
+                                            : "text-slate-400"
+                                    }`}
+                                >
+                                    {cleanHtmlEntities(link.label)}
+                                </span>
+                            ),
+                        )}
                 </div>
+
+                {nextPageUrl ? (
+                    <button
+                        onClick={() => router.get(nextPageUrl)}
+                        className="p-2 border border-slate-200 rounded-lg hover:bg-white text-slate-600 bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                        aria-label="Halaman Berikutnya"
+                    >
+                        <ChevronRight size={16} />
+                    </button>
+                ) : (
+                    <span className="p-2 border border-slate-200 rounded-lg text-slate-300 bg-slate-50/50 cursor-not-allowed">
+                        <ChevronRight size={16} />
+                    </span>
+                )}
             </div>
         </div>
     );

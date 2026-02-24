@@ -12,10 +12,16 @@ use Illuminate\Support\Facades\Request as RequestFacade;
 use Inertia\Inertia;
 use Inertia\Response;
 
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 class MuzakkiController extends Controller
 {
+    use AuthorizesRequests;
+
     public function index(): Response
     {
+        $this->authorize('viewAny', Donatur::class);
+
         $query = Donatur::query();
 
         if (request('search')) {
@@ -44,6 +50,8 @@ class MuzakkiController extends Controller
 
     public function store(StoreMuzakkiRequest $request): RedirectResponse
     {
+        $this->authorize('create', Donatur::class);
+
         Donatur::create($request->validated());
 
         return redirect()->back()->with('success', 'Muzakki berhasil ditambahkan.');
@@ -51,6 +59,8 @@ class MuzakkiController extends Controller
 
     public function update(UpdateMuzakkiRequest $request, Donatur $muzakki): RedirectResponse
     {
+        $this->authorize('update', $muzakki);
+
         $muzakki->update($request->validated());
 
         return redirect()->back()->with('success', 'Data Muzakki berhasil diperbarui.');
@@ -58,6 +68,8 @@ class MuzakkiController extends Controller
 
     public function destroy(Donatur $muzakki): RedirectResponse
     {
+        $this->authorize('delete', $muzakki);
+
         $muzakki->delete();
 
         return redirect()->back()->with('success', 'Muzakki berhasil dihapus.');
@@ -65,6 +77,8 @@ class MuzakkiController extends Controller
 
     public function import(Request $request): RedirectResponse
     {
+        $this->authorize('create', Donatur::class);
+
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv|max:5120',
         ]);

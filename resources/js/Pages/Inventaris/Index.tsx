@@ -13,7 +13,12 @@ import {
     Filter,
     ChevronLeft,
     ChevronRight,
+    Save,
 } from "lucide-react";
+import FilterBar from "@/Components/FilterBar";
+import PageHeader from "@/Components/PageHeader";
+import Pagination from "@/Components/Pagination";
+import DataTable, { ColumnDef } from "@/Components/DataTable";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface User {
@@ -204,54 +209,40 @@ export default function InventarisIndex({
             <Head title="Inventaris Masjid" />
 
             {/* Header Section */}
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6 shrink-0">
-                <div>
-                    <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
-                        Inventaris
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Daftar barang, fasilitas, dan aset yang dimiliki oleh
-                        masjid.
-                    </p>
-                </div>
+            <PageHeader
+                title="Inventaris"
+                description="Daftar barang, fasilitas, dan aset yang dimiliki oleh masjid."
+                className="shrink-0"
+            >
                 <button
                     onClick={openAddModal}
-                    className="inline-flex items-center justify-center px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-200 font-medium"
+                    className="inline-flex items-center justify-center px-4 py-2.5 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-sm font-medium cursor-pointer"
                 >
                     <Plus className="w-5 h-5 mr-2" />
                     Tambah Barang
                 </button>
-            </div>
+            </PageHeader>
 
-            <div className="mb-2 relative z-20 bg-white rounded-2xl shadow-sm border border-slate-200 p-4 shrink-0">
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="relative flex-1">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-slate-400" />
-                        </div>
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={handleSearchChange}
-                            className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 sm:text-sm transition-colors shadow-sm"
-                            placeholder="Cari nama barang..."
-                        />
-                    </div>
-
-                    {/* Kondisi Filter Dropdown - Custom UI */}
+            <FilterBar
+                searchPlaceholder="Cari nama barang..."
+                searchValue={search}
+                onSearchChange={(val) =>
+                    handleSearchChange({
+                        target: { value: val },
+                    } as React.ChangeEvent<HTMLInputElement>)
+                }
+                addon={
                     <div className="relative shrink-0 z-50">
-                        {/* Invisible overlay for closing dropdown */}
                         {isFilterOpen && (
                             <div
                                 className="fixed inset-0 z-40"
                                 onClick={() => setIsFilterOpen(false)}
                             ></div>
                         )}
-
                         <button
                             type="button"
                             onClick={() => setIsFilterOpen(!isFilterOpen)}
-                            className="relative z-50 inline-flex items-center justify-between w-full sm:w-[180px] px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
+                            className="relative z-50 inline-flex items-center justify-between w-full sm:w-[180px] px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
                         >
                             <span className="flex items-center">
                                 <Filter className="w-4 h-4 mr-2 text-slate-400" />
@@ -268,7 +259,6 @@ export default function InventarisIndex({
                                 className={`w-4 h-4 text-slate-400 transition-transform duration-200 ml-2 ${isFilterOpen ? "rotate-180" : ""}`}
                             />
                         </button>
-
                         <AnimatePresence>
                             {isFilterOpen && (
                                 <motion.div
@@ -276,7 +266,7 @@ export default function InventarisIndex({
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: 10 }}
                                     transition={{ duration: 0.15 }}
-                                    className="absolute right-0 mt-2 w-full sm:w-48 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-[60] p-1"
+                                    className="absolute right-0 sm:right-auto sm:left-0 mt-2 w-full sm:w-48 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-[60] p-1"
                                 >
                                     {[
                                         {
@@ -304,10 +294,10 @@ export default function InventarisIndex({
                                                     page: 1,
                                                 });
                                             }}
-                                            className={`w-full text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                            className={`w-full text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
                                                 (conditionFilter || "semua") ===
                                                 opt.value
-                                                    ? "bg-emerald-50 text-emerald-700 font-semibold"
+                                                    ? "bg-green-50 text-green-700 font-semibold"
                                                     : "text-slate-600 hover:bg-slate-50"
                                             }`}
                                         >
@@ -318,154 +308,148 @@ export default function InventarisIndex({
                             )}
                         </AnimatePresence>
                     </div>
-                </div>
-            </div>
+                }
+            />
 
             {/* Data Table */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-1 min-h-0">
-                <div
-                    className="inventaris-table-scroll overflow-x-auto overflow-y-auto rounded-t-2xl flex-1 min-h-0"
-                    style={{
-                        scrollbarWidth: "thin",
-                        scrollbarColor: "#CBD5E1 transparent",
-                    }}
-                >
-                    <style>{`
-                        .inventaris-table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-                        .inventaris-table-scroll::-webkit-scrollbar-track { background: transparent; }
-                        .inventaris-table-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
-                        .inventaris-table-scroll::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
-                    `}</style>
-                    <table className="w-full text-sm text-left align-middle table-fixed">
-                        <thead className="sticky top-0 z-10 bg-slate-50 shadow-sm text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
-                            <tr>
-                                <th className="px-6 py-4 w-[15%]">Tanggal</th>
-                                <th className="px-6 py-4 w-[20%]">
-                                    Nama Barang
-                                </th>
-                                <th className="px-6 py-4 text-center w-[12%]">
-                                    Jumlah
-                                </th>
-                                <th className="px-6 py-4 w-[13%]">Kondisi</th>
-                                <th className="px-6 py-4 w-[15%]">Lokasi</th>
-                                <th className="px-6 py-4 w-[15%]">
-                                    Keterangan
-                                </th>
-                                <th className="px-6 py-4 text-right w-[10%]">
-                                    Aksi
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100/80">
-                            {items.data.length > 0 ? (
-                                items.data.map((item) => (
-                                    <tr
-                                        key={item.id}
-                                        className="bg-white hover:bg-slate-50/80 transition-colors group"
+            <DataTable
+                className="flex-1 min-h-[400px]"
+                tableFixed
+                columns={
+                    [
+                        {
+                            key: "tanggal",
+                            header: "Tanggal",
+                            width: "w-[15%]",
+                            cellClassName:
+                                "whitespace-nowrap text-slate-600 font-medium text-sm",
+                            render: (item) => (
+                                <>
+                                    <div>
+                                        {new Date(
+                                            item.created_at,
+                                        ).toLocaleDateString("id-ID", {
+                                            day: "2-digit",
+                                            month: "short",
+                                            year: "numeric",
+                                        })}
+                                    </div>
+                                    <div className="text-xs text-slate-400 mt-0.5">
+                                        {new Date(
+                                            item.created_at,
+                                        ).toLocaleTimeString("id-ID", {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}
+                                    </div>
+                                </>
+                            ),
+                        },
+                        {
+                            key: "nama",
+                            header: "Nama Barang",
+                            width: "w-[20%]",
+                            cellClassName: "whitespace-nowrap",
+                            render: (item) => (
+                                <span className="font-semibold text-slate-700">
+                                    {item.item_name}
+                                </span>
+                            ),
+                        },
+                        {
+                            key: "jumlah",
+                            header: "Jumlah",
+                            width: "w-[12%]",
+                            headerClassName: "text-center",
+                            cellClassName: "whitespace-nowrap text-center",
+                            render: (item) => (
+                                <span className="text-slate-700 font-medium">
+                                    {item.quantity}
+                                </span>
+                            ),
+                        },
+                        {
+                            key: "kondisi",
+                            header: "Kondisi",
+                            width: "w-[13%]",
+                            cellClassName: "whitespace-nowrap",
+                            render: (item) => (
+                                <span
+                                    className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs border ${conditionStyles[item.condition]}`}
+                                >
+                                    {conditionLabels[item.condition]}
+                                </span>
+                            ),
+                        },
+                        {
+                            key: "lokasi",
+                            header: "Lokasi",
+                            width: "w-[15%]",
+                            cellClassName:
+                                "whitespace-nowrap text-slate-600 font-medium",
+                            render: (item) =>
+                                item.location || (
+                                    <span className="text-slate-400 italic">
+                                        Belum diatur
+                                    </span>
+                                ),
+                        },
+                        {
+                            key: "keterangan",
+                            header: "Keterangan",
+                            width: "w-[15%]",
+                            cellClassName: "max-w-xs truncate text-slate-600",
+                            render: (item) => item.notes || "-",
+                        },
+                        {
+                            key: "aksi",
+                            header: "Aksi",
+                            width: "w-[10%]",
+                            headerClassName: "text-right",
+                            cellClassName: "whitespace-nowrap text-right",
+                            render: (item) => (
+                                <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={() => openEditModal(item)}
+                                        className="p-1.5 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors"
+                                        title="Edit Barang"
                                     >
-                                        <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium text-sm">
-                                            <div>
-                                                {new Date(
-                                                    item.created_at,
-                                                ).toLocaleDateString("id-ID", {
-                                                    day: "2-digit",
-                                                    month: "short",
-                                                    year: "numeric",
-                                                })}
-                                            </div>
-                                            <div className="text-xs text-slate-400 mt-0.5">
-                                                {new Date(
-                                                    item.created_at,
-                                                ).toLocaleTimeString("id-ID", {
-                                                    hour: "2-digit",
-                                                    minute: "2-digit",
-                                                })}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="font-semibold text-slate-700">
-                                                {item.item_name}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                                            <span className="text-slate-700 font-medium">
-                                                {item.quantity}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span
-                                                className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs border ${conditionStyles[item.condition]}`}
-                                            >
-                                                {
-                                                    conditionLabels[
-                                                        item.condition
-                                                    ]
-                                                }
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium">
-                                            {item.location || (
-                                                <span className="text-slate-400 italic">
-                                                    Belum diatur
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 max-w-xs truncate text-slate-600">
-                                            {item.notes || "-"}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right">
-                                            <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={() =>
-                                                        openEditModal(item)
-                                                    }
-                                                    className="p-1.5 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors"
-                                                    title="Edit Barang"
-                                                >
-                                                    <Edit2 size={18} />
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        handleDelete(item.id)
-                                                    }
-                                                    className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                    title="Hapus Barang"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan={7}
-                                        className="px-6 py-12 text-center text-slate-500"
+                                        <Edit2 size={18} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(item.id)}
+                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                        title="Hapus Barang"
                                     >
-                                        <div className="flex flex-col items-center justify-center">
-                                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
-                                                <Info className="w-8 h-8 text-slate-300" />
-                                            </div>
-                                            <p className="font-medium text-slate-600">
-                                                Belum ada data barang
-                                            </p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
+                            ),
+                        },
+                    ] satisfies ColumnDef<(typeof items.data)[0]>[]
+                }
+                data={items.data}
+                keyExtractor={(row) => row.id}
+                emptyState={
+                    <div className="flex flex-col items-center justify-center text-slate-400 py-2">
+                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                            <Info className="w-8 h-8 text-slate-300" />
+                        </div>
+                        <p className="font-medium text-slate-600">
+                            Belum ada data barang
+                        </p>
+                    </div>
+                }
+            />
 
-                {/* Pagination */}
-                <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+            {/* Pagination */}
+            {items.last_page > 1 && (
+                <div className="px-6 py-4 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 mt-2 shrink-0">
                     <span className="text-sm text-slate-500">
                         <span className="font-semibold text-slate-800">
                             {items.total}
                         </span>{" "}
-                        data
-                        {" · Halaman "}
+                        data{" · Halaman "}
                         <span className="font-semibold text-slate-800">
                             {items.current_page}
                         </span>{" "}
@@ -515,7 +499,7 @@ export default function InventarisIndex({
                                         }}
                                         className={`w-8 h-8 rounded-lg text-sm font-medium border transition-colors ${
                                             p === items.current_page
-                                                ? "bg-emerald-600 text-white border-emerald-600 cursor-default"
+                                                ? "bg-green-600 text-white border-green-600 cursor-default"
                                                 : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
                                         }`}
                                     >
@@ -536,7 +520,7 @@ export default function InventarisIndex({
                         </button>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Modal Add/Edit */}
             {isAddOpen && (
