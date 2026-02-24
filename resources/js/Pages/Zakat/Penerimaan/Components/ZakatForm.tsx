@@ -67,7 +67,7 @@ export default function ZakatForm({ isOpen, onClose, muzakkis }: Props) {
             <div className="p-6">
                 <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
                     <h2 className="text-lg font-bold text-slate-800 tracking-tight">
-                        Catat Transaksi Zakat
+                        Catat Penerimaan Zakat
                     </h2>
                     <button
                         onClick={onClose}
@@ -266,7 +266,7 @@ export default function ZakatForm({ isOpen, onClose, muzakkis }: Props) {
                             Batal
                         </SecondaryButton>
                         <PrimaryButton disabled={processing || !isOnline}>
-                            {processing ? "Menyimpan..." : "Simpan Transaksi"}
+                            {processing ? "Menyimpan..." : "Simpan Penerimaan"}
                         </PrimaryButton>
                     </div>
                 </form>

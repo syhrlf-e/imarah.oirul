@@ -16,6 +16,8 @@ import {
     Wallet,
     ArrowDownRight,
     ArrowUpRight,
+    TrendingUp,
+    TrendingDown,
     Loader2,
     Filter,
     ChevronDown,
@@ -161,6 +163,7 @@ export default function KasIndex({
     const openAddModal = () => {
         reset();
         setFormattedAmount("");
+        clearErrors();
         setIsAddOpen(true);
     };
 
@@ -190,7 +193,11 @@ export default function KasIndex({
         }
 
         post(route("kas.store"), {
-            onSuccess: () => closeAddModal(),
+            onSuccess: () => {
+                closeAddModal();
+                reset();
+                setFormattedAmount("");
+            },
         });
     };
 
@@ -271,7 +278,7 @@ export default function KasIndex({
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col">
                     <div className="flex justify-between items-start mb-4">
                         <div className="p-2.5 bg-emerald-50 rounded-xl">
-                            <ArrowDownRight className="w-5 h-5 text-emerald-600" />
+                            <TrendingUp className="w-5 h-5 text-emerald-600" />
                         </div>
                         <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-500">
                             {getMonthName(month)}
@@ -289,7 +296,7 @@ export default function KasIndex({
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col">
                     <div className="flex justify-between items-start mb-4">
                         <div className="p-2.5 bg-red-50 rounded-xl">
-                            <ArrowUpRight className="w-5 h-5 text-red-600" />
+                            <TrendingDown className="w-5 h-5 text-red-600" />
                         </div>
                         <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-500">
                             {getMonthName(month)}
@@ -354,7 +361,7 @@ export default function KasIndex({
                     </div>
 
                     {/* Jenis Transaksi Filter */}
-                    <div className="flex items-center gap-1.5 shrink-0 bg-slate-100 rounded-xl p-1">
+                    <div className="flex items-center gap-1.5 shrink-0 bg-slate-100 rounded-xl p-1 relative">
                         {(
                             [
                                 { value: "", label: "Semua" },
@@ -366,12 +373,23 @@ export default function KasIndex({
                                 key={opt.value}
                                 type="button"
                                 onClick={() => handleTypeChange(opt.value)}
-                                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                className={`relative px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors z-10 ${
                                     typeFilter === opt.value
-                                        ? "bg-white text-slate-800 shadow-sm"
+                                        ? "text-emerald-700"
                                         : "text-slate-500 hover:text-slate-700"
                                 }`}
                             >
+                                {typeFilter === opt.value && (
+                                    <motion.div
+                                        layoutId="activeFilterTab"
+                                        className="absolute inset-0 bg-white border border-emerald-500 rounded-lg shadow-sm -z-10"
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 400,
+                                            damping: 30,
+                                        }}
+                                    />
+                                )}
                                 {opt.label}
                             </button>
                         ))}

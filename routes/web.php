@@ -39,7 +39,9 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::put('zakat/mustahiq/{mustahiq}', [\App\Http\Controllers\MustahiqController::class, 'update'])->name('zakat.mustahiq.update');
     Route::delete('zakat/mustahiq/{mustahiq}', [\App\Http\Controllers\MustahiqController::class, 'destroy'])->name('zakat.mustahiq.destroy');
     Route::post('zakat/mustahiq/import', [\App\Http\Controllers\MustahiqController::class, 'import'])->name('zakat.mustahiq.import');
-    Route::get('zakat/transaksi', [\App\Http\Controllers\ZakatController::class, 'history'])->name('zakat.transaksi');
+    Route::get('zakat/penerimaan', [\App\Http\Controllers\ZakatController::class, 'history'])->name('zakat.penerimaan');
+    Route::get('zakat/penyaluran', [\App\Http\Controllers\ZakatController::class, 'penyaluran'])->name('zakat.penyaluran');
+    Route::post('zakat/penyaluran', [\App\Http\Controllers\ZakatController::class, 'storePenyaluran'])->name('zakat.penyaluran.store')->middleware('throttle:transactions');
 
     // Tromol
     Route::get('tromol', [\App\Http\Controllers\TromolController::class, 'index'])->name('tromol.index');

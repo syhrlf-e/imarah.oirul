@@ -20,6 +20,8 @@ class Transaction extends Model
         'notes',
         'donatur_id',
         'tromol_box_id',
+        'mustahiq_id',
+        'transaction_date',
         'created_by',
         'verified_at',
         'verified_by',
@@ -33,6 +35,11 @@ class Transaction extends Model
     public function donatur()
     {
         return $this->belongsTo(Donatur::class);
+    }
+
+    public function mustahiq()
+    {
+        return $this->belongsTo(Mustahiq::class);
     }
 
     public function tromolBox()

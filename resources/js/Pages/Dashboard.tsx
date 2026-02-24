@@ -91,24 +91,6 @@ export default function Dashboard({
 }: DashboardProps) {
     const [loading, setLoading] = useState(true);
     const [hijriDate, setHijriDate] = useState<string>("");
-    const [exportFormat, setExportFormat] = useState<"excel" | "pdf">("excel");
-    const [isExportDropdownOpen, setIsExportDropdownOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
-
-    // Close dropdown on click outside
-    useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target as Node)
-            ) {
-                setIsExportDropdownOpen(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () =>
-            document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
 
     // Format Number Compact for Chart YAxis (e.g 10M, 500K)
     const formatCompactNumber = (number: number) => {
@@ -394,7 +376,7 @@ export default function Dashboard({
                         {/* Upcoming Agendas Widget */}
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0">
                             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-                                <h3 className="font-bold text-slate-800 text-base">
+                                <h3 className="font-semibold text-slate-800 text-base">
                                     Agenda Mendatang
                                 </h3>
                                 <Link
@@ -477,7 +459,7 @@ export default function Dashboard({
                         {/* Recent Transactions Widget */}
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col flex-1">
                             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                                <h3 className="font-bold text-slate-800 text-base">
+                                <h3 className="font-semibold text-slate-800 text-base">
                                     Transaksi Terbaru
                                 </h3>
                                 <Link
@@ -577,7 +559,7 @@ export default function Dashboard({
                             <FileText className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-slate-800 mb-1">
+                            <h3 className="text-lg font-semibold text-slate-800 mb-1">
                                 Laporan Keuangan {dayjs().format("MMMM YYYY")}
                             </h3>
                             <p className="text-sm text-slate-500">
@@ -588,98 +570,12 @@ export default function Dashboard({
                     </div>
 
                     <div className="shrink-0 mt-4 sm:mt-0 w-full sm:w-auto">
-                        <div
-                            className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto relative"
-                            ref={dropdownRef}
+                        <Link
+                            href="/laporan"
+                            className="inline-flex w-full sm:w-[140px] items-center justify-center px-6 py-2.5 bg-white border border-emerald-500 text-emerald-600 font-bold text-sm rounded-xl hover:bg-emerald-50 hover:border-emerald-600 hover:text-emerald-700 shadow-sm transition-all focus:ring-2 focus:ring-emerald-500/50 focus:outline-none cursor-pointer"
                         >
-                            {/* Custom Dropdown Trigger */}
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setIsExportDropdownOpen(
-                                        !isExportDropdownOpen,
-                                    )
-                                }
-                                className="inline-flex w-full sm:w-[140px] items-center justify-between px-4 py-3 bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-sm rounded-xl hover:bg-slate-100 transition-all focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
-                            >
-                                <span className="flex items-center gap-2">
-                                    {exportFormat === "excel"
-                                        ? "File Excel"
-                                        : "File PDF"}
-                                </span>
-                                <ChevronDown
-                                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isExportDropdownOpen ? "rotate-180" : ""}`}
-                                />
-                            </button>
-
-                            {/* Dropdown Menu */}
-                            {isExportDropdownOpen && (
-                                <div className="absolute bottom-[calc(100%+8px)] left-0 sm:left-auto sm:right-[auto] w-full sm:w-[140px] bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden z-20 py-1 origin-bottom animate-in fade-in slide-in-from-bottom-2 duration-200">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setExportFormat("excel");
-                                            setIsExportDropdownOpen(false);
-                                        }}
-                                        className="w-full text-left px-4 py-2.5 text-sm font-medium hover:bg-slate-50 flex items-center justify-between transition-colors"
-                                    >
-                                        <span
-                                            className={
-                                                exportFormat === "excel"
-                                                    ? "text-emerald-600 font-semibold"
-                                                    : "text-slate-700"
-                                            }
-                                        >
-                                            File Excel
-                                        </span>
-                                        {exportFormat === "excel" && (
-                                            <Check className="w-4 h-4 text-emerald-600" />
-                                        )}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setExportFormat("pdf");
-                                            setIsExportDropdownOpen(false);
-                                        }}
-                                        className="w-full text-left px-4 py-2.5 text-sm font-medium hover:bg-slate-50 flex items-center justify-between transition-colors"
-                                    >
-                                        <span
-                                            className={
-                                                exportFormat === "pdf"
-                                                    ? "text-emerald-600 font-semibold"
-                                                    : "text-slate-700"
-                                            }
-                                        >
-                                            File PDF
-                                        </span>
-                                        {exportFormat === "pdf" && (
-                                            <Check className="w-4 h-4 text-emerald-600" />
-                                        )}
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* Download Button */}
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    // Construct the URL based on selected format
-                                    const formatParam =
-                                        exportFormat === "excel"
-                                            ? "xlsx"
-                                            : "pdf";
-                                    window.open(
-                                        window.location.origin +
-                                            `/laporan/export?format=${formatParam}`,
-                                        "_self",
-                                    );
-                                }}
-                                className="inline-flex w-full sm:w-[140px] items-center justify-center px-6 py-3 bg-emerald-600 text-white font-bold text-sm rounded-xl hover:bg-emerald-700 shadow-sm transition-all focus:ring-2 focus:ring-emerald-500/50 focus:outline-none cursor-pointer"
-                            >
-                                Unduh
-                            </button>
-                        </div>
+                            Lihat Disini
+                        </Link>
                     </div>
                 </div>
             </div>

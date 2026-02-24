@@ -19,7 +19,7 @@ import { Link } from "@inertiajs/react";
 interface Transaction {
     id: string;
     created_at: string;
-    donatur_name: string;
+    mustahiq_name: string;
     category: string;
     amount: number;
     payment_method: string;
@@ -27,7 +27,7 @@ interface Transaction {
     status: string;
 }
 
-interface Muzakki {
+interface Mustahiq {
     id: string;
     name: string;
 }
@@ -47,10 +47,10 @@ interface Props {
         prev_page_url: string | null;
         next_page_url: string | null;
     };
-    muzakkis: Muzakki[];
+    mustahiqs: Mustahiq[];
 }
 
-export default function Index({ transactions, muzakkis }: Props) {
+export default function Index({ transactions, mustahiqs }: Props) {
     const [search, setSearch] = useState("");
     const [sortOrder, setSortOrder] = useState<"terbaru" | "terlama">(
         "terbaru",
@@ -87,17 +87,17 @@ export default function Index({ transactions, muzakkis }: Props) {
 
     return (
         <AppLayout title="Pengelola Zakat">
-            <Head title="Transaksi Zakat" />
+            <Head title="Penyaluran Zakat" />
 
             {/* Header Section */}
             <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6">
                 <div>
                     <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
-                        Riwayat Zakat
+                        Riwayat Penyaluran
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
-                        Pencatatan pemasukan Zakat Maal dan Zakat Fitrah dari
-                        para jamaah.
+                        Pencatatan penyaluran Zakat Maal dan Zakat Fitrah kepada
+                        para Mustahiq.
                     </p>
                 </div>
                 {transactions.data.length > 0 && (
@@ -106,7 +106,7 @@ export default function Index({ transactions, muzakkis }: Props) {
                         className="inline-flex items-center justify-center px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-200 font-medium"
                     >
                         <Plus className="w-5 h-5 mr-2" />
-                        Catat Zakat
+                        Salurkan Zakat
                     </button>
                 )}
             </div>
@@ -122,7 +122,7 @@ export default function Index({ transactions, muzakkis }: Props) {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 sm:text-sm transition-colors shadow-sm"
-                            placeholder="Cari transaksi..."
+                            placeholder="Cari penyaluran..."
                         />
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
@@ -164,10 +164,10 @@ export default function Index({ transactions, muzakkis }: Props) {
                         <thead className="bg-slate-50/80 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
                             <tr>
                                 <th scope="col" className="px-6 py-4">
-                                    Tanggal Penerimaan
+                                    Tanggal Penyaluran
                                 </th>
                                 <th scope="col" className="px-6 py-4">
-                                    Nama Muzakki
+                                    Nama Mustahiq
                                 </th>
                                 <th scope="col" className="px-6 py-4">
                                     Jenis Zakat
@@ -199,12 +199,12 @@ export default function Index({ transactions, muzakkis }: Props) {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold mr-3">
-                                                    {trx.donatur_name
+                                                    {trx.mustahiq_name
                                                         .charAt(0)
                                                         .toUpperCase()}
                                                 </div>
                                                 <span className="font-bold text-slate-800">
-                                                    {trx.donatur_name}
+                                                    {trx.mustahiq_name}
                                                 </span>
                                             </div>
                                         </td>
@@ -246,8 +246,8 @@ export default function Index({ transactions, muzakkis }: Props) {
                                 <tr>
                                     <td colSpan={6} className="py-12">
                                         <EmptyState
-                                            message="Belum ada riwayat transaksi zakat yang tercatat."
-                                            actionLabel="Catat Zakat Perdana"
+                                            message="Belum ada riwayat penyaluran zakat yang tercatat."
+                                            actionLabel="Salurkan Zakat Perdana"
                                             onAction={() => setIsFormOpen(true)}
                                         />
                                     </td>
@@ -347,7 +347,7 @@ export default function Index({ transactions, muzakkis }: Props) {
             <ZakatForm
                 isOpen={isFormOpen}
                 onClose={() => setIsFormOpen(false)}
-                muzakkis={muzakkis}
+                mustahiqs={mustahiqs}
             />
         </AppLayout>
     );

@@ -96,12 +96,23 @@ export default function AppLayout({ title, children }: Props) {
 
                     <Link
                         href="/dashboard"
-                        className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                        className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                             isActive("/dashboard")
-                                ? "bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/50"
+                                ? "text-emerald-700 font-semibold"
                                 : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                         }`}
                     >
+                        {isActive("/dashboard") && (
+                            <motion.div
+                                layoutId="sidebarActiveMenu"
+                                className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 400,
+                                    damping: 30,
+                                }}
+                            />
+                        )}
                         <LayoutDashboard
                             className={`w-5 h-5 mr-3 transition-colors ${isActive("/dashboard") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
                         />
@@ -113,12 +124,23 @@ export default function AppLayout({ title, children }: Props) {
                         <>
                             <Link
                                 href="/kas"
-                                className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                                     isActive("/kas")
-                                        ? "bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/50"
+                                        ? "text-emerald-700 font-semibold"
                                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                 }`}
                             >
+                                {isActive("/kas") && (
+                                    <motion.div
+                                        layoutId="sidebarActiveMenu"
+                                        className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 400,
+                                            damping: 30,
+                                        }}
+                                    />
+                                )}
                                 <Wallet
                                     className={`w-5 h-5 mr-3 transition-colors ${isActive("/kas") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
                                 />
@@ -127,12 +149,23 @@ export default function AppLayout({ title, children }: Props) {
 
                             <Link
                                 href="/inventaris"
-                                className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                                     isActive("/inventaris")
-                                        ? "bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/50"
+                                        ? "text-emerald-700 font-semibold"
                                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                 }`}
                             >
+                                {isActive("/inventaris") && (
+                                    <motion.div
+                                        layoutId="sidebarActiveMenu"
+                                        className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 400,
+                                            damping: 30,
+                                        }}
+                                    />
+                                )}
                                 <Archive
                                     className={`w-5 h-5 mr-3 transition-colors ${isActive("/inventaris") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
                                 />
@@ -143,12 +176,23 @@ export default function AppLayout({ title, children }: Props) {
 
                     <Link
                         href="/agenda"
-                        className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                        className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                             isActive("/agenda")
-                                ? "bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/50"
+                                ? "text-emerald-700 font-semibold"
                                 : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                         }`}
                     >
+                        {isActive("/agenda") && (
+                            <motion.div
+                                layoutId="sidebarActiveMenu"
+                                className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 400,
+                                    damping: 30,
+                                }}
+                            />
+                        )}
                         <Calendar
                             className={`w-5 h-5 mr-3 transition-colors ${isActive("/agenda") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
                         />
@@ -157,12 +201,23 @@ export default function AppLayout({ title, children }: Props) {
 
                     <Link
                         href="/laporan"
-                        className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                        className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                             isActive("/laporan")
-                                ? "bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/50"
+                                ? "text-emerald-700 font-semibold"
                                 : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                         }`}
                     >
+                        {isActive("/laporan") && (
+                            <motion.div
+                                layoutId="sidebarActiveMenu"
+                                className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 400,
+                                    damping: 30,
+                                }}
+                            />
+                        )}
                         <FileText
                             className={`w-5 h-5 mr-3 transition-colors ${isActive("/laporan") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
                         />
@@ -182,12 +237,23 @@ export default function AppLayout({ title, children }: Props) {
                             <div>
                                 <button
                                     onClick={() => setIsZakatOpen(!isZakatOpen)}
-                                    className={`group w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                    className={`group relative z-10 w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                                         isActive("/zakat") && !isZakatOpen
-                                            ? "bg-emerald-50 text-emerald-700"
+                                            ? "text-emerald-700 font-semibold"
                                             : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                     }`}
                                 >
+                                    {isActive("/zakat") && !isZakatOpen && (
+                                        <motion.div
+                                            layoutId="sidebarActiveMenu"
+                                            className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                            transition={{
+                                                type: "spring",
+                                                stiffness: 400,
+                                                damping: 30,
+                                            }}
+                                        />
+                                    )}
                                     <div className="flex items-center">
                                         <UserCircle
                                             className={`w-5 h-5 mr-3 transition-colors ${isActive("/zakat") && !isZakatOpen ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
@@ -200,26 +266,76 @@ export default function AppLayout({ title, children }: Props) {
                                 </button>
 
                                 <div
-                                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isZakatOpen ? "max-h-48 opacity-100 mt-1" : "max-h-0 opacity-0"}`}
+                                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isZakatOpen ? "max-h-60 opacity-100 mt-1" : "max-h-0 opacity-0"}`}
                                 >
                                     <div className="pl-11 pr-3 py-1 space-y-1 relative before:absolute before:inset-y-0 before:left-5 before:w-px before:bg-slate-200">
                                         <Link
                                             href="/zakat/muzakki"
-                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${isActive("/zakat/muzakki") ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/muzakki") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
                                         >
+                                            {isActive("/zakat/muzakki") && (
+                                                <motion.div
+                                                    layoutId="sidebarActiveMenu"
+                                                    className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
+                                                    transition={{
+                                                        type: "spring",
+                                                        stiffness: 400,
+                                                        damping: 30,
+                                                    }}
+                                                />
+                                            )}
                                             Muzakki
                                         </Link>
                                         <Link
                                             href="/zakat/mustahiq"
-                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${isActive("/zakat/mustahiq") ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/mustahiq") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
                                         >
+                                            {isActive("/zakat/mustahiq") && (
+                                                <motion.div
+                                                    layoutId="sidebarActiveMenu"
+                                                    className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
+                                                    transition={{
+                                                        type: "spring",
+                                                        stiffness: 400,
+                                                        damping: 30,
+                                                    }}
+                                                />
+                                            )}
                                             Mustahiq
                                         </Link>
                                         <Link
-                                            href="/zakat/transaksi"
-                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${isActive("/zakat/transaksi") ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                            href="/zakat/penerimaan"
+                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/penerimaan") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
                                         >
-                                            Transaksi
+                                            {isActive("/zakat/penerimaan") && (
+                                                <motion.div
+                                                    layoutId="sidebarActiveMenu"
+                                                    className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
+                                                    transition={{
+                                                        type: "spring",
+                                                        stiffness: 400,
+                                                        damping: 30,
+                                                    }}
+                                                />
+                                            )}
+                                            Penerimaan
+                                        </Link>
+                                        <Link
+                                            href="/zakat/penyaluran"
+                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/penyaluran") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                        >
+                                            {isActive("/zakat/penyaluran") && (
+                                                <motion.div
+                                                    layoutId="sidebarActiveMenu"
+                                                    className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
+                                                    transition={{
+                                                        type: "spring",
+                                                        stiffness: 400,
+                                                        damping: 30,
+                                                    }}
+                                                />
+                                            )}
+                                            Penyaluran
                                         </Link>
                                     </div>
                                 </div>
@@ -231,12 +347,23 @@ export default function AppLayout({ title, children }: Props) {
                                     onClick={() =>
                                         setIsTromolOpen(!isTromolOpen)
                                     }
-                                    className={`group w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                    className={`group relative z-10 w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                                         isActive("/tromol") && !isTromolOpen
-                                            ? "bg-emerald-50 text-emerald-700"
+                                            ? "text-emerald-700 font-semibold"
                                             : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                     }`}
                                 >
+                                    {isActive("/tromol") && !isTromolOpen && (
+                                        <motion.div
+                                            layoutId="sidebarActiveMenu"
+                                            className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                            transition={{
+                                                type: "spring",
+                                                stiffness: 400,
+                                                damping: 30,
+                                            }}
+                                        />
+                                    )}
                                     <div className="flex items-center">
                                         <Box
                                             className={`w-5 h-5 mr-3 transition-colors ${isActive("/tromol") && !isTromolOpen ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
@@ -253,14 +380,36 @@ export default function AppLayout({ title, children }: Props) {
                                     <div className="pl-11 pr-3 py-1 space-y-1 relative before:absolute before:inset-y-0 before:left-5 before:w-px before:bg-slate-200">
                                         <Link
                                             href="/tromol"
-                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${url === "/tromol" ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${url === "/tromol" ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
                                         >
+                                            {url === "/tromol" && (
+                                                <motion.div
+                                                    layoutId="sidebarActiveMenu"
+                                                    className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
+                                                    transition={{
+                                                        type: "spring",
+                                                        stiffness: 400,
+                                                        damping: 30,
+                                                    }}
+                                                />
+                                            )}
                                             Daftar Kotak
                                         </Link>
                                         <Link
                                             href="/tromol/history"
-                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative ${isActive("/tromol/history") ? "text-emerald-600 font-semibold bg-emerald-50/50" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/tromol/history") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
                                         >
+                                            {isActive("/tromol/history") && (
+                                                <motion.div
+                                                    layoutId="sidebarActiveMenu"
+                                                    className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
+                                                    transition={{
+                                                        type: "spring",
+                                                        stiffness: 400,
+                                                        damping: 30,
+                                                    }}
+                                                />
+                                            )}
                                             Riwayat
                                         </Link>
                                     </div>
@@ -277,12 +426,23 @@ export default function AppLayout({ title, children }: Props) {
                             </div>
                             <Link
                                 href="/settings"
-                                className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                                     isActive("/settings")
-                                        ? "bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/50"
+                                        ? "text-emerald-700 font-semibold"
                                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                 }`}
                             >
+                                {isActive("/settings") && (
+                                    <motion.div
+                                        layoutId="sidebarActiveMenu"
+                                        className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 400,
+                                            damping: 30,
+                                        }}
+                                    />
+                                )}
                                 <Settings
                                     className={`w-5 h-5 mr-3 transition-colors ${isActive("/settings") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
                                 />
@@ -306,7 +466,7 @@ export default function AppLayout({ title, children }: Props) {
                                 <Menu size={24} />
                             </button>
                             {title && (
-                                <h1 className="text-lg font-bold text-slate-900 tracking-tight hidden md:block">
+                                <h1 className="text-lg font-semibold text-slate-900 tracking-tight hidden md:block">
                                     {title}
                                 </h1>
                             )}
@@ -335,7 +495,7 @@ export default function AppLayout({ title, children }: Props) {
                                     }
                                 >
                                     <div className="hidden sm:block text-right">
-                                        <p className="text-sm font-bold text-slate-800 leading-tight">
+                                        <p className="text-sm font-medium text-slate-800 leading-tight">
                                             {auth.user.name}
                                         </p>
                                         <p className="text-[10px] text-slate-500 capitalize">
