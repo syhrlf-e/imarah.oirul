@@ -40,13 +40,15 @@ export default function KasSummaryCards({
     const hasSurplus = surplusDefisit !== undefined;
     const isPositive = (surplusDefisit ?? 0) >= 0;
     const gridCols = hasSurplus
-        ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
-        : "grid-cols-1 md:grid-cols-3";
+        ? "grid-cols-2 lg:grid-cols-4"
+        : "grid-cols-2 md:grid-cols-3";
 
     return (
-        <div className={`grid ${gridCols} gap-4 md:gap-6 ${className}`}>
+        <div className={`grid ${gridCols} gap-3 md:gap-6 ${className}`}>
             {/* Total Saldo Kas */}
-            <div className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-slate-200 flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300">
+            <div
+                className={`bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300 ${!hasSurplus ? "col-span-2 md:col-span-1" : "col-span-2 lg:col-span-1"}`}
+            >
                 <div className="flex justify-between items-start mb-4">
                     <div className="p-2.5 bg-green-50 rounded-xl">
                         <Wallet className="w-5 h-5 text-green-600" />
@@ -65,7 +67,7 @@ export default function KasSummaryCards({
             </div>
 
             {/* Pemasukan Bulan Ini */}
-            <div className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-slate-200 flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300">
+            <div className="col-span-1 bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300">
                 <div className="flex justify-between items-start mb-4">
                     <div className="p-2.5 bg-emerald-50 rounded-xl">
                         <TrendingUp className="w-5 h-5 text-emerald-600" />
@@ -89,7 +91,7 @@ export default function KasSummaryCards({
             </div>
 
             {/* Pengeluaran Bulan Ini */}
-            <div className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-slate-200 flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300">
+            <div className="col-span-1 bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300">
                 <div className="flex justify-between items-start mb-4">
                     <div className="p-2.5 bg-red-50 rounded-xl">
                         <TrendingDown className="w-5 h-5 text-red-600" />
@@ -114,7 +116,7 @@ export default function KasSummaryCards({
 
             {/* Surplus / Defisit (optional card ke-4) */}
             {hasSurplus && (
-                <div className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-slate-200 flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300">
+                <div className="col-span-2 lg:col-span-1 bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300">
                     <div className="flex justify-between items-start mb-4">
                         <div
                             className={`p-2.5 rounded-xl ${isPositive ? "bg-blue-50" : "bg-orange-50"}`}

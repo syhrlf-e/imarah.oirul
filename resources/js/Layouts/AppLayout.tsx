@@ -459,12 +459,18 @@ export default function AppLayout({ title, children }: Props) {
                 <header className="flex-none z-30 bg-white border-b border-slate-200 md:border-none relative shadow-sm md:mt-4 md:mx-4 md:rounded-2xl">
                     <div className="flex items-center justify-between h-[70px] px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center">
-                            <button
-                                onClick={toggleSidebar}
-                                className="md:hidden p-2 -ml-2 mr-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
-                            >
-                                <Menu size={24} />
-                            </button>
+                            {/* Logo for mobile */}
+                            <div className="md:hidden flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-xl bg-emerald-500 flex items-center justify-center shadow-inner">
+                                    <span className="text-white font-bold text-lg font-poppins leading-none">
+                                        I
+                                    </span>
+                                </div>
+                                <span className="text-lg font-bold text-slate-900 font-poppins tracking-tight">
+                                    Imarah.
+                                </span>
+                            </div>
+
                             {title && (
                                 <h1 className="text-lg font-semibold text-slate-900 tracking-tight hidden md:block">
                                     {title}
@@ -472,9 +478,26 @@ export default function AppLayout({ title, children }: Props) {
                             )}
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 md:gap-4">
                             <button className="p-2 text-slate-400 hover:text-slate-600 rounded-full transition-colors relative">
+                                <div className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></div>
                                 <Bell size={20} />
+                            </button>
+
+                            {/* Custom Hamburger Menu (Mobile Only) */}
+                            <button
+                                onClick={toggleSidebar}
+                                className="md:hidden flex flex-col justify-center items-end w-8 h-8 space-y-1 focus:outline-none group"
+                            >
+                                <span
+                                    className={`block h-[1.5px] bg-slate-600 rounded-full transition-all duration-300 ease-in-out ${isSidebarOpen ? "w-5 rotate-45 translate-y-[5.5px]" : "w-5"}`}
+                                ></span>
+                                <span
+                                    className={`block h-[1.5px] bg-slate-600 rounded-full transition-all duration-300 ease-in-out ${isSidebarOpen ? "w-5 opacity-0 translate-x-1" : "w-4"}`}
+                                ></span>
+                                <span
+                                    className={`block h-[1.5px] bg-slate-600 rounded-full transition-all duration-300 ease-in-out ${isSidebarOpen ? "w-5 -rotate-45 -translate-y-[5.5px]" : "w-3 group-hover:w-5"}`}
+                                ></span>
                             </button>
 
                             <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
@@ -488,8 +511,9 @@ export default function AppLayout({ title, children }: Props) {
                                     ></div>
                                 )}
 
+                                {/* Profile Trigger (Desktop Only) */}
                                 <div
-                                    className="relative z-50 flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition-colors -mr-2"
+                                    className="relative z-50 hidden md:flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition-colors -mr-2"
                                     onClick={() =>
                                         setIsProfileOpen(!isProfileOpen)
                                     }
@@ -507,9 +531,9 @@ export default function AppLayout({ title, children }: Props) {
                                     </div>
                                 </div>
 
-                                {/* Dropdown Menu Logout */}
+                                {/* Dropdown Menu Logout (Desktop Only) */}
                                 <div
-                                    className={`absolute right-0 top-[110%] w-48 bg-white rounded-xl shadow-lg border border-slate-100 transition-all duration-200 z-50 ${isProfileOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2"}`}
+                                    className={`hidden md:block absolute right-0 top-[110%] w-48 bg-white rounded-xl shadow-lg border border-slate-100 transition-all duration-200 z-50 ${isProfileOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2"}`}
                                 >
                                     <div className="p-2">
                                         <Link

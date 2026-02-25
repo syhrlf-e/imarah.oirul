@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SIM Masjid Dashboard Mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#17cf54",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#112116",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a3322",
+                        "text-main-light": "#0e1b12",
+                        "text-main-dark": "#e0ece4",
+                        "text-secondary-light": "#4e9767",
+                        "text-secondary-dark": "#8bc49e",
+                        "accent-light": "#e7f3eb",
+                        "accent-dark": "#1f3b28",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-main-light dark:text-text-main-dark transition-colors duration-200">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Header / Navigation -->
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-accent-light dark:border-accent-dark bg-surface-light dark:bg-surface-dark px-4 py-3 shadow-sm">
+<div class="flex items-center gap-3">
+<div class="flex size-8 items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/20 text-primary">
+<span class="material-symbols-outlined !text-2xl">mosque</span>
+</div>
+<h1 class="text-lg font-bold leading-tight tracking-tight">SIM Masjid</h1>
+</div>
+<div class="flex items-center gap-3">
+<button class="relative flex size-9 items-center justify-center rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-accent-light dark:hover:bg-accent-dark transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-2 size-2 rounded-full bg-red-500 border border-white dark:border-surface-dark"></span>
+</button>
+<button class="flex size-9 items-center justify-center rounded-lg bg-accent-light dark:bg-accent-dark text-text-main-light dark:text-text-main-dark">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 px-4 py-6 pb-20">
+<!-- User Welcome -->
+<div class="mb-6 flex items-center gap-3">
+<div class="size-12 rounded-full bg-gray-200 bg-cover bg-center ring-2 ring-primary/20" data-alt="Portrait of mosque administrator" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDkrEEYf7J_R_tp4rILbehjic9FR9GL6s1R1RZgLB9GR401fE5-4kHOm_k69UrBT9OmCo7qsbzN8sUygTaAnjjRlhDSo2s4LdIOtvfssQR2hf30TPJ0MkQcxKQAhHUY1Eo_oEe0Bj9DNyNoebAjN8F49XhD4yMNI5k74i3xKb-YfF7WwqliFnK1MyFiisXfGjb0ww2y8t4MhPLH4txgT8svSwv2t8dwbEDmPiC6xJ2Dwmml-EybZrGyt6gpiAa_ReTtodq6Tf4sjg0");'></div>
+<div>
+<p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Assalamu'alaikum,</p>
+<p class="text-lg font-bold">Pak Budi Santoso</p>
+</div>
+</div>
+<!-- Stats Grid -->
+<section class="mb-8">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-base font-bold">Overview</h2>
+<span class="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">This Month</span>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<!-- Stat Card 1 -->
+<div class="flex flex-col gap-2 rounded-xl bg-surface-light dark:bg-surface-dark p-4 shadow-sm border border-accent-light dark:border-accent-dark">
+<div class="flex items-center justify-between">
+<div class="size-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined !text-lg">groups</span>
+</div>
+<span class="text-xs font-bold text-primary flex items-center">
+<span class="material-symbols-outlined !text-sm">trending_up</span> 12%
+                            </span>
+</div>
+<div>
+<p class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark mt-2">Total Jamaah</p>
+<p class="text-xl font-bold tracking-tight">1,250</p>
+</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="flex flex-col gap-2 rounded-xl bg-surface-light dark:bg-surface-dark p-4 shadow-sm border border-accent-light dark:border-accent-dark">
+<div class="flex items-center justify-between">
+<div class="size-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-symbols-outlined !text-lg">account_balance_wallet</span>
+</div>
+<span class="text-xs font-bold text-primary flex items-center">
+<span class="material-symbols-outlined !text-sm">trending_up</span> 5%
+                            </span>
+</div>
+<div>
+<p class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark mt-2">Saldo Kas</p>
+<p class="text-xl font-bold tracking-tight">45.2jt</p>
+</div>
+</div>
+<!-- Stat Card 3 -->
+<div class="flex flex-col gap-2 rounded-xl bg-surface-light dark:bg-surface-dark p-4 shadow-sm border border-accent-light dark:border-accent-dark">
+<div class="flex items-center justify-between">
+<div class="size-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+<span class="material-symbols-outlined !text-lg">volunteer_activism</span>
+</div>
+<span class="text-xs font-bold text-primary flex items-center">
+<span class="material-symbols-outlined !text-sm">trending_up</span> 2%
+                            </span>
+</div>
+<div>
+<p class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark mt-2">Infaq Jumat</p>
+<p class="text-xl font-bold tracking-tight">3.5jt</p>
+</div>
+</div>
+<!-- Stat Card 4 -->
+<div class="flex flex-col gap-2 rounded-xl bg-surface-light dark:bg-surface-dark p-4 shadow-sm border border-accent-light dark:border-accent-dark">
+<div class="flex items-center justify-between">
+<div class="size-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined !text-lg">inventory_2</span>
+</div>
+<span class="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark flex items-center">
+                                0%
+                            </span>
+</div>
+<div>
+<p class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark mt-2">Aset Masjid</p>
+<p class="text-xl font-bold tracking-tight">1.2M</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Quick Actions -->
+<section class="mb-8">
+<h2 class="text-base font-bold mb-3 px-1">Quick Actions</h2>
+<div class="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+<button class="flex flex-col items-center gap-2 min-w-[80px]">
+<div class="size-12 rounded-full bg-primary text-white flex items-center justify-center shadow-md shadow-primary/20">
+<span class="material-symbols-outlined">add</span>
+</div>
+<span class="text-xs font-medium text-center">New Transaction</span>
+</button>
+<button class="flex flex-col items-center gap-2 min-w-[80px]">
+<div class="size-12 rounded-full bg-surface-light dark:bg-surface-dark border border-accent-light dark:border-accent-dark text-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined">event</span>
+</div>
+<span class="text-xs font-medium text-center">Add Event</span>
+</button>
+<button class="flex flex-col items-center gap-2 min-w-[80px]">
+<div class="size-12 rounded-full bg-surface-light dark:bg-surface-dark border border-accent-light dark:border-accent-dark text-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined">campaign</span>
+</div>
+<span class="text-xs font-medium text-center">Broadcast</span>
+</button>
+<button class="flex flex-col items-center gap-2 min-w-[80px]">
+<div class="size-12 rounded-full bg-surface-light dark:bg-surface-dark border border-accent-light dark:border-accent-dark text-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined">description</span>
+</div>
+<span class="text-xs font-medium text-center">Report</span>
+</button>
+</div>
+</section>
+<!-- Recent Transactions List -->
+<section class="mb-8">
+<div class="flex items-center justify-between mb-4 px-1">
+<h2 class="text-base font-bold">Recent Transactions</h2>
+<a class="text-sm font-medium text-primary hover:text-green-600" href="#">View All</a>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Transaction Item 1 -->
+<div class="flex items-center justify-between rounded-xl bg-surface-light dark:bg-surface-dark p-4 shadow-sm border border-accent-light dark:border-accent-dark">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined">arrow_downward</span>
+</div>
+<div>
+<p class="text-sm font-semibold line-clamp-1">Infaq Hamba Allah</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">2 hours ago</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-green-600 dark:text-green-400">+Rp 500.000</p>
+<span class="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20">Success</span>
+</div>
+</div>
+<!-- Transaction Item 2 -->
+<div class="flex items-center justify-between rounded-xl bg-surface-light dark:bg-surface-dark p-4 shadow-sm border border-accent-light dark:border-accent-dark">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined">arrow_upward</span>
+</div>
+<div>
+<p class="text-sm font-semibold line-clamp-1">Listrik &amp; Air Masjid</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">Yesterday</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-red-600 dark:text-red-400">-Rp 1.200.000</p>
+<span class="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20">Success</span>
+</div>
+</div>
+<!-- Transaction Item 3 -->
+<div class="flex items-center justify-between rounded-xl bg-surface-light dark:bg-surface-dark p-4 shadow-sm border border-accent-light dark:border-accent-dark">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined">arrow_downward</span>
+</div>
+<div>
+<p class="text-sm font-semibold line-clamp-1">Kotak Amal Jumat</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">3 days ago</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-green-600 dark:text-green-400">+Rp 2.150.000</p>
+<span class="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20">Success</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Upcoming Events -->
+<section class="mb-4">
+<div class="flex items-center justify-between mb-4 px-1">
+<h2 class="text-base font-bold">Upcoming Events</h2>
+<div class="flex gap-2">
+<button class="size-7 rounded-full bg-accent-light dark:bg-accent-dark flex items-center justify-center text-text-secondary-light dark:text-text-secondary-dark hover:text-primary">
+<span class="material-symbols-outlined !text-sm">chevron_left</span>
+</button>
+<button class="size-7 rounded-full bg-accent-light dark:bg-accent-dark flex items-center justify-center text-text-secondary-light dark:text-text-secondary-dark hover:text-primary">
+<span class="material-symbols-outlined !text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="rounded-xl bg-surface-light dark:bg-surface-dark shadow-sm border border-accent-light dark:border-accent-dark overflow-hidden flex">
+<div class="bg-primary/10 dark:bg-primary/20 p-4 flex flex-col items-center justify-center min-w-[70px] border-r border-accent-light dark:border-accent-dark">
+<span class="text-xs font-bold text-primary uppercase">Sun</span>
+<span class="text-xl font-bold text-text-main-light dark:text-text-main-dark">12</span>
+</div>
+<div class="p-3 flex-1 flex flex-col justify-center">
+<div class="flex items-center gap-1.5 text-xs text-text-secondary-light dark:text-text-secondary-dark mb-1">
+<span class="material-symbols-outlined !text-sm">schedule</span>
+                                08:00 AM - 11:00 AM
+                            </div>
+<h3 class="text-sm font-bold text-text-main-light dark:text-text-main-dark mb-1">Kajian Bulanan</h3>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark line-clamp-1">Speaker: Ustadz Abdul Somad</p>
+</div>
+<div class="flex items-center px-3">
+<button class="p-2 text-text-secondary-light dark:text-text-secondary-dark hover:text-primary">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<div class="rounded-xl bg-surface-light dark:bg-surface-dark shadow-sm border border-accent-light dark:border-accent-dark overflow-hidden flex">
+<div class="bg-primary/10 dark:bg-primary/20 p-4 flex flex-col items-center justify-center min-w-[70px] border-r border-accent-light dark:border-accent-dark">
+<span class="text-xs font-bold text-primary uppercase">Fri</span>
+<span class="text-xl font-bold text-text-main-light dark:text-text-main-dark">17</span>
+</div>
+<div class="p-3 flex-1 flex flex-col justify-center">
+<div class="flex items-center gap-1.5 text-xs text-text-secondary-light dark:text-text-secondary-dark mb-1">
+<span class="material-symbols-outlined !text-sm">schedule</span>
+                                04:00 PM - 05:30 PM
+                            </div>
+<h3 class="text-sm font-bold text-text-main-light dark:text-text-main-dark mb-1">Taman Pendidikan Quran</h3>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark line-clamp-1">Regular afternoon session for kids</p>
+</div>
+<div class="flex items-center px-3">
+<button class="p-2 text-text-secondary-light dark:text-text-secondary-dark hover:text-primary">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-surface-light dark:bg-surface-dark border-t border-accent-light dark:border-accent-dark h-16 px-2 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+<a class="flex flex-col items-center gap-1 p-2 text-primary" href="#">
+<span class="material-symbols-outlined !text-2xl filled">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-text-secondary-light dark:text-text-secondary-dark hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined !text-2xl">account_balance_wallet</span>
+<span class="text-[10px] font-medium">Finance</span>
+</a>
+<div class="relative -top-5">
+<button class="flex items-center justify-center size-12 bg-primary text-white rounded-full shadow-lg shadow-primary/40">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+</button>
+</div>
+<a class="flex flex-col items-center gap-1 p-2 text-text-secondary-light dark:text-text-secondary-dark hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined !text-2xl">groups</span>
+<span class="text-[10px] font-medium">Jamaah</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-text-secondary-light dark:text-text-secondary-dark hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined !text-2xl">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</a>
+</nav>
+</div>
+</body></html>
