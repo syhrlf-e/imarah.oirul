@@ -157,8 +157,26 @@ export default function Dashboard({
             <Head title="Beranda" />
 
             <div className="flex flex-col flex-1 lg:min-h-0">
-                {/* Greeting Header Section */}
-                <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 md:px-6">
+                {/* Mobile Greeting Section */}
+                <div className="flex flex-col md:hidden px-4 mb-4 shrink-0">
+                    <p className="text-sm font-normal text-slate-900 lowercase">
+                        assalamualaikum
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-lg font-bold text-slate-900">
+                            {auth.user.name}
+                        </span>
+                        <span className="text-[10px] font-medium text-[#22C55E] bg-white border border-[#22C55E] rounded-full px-1.5 py-[2px] capitalize">
+                            {auth.user.role.replace("_", " ")}
+                        </span>
+                    </div>
+                    <p className="text-[11px] font-normal text-slate-400 mt-1">
+                        {masehiDateStr} · {hijriDate}
+                    </p>
+                </div>
+
+                {/* Desktop Greeting Header Section */}
+                <div className="hidden md:flex mb-6 flex-row items-center justify-between gap-4 shrink-0 px-6">
                     <div>
                         <h1 className="text-2xl font-semibold text-slate-900 tracking-tight mb-1">
                             Assalamu'alaikum, {auth.user.name}! 👋
@@ -170,7 +188,7 @@ export default function Dashboard({
                             </span>
                         </p>
                     </div>
-                    <div className="text-left md:text-right">
+                    <div className="text-right">
                         <p className="text-sm font-bold text-slate-900">
                             {masehiDateStr}
                         </p>
@@ -181,9 +199,9 @@ export default function Dashboard({
                 </div>
 
                 {/* Main Layout Area */}
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 lg:min-h-0">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 flex-1 lg:min-h-0">
                     {/* Left Section: Stats & Chart */}
-                    <div className="lg:col-span-3 flex flex-col gap-6 lg:min-h-0">
+                    <div className="lg:col-span-3 flex flex-col gap-4 md:gap-6 lg:min-h-0">
                         {/* Top Stats Grid */}
                         <KasSummaryCards
                             totalSaldo={totalSaldo}
@@ -195,7 +213,7 @@ export default function Dashboard({
                         />
 
                         {/* 6-Month Chart Trend */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col flex-1 lg:min-h-0">
+                        <div className="hidden md:flex bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex-col flex-1 lg:min-h-0">
                             <div className="flex justify-between items-center mb-4 shrink-0">
                                 <div>
                                     <h2 className="text-lg font-bold text-slate-800 flex items-center">
@@ -317,9 +335,9 @@ export default function Dashboard({
                     </div>
 
                     {/* Right Section: Agenda & Recent Transactions */}
-                    <div className="lg:col-span-1 flex flex-col gap-6 lg:min-h-0">
+                    <div className="lg:col-span-1 flex flex-col gap-4 md:gap-6 lg:min-h-0">
                         {/* Upcoming Agendas Widget */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0">
+                        <div className="order-2 lg:order-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0">
                             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
                                 <h3 className="font-semibold text-slate-800 text-base">
                                     Agenda Mendatang
@@ -402,7 +420,7 @@ export default function Dashboard({
                         </div>
 
                         {/* Recent Transactions Widget */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col flex-1">
+                        <div className="order-1 lg:order-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col flex-1">
                             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                                 <h3 className="font-semibold text-slate-800 text-base">
                                     Transaksi Terbaru
@@ -498,9 +516,9 @@ export default function Dashboard({
                 </div>
 
                 {/* Monthly Report Full-width Shortcut */}
-                <div className="w-full bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6 shrink-0">
+                <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 md:mt-6 shrink-0">
                     <div className="flex items-center">
-                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl mr-4 shrink-0">
+                        <div className="hidden md:flex p-3 bg-emerald-50 text-emerald-600 rounded-xl mr-4 shrink-0">
                             <FileText className="w-6 h-6" />
                         </div>
                         <div>

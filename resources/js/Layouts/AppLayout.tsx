@@ -52,22 +52,8 @@ export default function AppLayout({ title, children }: Props) {
         <div className="h-screen bg-slate-100 font-sans flex text-slate-900 overflow-hidden text-sm">
             {/* PWA Window Controls Overlay - Drag Region */}
             <div className="pwa-titlebar-drag"></div>
-            {/* Overlay for mobile sidebar */}
-            {isSidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden transition-opacity"
-                    onClick={toggleSidebar}
-                ></div>
-            )}
-
-            {/* Sidebar */}
-            <aside
-                className={`fixed inset-y-0 left-0 z-50 w-72 bg-white transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col md:translate-x-0 md:static md:inset-auto md:my-4 md:ml-4 md:rounded-2xl md:shadow-sm ${
-                    isSidebarOpen
-                        ? "translate-x-0 shadow-2xl"
-                        : "-translate-x-full"
-                }`}
-            >
+            {/* Sidebar (Desktop Only) */}
+            <aside className="hidden md:flex flex-col z-10 w-72 bg-white my-4 ml-4 rounded-2xl shadow-sm border border-slate-200/50 overflow-hidden">
                 {/* Logo Area */}
                 <div className="h-20 flex items-center px-6 border-b border-slate-100">
                     <div className="flex items-center gap-3">
@@ -453,10 +439,149 @@ export default function AppLayout({ title, children }: Props) {
                 </nav>
             </aside>
 
-            {/* Main Content Area */}
-            <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
-                {/* Top Desktop/Mobile Header */}
-                <header className="flex-none z-30 bg-white border-b border-slate-200 md:border-none relative shadow-sm md:mt-4 md:mx-4 md:rounded-2xl">
+            <main className="flex-1 flex flex-col h-[100dvh] overflow-hidden relative bg-slate-50/50">
+                {/* Space Placeholder to prevent content jump due to fixed header */}
+                {/* Space Placeholder to prevent content jump due to fixed header */}
+
+                {/* Mobile Header (Expandable Island) */}
+                <div className="md:hidden shrink-0 relative z-50 mb-4 h-14 mt-4 mx-4">
+                    {/* Dark Overlay placed behind everything when menu is open */}
+                    <div
+                        className={`fixed inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300 z-40 ${
+                            isSidebarOpen
+                                ? "opacity-100 pointer-events-auto"
+                                : "opacity-0 pointer-events-none"
+                        }`}
+                        onClick={toggleSidebar}
+                    />
+
+                    {/* Fixed Island Header Container */}
+                    <div className="fixed top-4 left-5 right-5 z-50 bg-white/95 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200/50 overflow-hidden flex flex-col transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] rounded-3xl">
+                        {/* Always visible header portion */}
+                        <div className="flex items-center justify-between h-14 px-5 bg-transparent shrink-0">
+                            <span className="text-xl font-extrabold text-slate-900 tracking-tight leading-tight font-poppins">
+                                Imarah
+                            </span>
+                            <div className="flex items-center gap-3">
+                                <button className="p-2 text-slate-400 hover:text-slate-600 rounded-full transition-colors relative">
+                                    <Bell size={18} />
+                                </button>
+                                <button
+                                    className="flex flex-col justify-center items-end cursor-pointer w-6 h-6 py-1 transition-all duration-300"
+                                    onClick={toggleSidebar}
+                                >
+                                    {isSidebarOpen ? (
+                                        <X
+                                            size={20}
+                                            className="text-slate-700 animate-in fade-in zoom-in duration-200"
+                                        />
+                                    ) : (
+                                        <div className="flex flex-col gap-[4px] items-end w-5 animate-in fade-in zoom-in duration-200 pt-0.5">
+                                            <div className="h-[2px] w-6 bg-slate-700 rounded-full" />
+                                            <div className="h-[2px] w-4 bg-slate-700 rounded-full ml-auto" />
+                                            <div className="h-[2px] w-6 bg-slate-700 rounded-full" />
+                                        </div>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Expandable Menu Content - Sliding from bottom of the header */}
+                        <div
+                            className={`transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                                isSidebarOpen
+                                    ? "max-h-[500px] opacity-100 pb-2"
+                                    : "max-h-0 opacity-0 pointer-events-none"
+                            }`}
+                        >
+                            <div className="border-t border-slate-100/60 mx-4 pt-3 flex flex-col gap-1">
+                                {[
+                                    {
+                                        href: "/kas",
+                                        label: "Kas Masjid",
+                                        icon: Wallet,
+                                        roles: ["super_admin", "bendahara"],
+                                    },
+                                    {
+                                        href: "/inventaris",
+                                        label: "Inventaris",
+                                        icon: Archive,
+                                        roles: ["super_admin", "bendahara"],
+                                    },
+                                    {
+                                        href: "/agenda",
+                                        label: "Agenda",
+                                        icon: Calendar,
+                                        roles: "all",
+                                    },
+                                    {
+                                        href: "/tromol",
+                                        label: "Kotak Tromol",
+                                        icon: Box,
+                                        roles: [
+                                            "super_admin",
+                                            "bendahara",
+                                            "petugas_zakat",
+                                        ],
+                                    },
+                                    {
+                                        href: "/settings",
+                                        label: "Pengaturan",
+                                        icon: Settings,
+                                        roles: ["super_admin", "bendahara"],
+                                    },
+                                ].map((item, index) => {
+                                    // Check Role
+                                    if (
+                                        item.roles !== "all" &&
+                                        !item.roles.includes(auth.user.role)
+                                    ) {
+                                        return null;
+                                    }
+
+                                    const active = isActive(item.href);
+                                    const Icon = item.icon;
+
+                                    return (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            onClick={toggleSidebar}
+                                            style={{
+                                                transitionDelay: isSidebarOpen
+                                                    ? `${index * 50}ms`
+                                                    : "0ms",
+                                            }}
+                                            className={`flex items-center px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group ${
+                                                active
+                                                    ? "bg-emerald-50 text-emerald-700"
+                                                    : "text-slate-700 hover:bg-slate-50"
+                                            } ${
+                                                isSidebarOpen
+                                                    ? "opacity-100 translate-y-0"
+                                                    : "opacity-0 translate-y-2"
+                                            }`}
+                                        >
+                                            <Icon
+                                                className={`w-5 h-5 mr-3 group-hover:scale-110 transition-transform ${
+                                                    active
+                                                        ? "text-emerald-600"
+                                                        : "text-slate-400"
+                                                }`}
+                                            />
+                                            <span className="group-hover:translate-x-1 transition-transform">
+                                                {item.label}
+                                            </span>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Top Desktop Header */}
+                <header className="hidden md:block flex-none z-30 bg-white md:border-none relative shadow-sm md:mt-4 md:mx-4 md:rounded-2xl">
                     <div className="flex items-center justify-between h-[70px] px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center">
                             <button
@@ -531,7 +656,7 @@ export default function AppLayout({ title, children }: Props) {
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-24 md:p-6 no-scrollbar md:scrollbar-default relative flex flex-col">
+                <div className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-20 md:p-6 no-scrollbar md:scrollbar-default relative flex flex-col">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={component}
