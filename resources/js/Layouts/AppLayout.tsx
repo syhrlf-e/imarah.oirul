@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Toaster } from "sonner";
+import GlobalToastListener from "@/Components/GlobalToastListener";
 import {
     LayoutDashboard,
     Wallet,
@@ -14,9 +16,10 @@ import {
     UserCircle,
     Home,
     LogOut,
-    ChevronDown,
     ChevronRight,
     Bell,
+    ShieldCheck,
+    AlertOctagon,
 } from "lucide-react";
 import { User, PageProps } from "@/types";
 import BottomNav from "@/Components/BottomNav";
@@ -34,6 +37,30 @@ export default function AppLayout({ title, children }: Props) {
     const [isZakatOpen, setIsZakatOpen] = useState(url.startsWith("/zakat"));
     const [isTromolOpen, setIsTromolOpen] = useState(url.startsWith("/tromol"));
     const [scrolled, setScrolled] = useState(false);
+    const [isKickedOut, setIsKickedOut] = useState(false);
+
+    // Heartbeat Polling: Cek apakah akun masih aktif / belum dihapus admin
+    useEffect(() => {
+        const interval = setInterval(() => {
+            // Karena kita mendaftarkan global interceptor, abaikan alert toast jika 401/403 dari Heartbeat
+            window.axios
+                .get("/api/session-heartbeat", {
+                    // Konfigurasi ini memberitahu interceptor custom kita untuk tidak memunculkan toast pada background check
+                    headers: { "X-Silent-Ping": "true" },
+                })
+                .catch((err) => {
+                    if (
+                        err.response &&
+                        (err.response.status === 401 ||
+                            err.response.status === 403)
+                    ) {
+                        setIsKickedOut(true);
+                    }
+                });
+        }, 10000); // 10 Detik sekali
+
+        return () => clearInterval(interval);
+    }, []);
 
     // Handle scroll for glassmorphism header effect on mobile
     useEffect(() => {
@@ -50,6 +77,8 @@ export default function AppLayout({ title, children }: Props) {
 
     return (
         <div className="h-screen bg-slate-100 font-sans flex text-slate-900 overflow-hidden text-sm">
+            <Toaster position="top-center" richColors />
+            <GlobalToastListener />
             {/* PWA Window Controls Overlay - Drag Region */}
             <div className="pwa-titlebar-drag"></div>
             {/* Sidebar (Desktop Only) */}
@@ -436,6 +465,28 @@ export default function AppLayout({ title, children }: Props) {
                             </Link>
                         </>
                     )}
+
+                    {/* Manajemen Pengguna HANYA Super Admin */}
+                    {auth.user.role === "super_admin" && (
+                        <>
+                            <div className="mt-6 mb-2 px-3 text-xs font-semibold text-purple-400 uppercase tracking-wider">
+                                Keamanan Inti
+                            </div>
+                            <Link
+                                href="/users"
+                                className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                    isActive("/users")
+                                        ? "text-purple-700 font-semibold bg-purple-50"
+                                        : "text-slate-600 hover:bg-purple-50/50 hover:text-purple-900"
+                                }`}
+                            >
+                                <ShieldCheck
+                                    className={`w-5 h-5 mr-3 transition-colors ${isActive("/users") ? "text-purple-600" : "text-slate-400 group-hover:text-purple-600"}`}
+                                />
+                                Pengguna (Admin)
+                            </Link>
+                        </>
+                    )}
                 </nav>
             </aside>
 
@@ -530,6 +581,12 @@ export default function AppLayout({ title, children }: Props) {
                                         icon: Settings,
                                         roles: ["super_admin", "bendahara"],
                                     },
+                                    {
+                                        href: "/users",
+                                        label: "Manajemen Pengguna",
+                                        icon: ShieldCheck,
+                                        roles: ["super_admin"],
+                                    },
                                 ].map((item, index) => {
                                     // Check Role
                                     if (
@@ -554,7 +611,12 @@ export default function AppLayout({ title, children }: Props) {
                                             }}
                                             className={`flex items-center px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group ${
                                                 active
-                                                    ? "bg-emerald-50 text-emerald-700"
+                                                    ? item.roles.includes(
+                                                          "super_admin",
+                                                      ) &&
+                                                      item.href === "/users"
+                                                        ? "bg-purple-50 text-purple-700"
+                                                        : "bg-emerald-50 text-emerald-700"
                                                     : "text-slate-700 hover:bg-slate-50"
                                             } ${
                                                 isSidebarOpen
@@ -565,7 +627,12 @@ export default function AppLayout({ title, children }: Props) {
                                             <Icon
                                                 className={`w-5 h-5 mr-3 group-hover:scale-110 transition-transform ${
                                                     active
-                                                        ? "text-emerald-600"
+                                                        ? item.roles.includes(
+                                                              "super_admin",
+                                                          ) &&
+                                                          item.href === "/users"
+                                                            ? "text-purple-600"
+                                                            : "text-emerald-600"
                                                         : "text-slate-400"
                                                 }`}
                                             />

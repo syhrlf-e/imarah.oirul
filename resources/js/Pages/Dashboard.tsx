@@ -160,7 +160,7 @@ export default function Dashboard({
                 {/* Mobile Greeting Section */}
                 <div className="flex flex-col md:hidden px-4 mb-4 shrink-0">
                     <p className="text-sm font-normal text-slate-900 lowercase">
-                        assalamualaikum
+                        Assalamu'alaikum,
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-lg font-bold text-slate-900">

@@ -20,6 +20,7 @@ import FormActions from "@/Components/FormActions";
 import PageHeader from "@/Components/PageHeader";
 import Pagination from "@/Components/Pagination";
 import DataTable, { ColumnDef } from "@/Components/DataTable";
+import PrimaryButton from "@/Components/PrimaryButton";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface User {
@@ -215,13 +216,13 @@ export default function InventarisIndex({
                 description="Daftar barang, fasilitas, dan aset yang dimiliki oleh masjid."
                 className="shrink-0"
             >
-                <button
+                <PrimaryButton
                     onClick={openAddModal}
-                    className="inline-flex items-center justify-center px-4 py-2.5 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-sm font-medium cursor-pointer"
+                    className="!py-2.5 font-medium cursor-pointer"
                 >
-                    <Plus className="w-5 h-5 mr-2" />
+                    <Plus className="w-5 h-5" />
                     Catat Inventaris
-                </button>
+                </PrimaryButton>
             </PageHeader>
 
             <FilterBar

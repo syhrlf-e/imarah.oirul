@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import PageHeader from "@/Components/PageHeader";
 import FilterBar from "@/Components/FilterBar";
+import PrimaryButton from "@/Components/PrimaryButton";
 
 interface TromolBox {
     id: string;
@@ -43,14 +44,14 @@ export default function TromolIndex({
                 title="Kotak Tromol & Amal"
                 description="Daftar dan status kotak tromol fisik maupun QRIS digital."
             >
-                <button
-                    className="inline-flex items-center justify-center px-4 py-2.5 bg-green-500 text-white rounded-xl transition-colors shadow-sm font-medium opacity-50 cursor-not-allowed"
+                <PrimaryButton
+                    className="!py-2.5 font-medium cursor-not-allowed hidden-sm h-11"
                     title="Fitur akan datang"
                     disabled
                 >
-                    <Plus className="w-5 h-5 mr-2" />
+                    <Plus className="w-5 h-5" />
                     Tambah Kotak Tromol
-                </button>
+                </PrimaryButton>
             </PageHeader>
 
             <FilterBar

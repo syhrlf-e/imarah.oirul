@@ -194,8 +194,11 @@ export default function AgendaIndex({
                     ["super_admin", "bendahara", "petugas_zakat"].includes(
                         auth.user.role,
                     ) && (
-                        <PrimaryButton onClick={openAddModal}>
-                            <Plus className="w-5 h-5 mr-2" />
+                        <PrimaryButton
+                            onClick={openAddModal}
+                            className="!py-2.5 font-medium cursor-pointer"
+                        >
+                            <Plus className="w-5 h-5" />
                             Buat Agenda
                         </PrimaryButton>
                     )}

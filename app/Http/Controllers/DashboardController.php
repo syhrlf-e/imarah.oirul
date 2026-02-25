@@ -20,32 +20,36 @@ class DashboardController extends Controller
         $kasCategories = ['infaq', 'infaq_tromol', 'operasional', 'gaji', 'lainnya'];
         $zakatCategories = ['zakat_fitrah', 'zakat_maal'];
 
-        // 1. Total Saldo Kas (Overall)
-        $totalPemasukanKas = Transaction::whereIn('category', $kasCategories)->where('type', 'in')->sum('amount');
-        $totalPengeluaranKas = Transaction::whereIn('category', $kasCategories)->where('type', 'out')->sum('amount');
+        // 1 & 2. Aggregate Queries for Overall and This Month
+        // Secara drastis menghemat beban N+1 query dengan single group-by query.
+        $kasStats = Transaction::whereIn('category', $kasCategories)
+            ->selectRaw('type, COUNT(*) as count, SUM(amount) as total')
+            ->groupBy('type')
+            ->get()
+            ->keyBy('type');
+
+        $totalPemasukanKas = $kasStats->has('in') ? $kasStats->get('in')->total : 0;
+        $totalPengeluaranKas = $kasStats->has('out') ? $kasStats->get('out')->total : 0;
         $saldoTotalKas = $totalPemasukanKas - $totalPengeluaranKas;
+        $totalKasTransactions = ($kasStats->has('in') ? $kasStats->get('in')->count : 0) 
+                              + ($kasStats->has('out') ? $kasStats->get('out')->count : 0);
 
-        // 2. Metrics Bulan Ini
-        $pemasukanBulanIni = Transaction::whereIn('category', $kasCategories)
-            ->where('type', 'in')
+        $kasBulanIniStats = Transaction::whereIn('category', $kasCategories)
             ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->sum('amount');
+            ->selectRaw('type, COUNT(*) as count, SUM(amount) as total')
+            ->groupBy('type')
+            ->get()
+            ->keyBy('type');
 
-        $pengeluaranBulanIni = Transaction::whereIn('category', $kasCategories)
-            ->where('type', 'out')
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->sum('amount');
+        $pemasukanBulanIni = $kasBulanIniStats->has('in') ? $kasBulanIniStats->get('in')->total : 0;
+        $pengeluaranBulanIni = $kasBulanIniStats->has('out') ? $kasBulanIniStats->get('out')->total : 0;
+        $totalTransaksiBulanIni = ($kasBulanIniStats->has('in') ? $kasBulanIniStats->get('in')->count : 0) 
+                                + ($kasBulanIniStats->has('out') ? $kasBulanIniStats->get('out')->count : 0);
 
         $totalZakat = Transaction::whereIn('category', $zakatCategories)
             ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
             ->sum('amount');
         
-        $totalTransaksiBulanIni = Transaction::whereIn('category', $kasCategories)
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->count();
-
-        $totalKasTransactions = Transaction::whereIn('category', $kasCategories)->count();
-
         // 3. Five Latest Kas Transactions for Widget
         $recentTransactions = Transaction::with('creator:id,name')
             ->whereIn('category', $kasCategories)
@@ -78,21 +82,24 @@ class DashboardController extends Controller
                 ];
             });
 
-        // 5. Chart Data (Last 6 Months Income vs Expense)
+        // 5. Chart Data (Last 6 Months Income vs Expense) - Diambil 1x via RAM DB
+        $sixMonthsAgo = $now->copy()->subMonths(5)->startOfMonth();
+        $chartTransactions = Transaction::whereIn('category', $kasCategories)
+            ->where('created_at', '>=', $sixMonthsAgo)
+            ->select('type', 'amount', 'created_at')
+            ->get();
+
         $chartData = [];
         for ($i = 5; $i >= 0; $i--) {
             $monthStart = $now->copy()->subMonths($i)->startOfMonth();
             $monthEnd = $now->copy()->subMonths($i)->endOfMonth();
 
-            $income = Transaction::whereIn('category', $kasCategories)
-                ->where('type', 'in')
-                ->whereBetween('created_at', [$monthStart, $monthEnd])
-                ->sum('amount');
+            $monthlyData = $chartTransactions->filter(function ($t) use ($monthStart, $monthEnd) {
+                return $t->created_at >= $monthStart && $t->created_at <= $monthEnd;
+            });
 
-            $expense = Transaction::whereIn('category', $kasCategories)
-                ->where('type', 'out')
-                ->whereBetween('created_at', [$monthStart, $monthEnd])
-                ->sum('amount');
+            $income = $monthlyData->where('type', 'in')->sum('amount');
+            $expense = $monthlyData->where('type', 'out')->sum('amount');
 
             $chartData[] = [
                 'name' => $monthStart->translatedFormat('M y'), // e.g 'Jan 24'

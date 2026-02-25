@@ -29,6 +29,7 @@ import PageHeader from "@/Components/PageHeader";
 import KasSummaryCards from "@/Components/KasSummaryCards";
 import FormActions from "@/Components/FormActions";
 import DataTable, { ColumnDef } from "@/Components/DataTable";
+import PrimaryButton from "@/Components/PrimaryButton";
 
 const CATEGORY_OPTIONS = [
     { value: "", label: "Semua Kategori" },
@@ -246,13 +247,13 @@ export default function KasIndex({
                 description="Kelola dan pantau seluruh pemasukan serta pengeluaran operasional masjid."
             >
                 {isBendaharaOrAdmin && (
-                    <button
+                    <PrimaryButton
                         onClick={openAddModal}
-                        className="inline-flex items-center justify-center px-4 py-2.5 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-sm font-medium cursor-pointer"
+                        className="!py-2.5 font-medium cursor-pointer"
                     >
-                        <Plus className="w-5 h-5 mr-2" />
+                        <Plus className="w-5 h-5" />
                         Catat Transaksi
-                    </button>
+                    </PrimaryButton>
                 )}
             </PageHeader>
 

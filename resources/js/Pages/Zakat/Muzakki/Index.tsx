@@ -3,6 +3,7 @@ import { Head, router, useForm } from "@inertiajs/react";
 import AppLayout from "@/Layouts/AppLayout";
 import ConfirmDialog from "@/Components/ConfirmDialog";
 import EmptyState from "@/Components/EmptyState";
+import PrimaryButton from "@/Components/PrimaryButton";
 import MuzakkiForm from "./Components/MuzakkiForm";
 import {
     Plus,
@@ -145,13 +146,13 @@ export default function Index({ muzakkis, filters }: Props) {
                     Import Excel
                 </button>
                 {muzakkis.data.length > 0 && (
-                    <button
+                    <PrimaryButton
                         onClick={handleCreate}
-                        className="inline-flex items-center justify-center px-4 py-2.5 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-sm font-medium cursor-pointer"
+                        className="!py-2.5 font-medium cursor-pointer"
                     >
-                        <Plus className="w-5 h-5 mr-2" />
+                        <Plus className="w-5 h-5" />
                         Daftarkan Muzakki
-                    </button>
+                    </PrimaryButton>
                 )}
             </PageHeader>
 

@@ -19,10 +19,36 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
+            'super_admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
         ]);
 
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
+            $status = 500;
+            if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface) {
+                $status = $e->getStatusCode();
+            }
+
+            // Memaksa JSON response untuk mempermudah handler global di Axios jika origin berupa Fetch/XHR
+            if ($request->wantsJson() || $request->is('api/*')) {
+                // Abaikan validation exception karena sudah ada handlernya sendiri by default
+                if ($e instanceof \Illuminate\Validation\ValidationException) {
+                    return null;
+                }
+                return response()->json([
+                    'message' => $e->getMessage() ?: 'Server Error',
+                ], $status);
+            }
+
+            // Rendisi fallback component via Inertia khusus untuk error page (bukan environment DEV)
+            if (!app()->environment('local') && in_array($status, [ 500, 503, 404, 403 ])) {
+                return \Inertia\Inertia::render('Error', ['status' => $status])
+                    ->toResponse($request)
+                    ->setStatusCode($status);
+            }
+
+            return null; // Biarkan default handling Laravel bekerja (menampilkan laravel ignition debug if app_debug=true)
+        });
     })->create();

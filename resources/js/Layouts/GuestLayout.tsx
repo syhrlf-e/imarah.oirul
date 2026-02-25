@@ -3,11 +3,15 @@ import { Link } from "@inertiajs/react";
 import { PropsWithChildren } from "react";
 import { useNetwork } from "@/Hooks/useNetwork";
 import { WifiOff } from "lucide-react";
+import { Toaster } from "sonner";
+import GlobalToastListener from "@/Components/GlobalToastListener";
 
 export default function Guest({ children }: PropsWithChildren) {
     const isOnline = useNetwork();
     return (
         <div className="flex flex-col min-h-screen font-sans">
+            <Toaster position="top-center" richColors />
+            <GlobalToastListener />
             {!isOnline && (
                 <div className="bg-red-500 text-white px-4 py-2.5 text-center text-sm font-medium flex items-center justify-center space-x-2 shadow-sm relative z-50 w-full shrink-0">
                     <WifiOff size={16} />
@@ -29,14 +33,11 @@ export default function Guest({ children }: PropsWithChildren) {
                     <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-slate-950/90 via-slate-900/60 to-transparent"></div>
 
                     <div className="relative z-10 flex h-full flex-col justify-end px-16 pb-16 text-white text-left">
-                        <div className="flex items-center gap-3 mb-2">
-                            <h1 className="text-6xl font-black tracking-tighter text-white drop-shadow-md font-poppins">
-                                Imarah
+                        <div className="flex items-center gap-3 mb-4">
+                            <h1 className="text-5xl font-black tracking-tighter text-white drop-shadow-md font-poppins">
+                                Selamat Datang 👋
                             </h1>
                         </div>
-                        <h2 className="mb-4 text-2xl font-bold tracking-tight leading-snug text-emerald-50/90">
-                            Sistem Manajemen Masjid Digital
-                        </h2>
                         <p className="text-lg font-light text-emerald-50/80 max-w-lg leading-relaxed">
                             Platform modern untuk mengelola keuangan,
                             inventaris, zakat, dan agenda kegiatan masjid secara
@@ -46,7 +47,7 @@ export default function Guest({ children }: PropsWithChildren) {
                 </div>
 
                 {/* Right Area - Form Auth */}
-                <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24 bg-white shadow-2xl relative z-20">
+                <div className="flex flex-1 flex-col justify-center px-5 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24 bg-white shadow-2xl relative z-20">
                     <div className="mx-auto w-full max-w-sm lg:w-96">
                         <div className="mb-12 flex justify-center text-center">
                             <Link

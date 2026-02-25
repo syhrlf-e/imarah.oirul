@@ -57,6 +57,16 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('laporan/export', [\App\Http\Controllers\ReportController::class, 'export'])->name('laporan.export');
     Route::get('settings', [\App\Http\Controllers\SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [\App\Http\Controllers\SettingController::class, 'store'])->name('settings.store');
+
+    Route::get('api/session-heartbeat', function () {
+        // Karena API ini ditenagai middleware `active` dan `auth`, 
+        // Jika user diblokir/dihapus (SoftDeletes), Middleware akan merespon 401/403 secara berantai.
+        return response()->json(['status' => 'alive']);
+    })->name('api.heartbeat');
+
+    Route::middleware(['super_admin'])->group(function () {
+        Route::resource('users', \App\Http\Controllers\UserController::class)->only(['index', 'store', 'destroy']);
+    });
 });
 
 require __DIR__.'/auth.php';
