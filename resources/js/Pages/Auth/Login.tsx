@@ -134,7 +134,7 @@ export default function Login({
             </form>
 
             <div className="mt-8 text-center text-xs text-slate-400">
-                <p>
+                <p className="font-poppins tracking-wide">
                     © {new Date().getFullYear()} Imarah. Hak Cipta Dilindungi.
                 </p>
             </div>

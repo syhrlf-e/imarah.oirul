@@ -49,7 +49,7 @@ export default function TromolIndex({
                     disabled
                 >
                     <Plus className="w-5 h-5 mr-2" />
-                    Tambah Kotak
+                    Tambah Kotak Tromol
                 </button>
             </PageHeader>
 

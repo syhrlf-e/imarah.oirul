@@ -11,7 +11,7 @@ import { formatRupiah } from "@/utils/formatter"; // Ensure this exists or I'll 
 import { Loader2 } from "lucide-react";
 import RupiahInput from "@/Components/RupiahInput"; // Need to check if this exists
 import { useNetwork } from "@/Hooks/useNetwork";
-
+import FormActions from "@/Components/FormActions";
 // Checking components: RupiahInput.tsx exists.
 
 interface Mustahiq {
@@ -108,7 +108,7 @@ export default function ZakatForm({ isOpen, onClose, mustahiqs }: Props) {
                                 href={route("zakat.mustahiq")}
                                 className="text-emerald-600 hover:underline"
                             >
-                                Tambah Mustahiq
+                                Daftarkan Mustahiq
                             </a>
                         </p>
                     </div>
@@ -284,17 +284,12 @@ export default function ZakatForm({ isOpen, onClose, mustahiqs }: Props) {
                         <InputError message={errors.notes} className="mt-2" />
                     </div>
 
-                    <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
-                        <SecondaryButton
-                            onClick={onClose}
-                            disabled={processing}
-                        >
-                            Batal
-                        </SecondaryButton>
-                        <PrimaryButton disabled={processing || !isOnline}>
-                            {processing ? "Menyimpan..." : "Simpan Penyaluran"}
-                        </PrimaryButton>
-                    </div>
+                    <FormActions
+                        onCancel={onClose}
+                        processing={processing}
+                        submitDisabled={!isOnline}
+                        submitText="Simpan Penyaluran"
+                    />
                 </form>
             </div>
         </Modal>

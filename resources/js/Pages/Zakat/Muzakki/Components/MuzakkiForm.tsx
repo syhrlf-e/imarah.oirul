@@ -7,7 +7,7 @@ import TextInput from "@/Components/TextInput";
 import InputError from "@/Components/InputError";
 import PrimaryButton from "@/Components/PrimaryButton";
 import SecondaryButton from "@/Components/SecondaryButton";
-
+import FormActions from "@/Components/FormActions";
 interface Muzakki {
     id: string;
     name: string;
@@ -65,7 +65,7 @@ export default function MuzakkiForm({ isOpen, onClose, muzakki }: Props) {
             <div className="p-6">
                 <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
                     <h2 className="text-lg font-bold text-slate-800 tracking-tight">
-                        {muzakki ? "Edit Muzakki" : "Tambah Muzakki"}
+                        {muzakki ? "Edit Muzakki" : "Daftarkan Muzakki"}
                     </h2>
                     <button
                         onClick={onClose}
@@ -118,17 +118,11 @@ export default function MuzakkiForm({ isOpen, onClose, muzakki }: Props) {
                         <InputError message={errors.address} className="mt-2" />
                     </div>
 
-                    <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
-                        <SecondaryButton
-                            onClick={onClose}
-                            disabled={processing}
-                        >
-                            Batal
-                        </SecondaryButton>
-                        <PrimaryButton disabled={processing}>
-                            {processing ? "Menyimpan..." : "Simpan"}
-                        </PrimaryButton>
-                    </div>
+                    <FormActions
+                        onCancel={onClose}
+                        processing={processing}
+                        submitText="Simpan Data"
+                    />
                 </form>
             </div>
         </Modal>

@@ -72,7 +72,7 @@ export default function AppLayout({ title, children }: Props) {
                 <div className="h-20 flex items-center px-6 border-b border-slate-100">
                     <div className="flex items-center gap-3">
                         <div>
-                            <h1 className="text-xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                            <h1 className="text-xl font-extrabold text-slate-900 tracking-tight leading-tight font-poppins">
                                 Imarah
                             </h1>
                             <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
@@ -531,7 +531,7 @@ export default function AppLayout({ title, children }: Props) {
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-24 md:p-4 relative flex flex-col">
+                <div className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-24 md:p-6 no-scrollbar md:scrollbar-default relative flex flex-col">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={component}

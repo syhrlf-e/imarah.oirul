@@ -23,6 +23,7 @@ import InputLabel from "@/Components/InputLabel";
 import InputError from "@/Components/InputError";
 import FilterBar from "@/Components/FilterBar";
 import PageHeader from "@/Components/PageHeader";
+import FormActions from "@/Components/FormActions";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface User {
@@ -195,7 +196,7 @@ export default function AgendaIndex({
                     ) && (
                         <PrimaryButton onClick={openAddModal}>
                             <Plus className="w-5 h-5 mr-2" />
-                            Tambah Agenda
+                            Buat Agenda
                         </PrimaryButton>
                     )}
             </PageHeader>
@@ -385,7 +386,7 @@ export default function AgendaIndex({
                                             </h3>
                                             <p className="text-sm text-slate-500 max-w-sm mb-6">
                                                 Jadwal kajian dan kegiatan masih
-                                                kosong. Tambahkan agenda baru
+                                                kosong.Tambahkan agenda baru
                                                 untuk mulai menginformasikan
                                                 kegiatan ke jamaah.
                                             </p>
@@ -399,7 +400,7 @@ export default function AgendaIndex({
                                                     className="inline-flex items-center justify-center px-4 py-2 bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition-colors font-medium border border-green-100"
                                                 >
                                                     <Plus className="w-4 h-4 mr-2" />
-                                                    Tambah Sekarang
+                                                    Buat Agenda
                                                 </button>
                                             )}
                                         </div>
@@ -681,22 +682,14 @@ export default function AgendaIndex({
                             </form>
                         </div>
 
-                        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex gap-3 shrink-0">
-                            <SecondaryButton
-                                onClick={closeModal}
-                                className="flex-1 justify-center"
-                            >
-                                Batal
-                            </SecondaryButton>
-                            <PrimaryButton
-                                type="submit"
-                                form="agenda-form"
-                                disabled={processing}
-                                className="flex-1 justify-center"
-                            >
-                                {processing ? "Menyimpan..." : "Simpan Agenda"}
-                            </PrimaryButton>
-                        </div>
+                        <FormActions
+                            onCancel={closeModal}
+                            processing={processing}
+                            formId="agenda-form"
+                            submitText="Simpan Agenda"
+                            layout="full-width"
+                            className="px-6 py-4 border-t border-slate-100 bg-slate-50 shrink-0 mt-0"
+                        />
                     </div>
                 </div>
             )}

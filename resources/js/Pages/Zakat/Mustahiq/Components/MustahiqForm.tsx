@@ -11,7 +11,7 @@ import Dropdown from "@/Components/Dropdown"; // Need to check if Dropdown is su
 // Checking Components list: Dropdown.tsx exists. Usually for menus.
 // For form select, standard <select> or a custom Select component is better.
 // I'll use standard <select> with Tailwind classes for now to be safe and consistent.
-
+import FormActions from "@/Components/FormActions";
 interface Mustahiq {
     id: string;
     name: string;
@@ -84,7 +84,7 @@ export default function MustahiqForm({ isOpen, onClose, mustahiq }: Props) {
             <div className="p-6">
                 <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
                     <h2 className="text-lg font-bold text-slate-800 tracking-tight">
-                        {mustahiq ? "Edit Mustahiq" : "Tambah Mustahiq"}
+                        {mustahiq ? "Edit Mustahiq" : "Daftarkan Mustahiq"}
                     </h2>
                     <button
                         onClick={onClose}
@@ -163,17 +163,11 @@ export default function MustahiqForm({ isOpen, onClose, mustahiq }: Props) {
                         />
                     </div>
 
-                    <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
-                        <SecondaryButton
-                            onClick={onClose}
-                            disabled={processing}
-                        >
-                            Batal
-                        </SecondaryButton>
-                        <PrimaryButton disabled={processing}>
-                            {processing ? "Menyimpan..." : "Simpan"}
-                        </PrimaryButton>
-                    </div>
+                    <FormActions
+                        onCancel={onClose}
+                        processing={processing}
+                        submitText="Simpan Data"
+                    />
                 </form>
             </div>
         </Modal>

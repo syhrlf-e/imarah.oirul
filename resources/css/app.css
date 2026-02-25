@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+    .touch-target {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+@font-face {
+    font-family: "Plus Jakarta Sans";
+    src: url("/fonts/plus-jakarta-sans/PlusJakartaSans-Variable.ttf")
+        format("truetype");
+    font-weight: 200 800; /* Variable font range */
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Plus Jakarta Sans";
+    src: url("/fonts/plus-jakarta-sans/PlusJakartaSans-VariableItalic.ttf")
+        format("truetype");
+    font-weight: 200 800; /* Variable font range */
+    font-style: italic;
+    font-display: swap;
+}
+
 /* ================================================
    Window Controls Overlay (PWA Title Bar)
    Hanya aktif saat PWA di-install di desktop

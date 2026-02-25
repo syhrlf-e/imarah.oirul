@@ -30,7 +30,7 @@ export default function Guest({ children }: PropsWithChildren) {
 
                     <div className="relative z-10 flex h-full flex-col justify-end px-16 pb-16 text-white text-left">
                         <div className="flex items-center gap-3 mb-2">
-                            <h1 className="text-6xl font-black tracking-tighter text-white drop-shadow-md">
+                            <h1 className="text-6xl font-black tracking-tighter text-white drop-shadow-md font-poppins">
                                 Imarah
                             </h1>
                         </div>

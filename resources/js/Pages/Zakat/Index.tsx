@@ -19,11 +19,18 @@ export default function Index() {
             color: "bg-purple-500",
         },
         {
-            title: "Transaksi Zakat",
-            description: "Catat dan kelola transaksi zakat maal & fitrah.",
+            title: "Penerimaan Zakat",
+            description: "Catat dan kelola penerimaan zakat maal & fitrah.",
             icon: Wallet,
-            href: route("zakat.transaksi"),
+            href: route("zakat.penerimaan"),
             color: "bg-emerald-500",
+        },
+        {
+            title: "Penyaluran",
+            description: "Kelola distribusi dan penyaluran dana zakat.",
+            icon: Wallet,
+            href: route("zakat.penyaluran"),
+            color: "bg-amber-500",
         },
     ];
 

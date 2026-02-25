@@ -27,6 +27,7 @@ import {
 import FilterBar from "@/Components/FilterBar";
 import PageHeader from "@/Components/PageHeader";
 import KasSummaryCards from "@/Components/KasSummaryCards";
+import FormActions from "@/Components/FormActions";
 import DataTable, { ColumnDef } from "@/Components/DataTable";
 
 const CATEGORY_OPTIONS = [
@@ -250,7 +251,7 @@ export default function KasIndex({
                         className="inline-flex items-center justify-center px-4 py-2.5 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors shadow-sm font-medium cursor-pointer"
                     >
                         <Plus className="w-5 h-5 mr-2" />
-                        Tambah Transaksi
+                        Catat Transaksi
                     </button>
                 )}
             </PageHeader>
@@ -630,7 +631,6 @@ export default function KasIndex({
                 </div>
             )}
 
-            {/* Modal Tambah Transaksi */}
             {isAddOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
                     <div
@@ -641,7 +641,7 @@ export default function KasIndex({
                     <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
                         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
                             <h3 className="text-lg font-bold text-slate-900">
-                                Tambah Transaksi Baru
+                                Catat Transaksi
                             </h3>
                             <button
                                 onClick={closeAddModal}
@@ -827,32 +827,13 @@ export default function KasIndex({
                                     )}
                                 </div>
 
-                                <div className="pt-2 flex gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={closeAddModal}
-                                        className="flex-1 px-4 py-2 border border-slate-200 bg-white text-slate-700 rounded-xl hover:bg-slate-50 font-medium transition-colors"
-                                    >
-                                        Batal
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={processing || !isOnline}
-                                        className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-medium transition-colors shadow-sm disabled:opacity-70 flex justify-center items-center"
-                                    >
-                                        {processing ? (
-                                            <>
-                                                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                                                Menyimpan...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Save className="-ml-1 mr-2 h-4 w-4" />
-                                                Simpan Transaksi
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
+                                <FormActions
+                                    onCancel={closeAddModal}
+                                    processing={processing}
+                                    submitDisabled={!isOnline}
+                                    layout="full-width"
+                                    submitText="Simpan Transaksi"
+                                />
                             </form>
                         </div>
                     </div>

@@ -28,7 +28,8 @@ export default {
                 },
             },
             fontFamily: {
-                sans: ["Poppins", ...defaultTheme.fontFamily.sans],
+                sans: ["'Plus Jakarta Sans'", ...defaultTheme.fontFamily.sans],
+                poppins: ["Poppins", ...defaultTheme.fontFamily.sans],
             },
         },
     },
