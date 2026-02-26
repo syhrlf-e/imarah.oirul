@@ -107,6 +107,7 @@ export default function AppLayout({ title, children }: Props) {
                 <nav className="flex-1 flex flex-col overflow-y-auto py-6 px-4 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-200 hover:scrollbar-thumb-slate-300">
                     <Link
                         href="/dashboard"
+                        prefetch
                         className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                             isActive("/dashboard")
                                 ? "text-emerald-700 font-semibold"
@@ -134,6 +135,7 @@ export default function AppLayout({ title, children }: Props) {
                     {["super_admin", "bendahara"].includes(auth.user.role) && (
                         <Link
                             href="/kas"
+                            prefetch
                             className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                                 isActive("/kas")
                                     ? "text-emerald-700 font-semibold"
@@ -162,6 +164,7 @@ export default function AppLayout({ title, children }: Props) {
                     {["super_admin", "sekretaris"].includes(auth.user.role) && (
                         <Link
                             href="/inventaris"
+                            prefetch
                             className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                                 isActive("/inventaris")
                                     ? "text-emerald-700 font-semibold"
@@ -190,6 +193,7 @@ export default function AppLayout({ title, children }: Props) {
                     {["super_admin"].includes(auth.user.role) && (
                         <Link
                             href="/agenda"
+                            prefetch
                             className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                                 isActive("/agenda")
                                     ? "text-emerald-700 font-semibold"
@@ -218,6 +222,7 @@ export default function AppLayout({ title, children }: Props) {
                     {["super_admin", "bendahara"].includes(auth.user.role) && (
                         <Link
                             href="/laporan"
+                            prefetch
                             className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                                 isActive("/laporan")
                                     ? "text-emerald-700 font-semibold"
@@ -251,6 +256,7 @@ export default function AppLayout({ title, children }: Props) {
                                     {/* Urutan datar khusus Petugas Zakat */}
                                     <Link
                                         href="/zakat/muzakki"
+                                        prefetch
                                         className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${isActive("/zakat/muzakki") ? "text-emerald-700 font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
                                     >
                                         {isActive("/zakat/muzakki") && (
@@ -271,6 +277,7 @@ export default function AppLayout({ title, children }: Props) {
                                     </Link>
                                     <Link
                                         href="/zakat/mustahiq"
+                                        prefetch
                                         className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${isActive("/zakat/mustahiq") ? "text-emerald-700 font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
                                     >
                                         {isActive("/zakat/mustahiq") && (
@@ -291,6 +298,7 @@ export default function AppLayout({ title, children }: Props) {
                                     </Link>
                                     <Link
                                         href="/zakat/penerimaan"
+                                        prefetch
                                         className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${isActive("/zakat/penerimaan") ? "text-emerald-700 font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
                                     >
                                         {isActive("/zakat/penerimaan") && (
@@ -311,6 +319,7 @@ export default function AppLayout({ title, children }: Props) {
                                     </Link>
                                     <Link
                                         href="/zakat/penyaluran"
+                                        prefetch
                                         className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${isActive("/zakat/penyaluran") ? "text-emerald-700 font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
                                     >
                                         {isActive("/zakat/penyaluran") && (
@@ -374,6 +383,7 @@ export default function AppLayout({ title, children }: Props) {
                                             <div className="pl-11 pr-3 py-1 space-y-1 relative before:absolute before:inset-y-0 before:left-5 before:w-px before:bg-slate-200">
                                                 <Link
                                                     href="/zakat/muzakki"
+                                                    prefetch
                                                     className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/muzakki") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
                                                 >
                                                     {isActive(
@@ -393,6 +403,7 @@ export default function AppLayout({ title, children }: Props) {
                                                 </Link>
                                                 <Link
                                                     href="/zakat/mustahiq"
+                                                    prefetch
                                                     className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/mustahiq") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
                                                 >
                                                     {isActive(
@@ -412,6 +423,7 @@ export default function AppLayout({ title, children }: Props) {
                                                 </Link>
                                                 <Link
                                                     href="/zakat/penerimaan"
+                                                    prefetch
                                                     className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/penerimaan") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
                                                 >
                                                     {isActive(
@@ -431,6 +443,7 @@ export default function AppLayout({ title, children }: Props) {
                                                 </Link>
                                                 <Link
                                                     href="/zakat/penyaluran"
+                                                    prefetch
                                                     className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/penyaluran") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
                                                 >
                                                     {isActive(
@@ -493,6 +506,7 @@ export default function AppLayout({ title, children }: Props) {
                                             <div className="pl-11 pr-3 py-1 space-y-1 relative before:absolute before:inset-y-0 before:left-5 before:w-px before:bg-slate-200">
                                                 <Link
                                                     href="/tromol"
+                                                    prefetch
                                                     className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${url === "/tromol" ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
                                                 >
                                                     {url === "/tromol" && (
@@ -510,6 +524,7 @@ export default function AppLayout({ title, children }: Props) {
                                                 </Link>
                                                 <Link
                                                     href="/tromol/history"
+                                                    prefetch
                                                     className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/tromol/history") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
                                                 >
                                                     {isActive(
@@ -541,6 +556,7 @@ export default function AppLayout({ title, children }: Props) {
                     <div className="mt-auto p-4 border-t border-slate-100 bg-white/50 backdrop-blur-sm">
                         <Link
                             href="/users"
+                            prefetch
                             className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 mb-1 ${
                                 isActive("/users")
                                     ? "text-emerald-700 font-semibold"
@@ -565,6 +581,7 @@ export default function AppLayout({ title, children }: Props) {
                         </Link>
                         <Link
                             href="/settings"
+                            prefetch
                             className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                                 isActive("/settings")
                                     ? "text-emerald-700 font-semibold"

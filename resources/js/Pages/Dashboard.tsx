@@ -1,4 +1,4 @@
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, useRemember } from "@inertiajs/react";
 import AppLayout from "@/Layouts/AppLayout";
 import { formatRupiah } from "@/utils/formatter";
 import {
@@ -99,19 +99,79 @@ interface DashboardProps {
 
 export default function Dashboard({
     auth,
-    totalSaldo = 0,
-    totalZakat = 0,
-    totalTransaksiBulanIni = 0,
-    pemasukanBulanIni = 0,
-    pengeluaranBulanIni = 0,
-    recentTransactions = [],
-    upcomingAgendas = [],
-    chartData = [],
-    totalKasTransactions = 0,
-    zakatStats = null,
-    inventarisStats = null,
-    tromolStats = null,
+    totalSaldo: propTotalSaldo = 0,
+    totalZakat: propTotalZakat = 0,
+    totalTransaksiBulanIni: propTotalTransaksiBulanIni = 0,
+    pemasukanBulanIni: propPemasukanBulanIni = 0,
+    pengeluaranBulanIni: propPengeluaranBulanIni = 0,
+    recentTransactions: propRecentTransactions = [],
+    upcomingAgendas: propUpcomingAgendas = [],
+    chartData: propChartData = [],
+    totalKasTransactions: propTotalKasTransactions = 0,
+    zakatStats: propZakatStats = null,
+    inventarisStats: propInventarisStats = null,
+    tromolStats: propTromolStats = null,
 }: DashboardProps) {
+    // Cache data dashboard agar saat kembali dari halaman lain, data langsung tampil tanpa loading ulang
+    const [dashboardData, setDashboardData] = useRemember(
+        {
+            totalSaldo: propTotalSaldo,
+            totalZakat: propTotalZakat,
+            totalTransaksiBulanIni: propTotalTransaksiBulanIni,
+            pemasukanBulanIni: propPemasukanBulanIni,
+            pengeluaranBulanIni: propPengeluaranBulanIni,
+            recentTransactions: propRecentTransactions,
+            upcomingAgendas: propUpcomingAgendas,
+            chartData: propChartData,
+            totalKasTransactions: propTotalKasTransactions,
+            zakatStats: propZakatStats,
+            inventarisStats: propInventarisStats,
+            tromolStats: propTromolStats,
+        },
+        "dashboard-summary",
+    );
+
+    // Selalu update cache saat props berubah (data baru dari server)
+    useEffect(() => {
+        setDashboardData({
+            totalSaldo: propTotalSaldo,
+            totalZakat: propTotalZakat,
+            totalTransaksiBulanIni: propTotalTransaksiBulanIni,
+            pemasukanBulanIni: propPemasukanBulanIni,
+            pengeluaranBulanIni: propPengeluaranBulanIni,
+            recentTransactions: propRecentTransactions,
+            upcomingAgendas: propUpcomingAgendas,
+            chartData: propChartData,
+            totalKasTransactions: propTotalKasTransactions,
+            zakatStats: propZakatStats,
+            inventarisStats: propInventarisStats,
+            tromolStats: propTromolStats,
+        });
+    }, [
+        propTotalSaldo,
+        propTotalZakat,
+        propTotalTransaksiBulanIni,
+        propPemasukanBulanIni,
+        propPengeluaranBulanIni,
+        propTotalKasTransactions,
+    ]);
+
+    // Destructure dari cache
+    const {
+        totalSaldo,
+        totalZakat,
+        totalTransaksiBulanIni,
+        pemasukanBulanIni,
+        pengeluaranBulanIni,
+        recentTransactions,
+        upcomingAgendas,
+        chartData,
+        totalKasTransactions,
+        zakatStats,
+        inventarisStats,
+        tromolStats,
+    } = dashboardData;
+
     const [loading, setLoading] = useState(true);
     const [hijriDate, setHijriDate] = useState<string>("");
 

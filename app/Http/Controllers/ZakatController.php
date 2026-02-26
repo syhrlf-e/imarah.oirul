@@ -11,6 +11,7 @@ use App\Services\ZakatService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ZakatController extends Controller
@@ -140,36 +141,45 @@ class ZakatController extends Controller
         $validated = $request->validate([
             'mustahiq_id' => 'required|exists:mustahiqs,id',
             'type' => 'required|in:fitrah,maal',
-            'amount' => 'required|numeric|min:1',
+            'amount' => 'required|numeric|min:1|max:999999999',
             'transaction_date' => 'required|date',
-            'payment_method' => 'required|in:tunai,transfer',
-            'notes' => 'nullable|string',
+            'payment_method' => 'required|in:tunai,transfer,qris',
+            'notes' => 'nullable|string|max:500',
         ]);
 
         $category = $validated['type'] === 'maal' ? 'zakat_maal' : 'zakat_fitrah';
 
-        // Check balance
-        $totalIn = Transaction::where('category', $category)->where('type', 'in')->sum('amount');
-        $totalOut = Transaction::where('category', $category)->where('type', 'out')->sum('amount');
-        $balance = $totalIn - $totalOut;
+        // Atomic: cek saldo + buat transaksi dalam satu DB transaction
+        DB::transaction(function () use ($validated, $category, $request) {
+            // Lock rows untuk mencegah race condition
+            $totalIn = Transaction::where('category', $category)
+                ->where('type', 'in')
+                ->lockForUpdate()
+                ->sum('amount');
+            $totalOut = Transaction::where('category', $category)
+                ->where('type', 'out')
+                ->lockForUpdate()
+                ->sum('amount');
+            $balance = $totalIn - $totalOut;
 
-        if ($validated['amount'] > $balance) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'amount' => 'Saldo zakat tidak mencukupi (Sisa: Rp ' . number_format($balance, 0, ',', '.') . ')',
-            ]);
-        }
+            if ($validated['amount'] > $balance) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'amount' => 'Saldo zakat tidak mencukupi (Sisa: Rp ' . number_format($balance, 0, ',', '.') . ')',
+                ]);
+            }
 
-        $transactionData = [
-            'type' => 'out',
-            'category' => $category,
-            'amount' => $validated['amount'],
-            'transaction_date' => $validated['transaction_date'],
-            'payment_method' => $validated['payment_method'],
-            'notes' => $validated['notes'],
-            'mustahiq_id' => $validated['mustahiq_id'],
-        ];
+            $transactionData = [
+                'type' => 'out',
+                'category' => $category,
+                'amount' => $validated['amount'],
+                'transaction_date' => $validated['transaction_date'],
+                'payment_method' => $validated['payment_method'],
+                'notes' => $validated['notes'],
+                'mustahiq_id' => $validated['mustahiq_id'],
+            ];
 
-        $this->transactionService->store($transactionData, $request->user());
+            $this->transactionService->store($transactionData, $request->user());
+        });
 
         return redirect()->route('zakat.penyaluran')->with('success', 'Penyaluran Zakat berhasil dicatat.');
     }

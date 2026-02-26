@@ -77,6 +77,7 @@ class TransactionService
 
     /**
      * Get transaction summary and breakdown.
+     * Dioptimasi dari 6 query terpisah menjadi 2 query.
      *
      * @param string|int $month
      * @param string|int $year
@@ -84,38 +85,37 @@ class TransactionService
      */
     public function getSummary($month, $year): array
     {
-        // Query Rekap Bulanan
-        $query = Transaction::whereMonth('created_at', $month)
-                            ->whereYear('created_at', $year);
-
-        // Agregasi Bulanan
-        $pemasukan = (clone $query)->where('type', 'in')->sum('amount');
-        $pengeluaran = (clone $query)->where('type', 'out')->sum('amount');
-        $saldo_akhir_bulan = $pemasukan - $pengeluaran;
-
-        // Breakdown per Kategori (Pemasukan)
-        $pemasukan_by_category = (clone $query)->where('type', 'in')
-            ->selectRaw('category, SUM(amount) as total')
-            ->groupBy('category')
+        // Query 1: Breakdown bulanan per type + category (menggantikan 4 query terpisah)
+        $monthlyBreakdown = Transaction::whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->selectRaw('type, category, SUM(amount) as total')
+            ->groupBy('type', 'category')
             ->get();
 
-        // Breakdown per Kategori (Pengeluaran)
-        $pengeluaran_by_category = (clone $query)->where('type', 'out')
-            ->selectRaw('category, SUM(amount) as total')
-            ->groupBy('category')
-            ->get();
+        // Hitung summary dari hasil query tunggal
+        $pemasukan = $monthlyBreakdown->where('type', 'in')->sum('total');
+        $pengeluaran = $monthlyBreakdown->where('type', 'out')->sum('total');
 
-        // Saldo Kas Keseluruhan (Sepanjang Waktu)
-        $total_pemasukan_all = Transaction::where('type', 'in')->sum('amount');
-        $total_pengeluaran_all = Transaction::where('type', 'out')->sum('amount');
-        $saldo_total = $total_pemasukan_all - $total_pengeluaran_all;
+        // Breakdown per kategori
+        $pemasukan_by_category = $monthlyBreakdown->where('type', 'in')
+            ->map(fn ($item) => (object) ['category' => $item->category, 'total' => $item->total])
+            ->values();
+        $pengeluaran_by_category = $monthlyBreakdown->where('type', 'out')
+            ->map(fn ($item) => (object) ['category' => $item->category, 'total' => $item->total])
+            ->values();
+
+        // Query 2: Saldo total sepanjang waktu (menggantikan 2 query terpisah)
+        $saldoTotal = Transaction::selectRaw("
+            SUM(CASE WHEN type = 'in' THEN amount ELSE 0 END) -
+            SUM(CASE WHEN type = 'out' THEN amount ELSE 0 END) as saldo
+        ")->value('saldo') ?? 0;
 
         return [
             'summary' => [
                 'pemasukan_bulan_ini' => $pemasukan,
                 'pengeluaran_bulan_ini' => $pengeluaran,
-                'saldo_akhir_bulan' => $saldo_akhir_bulan,
-                'saldo_total_kas' => $saldo_total,
+                'saldo_akhir_bulan' => $pemasukan - $pengeluaran,
+                'saldo_total_kas' => $saldoTotal,
             ],
             'breakdown' => [
                 'pemasukan' => $pemasukan_by_category,
