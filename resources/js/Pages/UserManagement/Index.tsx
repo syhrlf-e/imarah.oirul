@@ -18,7 +18,7 @@ import {
     Trash2,
     X,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/Components/Toast";
 
 interface Props extends PageProps {
     users: User[];

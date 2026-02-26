@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { usePage } from "@inertiajs/react";
-import { toast } from "sonner";
+import { toast } from "@/Components/Toast";
 import { PageProps } from "@/types";
 
 export default function GlobalToastListener() {

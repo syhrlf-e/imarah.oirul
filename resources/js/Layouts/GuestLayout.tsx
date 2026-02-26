@@ -3,14 +3,14 @@ import { Link } from "@inertiajs/react";
 import { PropsWithChildren } from "react";
 import { useNetwork } from "@/Hooks/useNetwork";
 import { WifiOff } from "lucide-react";
-import { Toaster } from "sonner";
+import { Toaster } from "@/Components/Toast";
 import GlobalToastListener from "@/Components/GlobalToastListener";
 
 export default function Guest({ children }: PropsWithChildren) {
     const isOnline = useNetwork();
     return (
         <div className="flex flex-col min-h-screen font-sans">
-            <Toaster position="top-center" richColors />
+            <Toaster />
             <GlobalToastListener />
             {!isOnline && (
                 <div className="bg-red-500 text-white px-4 py-2.5 text-center text-sm font-medium flex items-center justify-center space-x-2 shadow-sm relative z-50 w-full shrink-0">

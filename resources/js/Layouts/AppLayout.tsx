@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Toaster } from "sonner";
+import { Toaster } from "@/Components/Toast";
 import GlobalToastListener from "@/Components/GlobalToastListener";
 import {
     LayoutDashboard,
@@ -77,7 +77,7 @@ export default function AppLayout({ title, children }: Props) {
 
     return (
         <div className="h-screen bg-slate-100 font-sans flex text-slate-900 overflow-hidden text-sm">
-            <Toaster position="top-center" richColors />
+            <Toaster />
             <GlobalToastListener />
             {/* PWA Window Controls Overlay - Drag Region */}
             <div className="pwa-titlebar-drag"></div>
