@@ -64,7 +64,6 @@ export default function Modal({
                         aria-hidden="true"
                     />
 
-                    {/* @ts-ignore: type conflict with framer-motion transition prop */}
                     <DialogPanel
                         as={motion.div}
                         initial={
@@ -74,23 +73,51 @@ export default function Modal({
                         }
                         animate={
                             isDrawer
-                                ? { y: 0, opacity: 1 }
-                                : { opacity: 1, scale: 1, y: 0 }
+                                ? {
+                                      y: 0,
+                                      opacity: 1,
+                                      transition: {
+                                          type: "spring",
+                                          bounce: 0,
+                                          duration: 0.4,
+                                      },
+                                  }
+                                : {
+                                      opacity: 1,
+                                      scale: 1,
+                                      y: 0,
+                                      transition: {
+                                          type: "spring",
+                                          bounce: 0,
+                                          duration: 0.4,
+                                      },
+                                  }
                         }
                         exit={
                             isDrawer
-                                ? { y: "100%", opacity: 0 }
-                                : { opacity: 0, scale: 0.95, y: 16 }
+                                ? {
+                                      y: "100%",
+                                      opacity: 0,
+                                      transition: {
+                                          type: "spring",
+                                          bounce: 0,
+                                          duration: 0.4,
+                                      },
+                                  }
+                                : {
+                                      opacity: 0,
+                                      scale: 0.95,
+                                      y: 16,
+                                      transition: {
+                                          type: "spring",
+                                          bounce: 0,
+                                          duration: 0.4,
+                                      },
+                                  }
                         }
-                        // @ts-ignore: conflicting transition property from headlessui
-                        transition={{
-                            type: "spring",
-                            bounce: 0,
-                            duration: 0.4,
-                        }}
                         className={`relative bg-white shadow-xl transition-all flex flex-col overflow-hidden sm:mx-auto sm:w-full ${maxWidthClass} ${
                             position === "bottom"
-                                ? "w-full rounded-t-3xl mt-auto max-h-[95vh] sm:rounded-lg sm:mb-6 sm:transform"
+                                ? "w-full rounded-t-3xl mt-auto h-[95vh] sm:rounded-lg sm:mb-6 sm:transform sm:h-auto sm:max-h-[80vh]"
                                 : "mb-6 transform rounded-lg max-h-[95vh] sm:max-h-[90vh]"
                         }`}
                     >

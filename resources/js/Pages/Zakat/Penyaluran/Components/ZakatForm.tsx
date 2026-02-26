@@ -65,22 +65,26 @@ export default function ZakatForm({ isOpen, onClose, mustahiqs }: Props) {
     };
 
     return (
-        <Modal show={isOpen} onClose={onClose} maxWidth="lg">
-            <div className="p-6">
-                <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
-                    <h2 className="text-lg font-bold text-slate-800 tracking-tight">
-                        Form Penyaluran Zakat
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        type="button"
-                        className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
+        <Modal show={isOpen} onClose={onClose} maxWidth="lg" position="bottom">
+            <div className="flex items-center justify-between px-6 py-4 pt-6 sm:pt-4 border-b border-slate-100 shrink-0 bg-white z-10">
+                <h2 className="text-lg font-bold text-slate-800 tracking-tight">
+                    Form Penyaluran Zakat
+                </h2>
+                <button
+                    onClick={onClose}
+                    type="button"
+                    className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors -mr-2"
+                >
+                    <X className="w-5 h-5" />
+                </button>
+            </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="p-6 overflow-y-auto flex-1 bg-white min-h-0">
+                <form
+                    id="zakat-penyaluran-form"
+                    onSubmit={handleSubmit}
+                    className="space-y-6"
+                >
                     {/* Mustahiq Select */}
                     <div>
                         <InputLabel htmlFor="mustahiq_id" value="Mustahiq" />
@@ -289,14 +293,17 @@ export default function ZakatForm({ isOpen, onClose, mustahiqs }: Props) {
                         />
                         <InputError message={errors.notes} className="mt-2" />
                     </div>
-
-                    <FormActions
-                        onCancel={onClose}
-                        processing={processing}
-                        submitDisabled={!isOnline}
-                        submitText="Simpan Penyaluran"
-                    />
                 </form>
+            </div>
+
+            <div className="px-6 py-4 border-t border-slate-100 shrink-0 bg-white pb-safe">
+                <FormActions
+                    formId="zakat-penyaluran-form"
+                    onCancel={onClose}
+                    processing={processing}
+                    submitDisabled={!isOnline}
+                    submitText="Simpan Penyaluran"
+                />
             </div>
         </Modal>
     );

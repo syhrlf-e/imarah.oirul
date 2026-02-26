@@ -669,7 +669,7 @@ export default function KasIndex({
                                 bounce: 0,
                                 duration: 0.4,
                             }}
-                            className="relative bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[95vh]"
+                            className="relative bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col h-[95vh] sm:h-auto sm:max-h-[80vh]"
                         >
                             <div className="sm:hidden absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-slate-200 rounded-full z-20"></div>
                             <div className="px-5 sm:px-6 py-4 pt-8 sm:pt-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white z-10">

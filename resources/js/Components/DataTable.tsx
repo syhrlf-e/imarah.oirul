@@ -68,7 +68,7 @@ export default function DataTable<T>({
         >
             <div className="overflow-auto flex-1">
                 <table
-                    className={`w-full text-sm text-left align-middle ${tableFixed ? "table-fixed" : "min-w-full"}`}
+                    className={`w-full text-sm text-left align-middle whitespace-nowrap ${tableFixed ? "table-fixed min-w-[800px]" : "min-w-[800px]"}`}
                 >
                     <thead className="bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200 sticky top-0 z-20">
                         <tr>
