@@ -19,7 +19,7 @@ export default function FilterBar({
     children,
 }: FilterBarProps) {
     return (
-        <div className="mb-2 relative z-10 bg-white rounded-2xl shadow-sm border border-slate-200 p-3 md:p-4">
+        <div className="mb-2 relative z-30 bg-white rounded-2xl shadow-sm border border-slate-200 p-3 md:p-4">
             <div className="flex flex-col md:flex-row gap-3 md:gap-4">
                 {/* Kiri: Search + Addon */}
                 <div className="flex-1 flex flex-col sm:flex-row gap-4">

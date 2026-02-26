@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AppLayout from "@/Layouts/AppLayout";
 import { Head, useForm, router } from "@inertiajs/react";
 import { PageProps, User } from "@/types";
+import CustomSelect from "@/Components/CustomSelect";
 import PrimaryButton from "@/Components/PrimaryButton";
 import {
     Plus,
@@ -341,40 +342,9 @@ export default function Index({ auth, users }: Props) {
                                 </div>
 
                                 {/* Role Select */}
-                                <div className="relative group">
-                                    <select
-                                        id="role"
-                                        className={`block w-full px-4 pt-6 pb-2 text-sm text-slate-900 bg-transparent border-2 rounded-xl appearance-none focus:outline-none focus:ring-0 peer transition-colors ${
-                                            errors.role
-                                                ? "border-red-400 focus:border-red-500"
-                                                : "border-slate-200 focus:border-emerald-500"
-                                        }`}
-                                        value={data.role}
-                                        onChange={(e) =>
-                                            setData(
-                                                "role",
-                                                e.target.value as
-                                                    | "petugas_zakat"
-                                                    | "bendahara"
-                                                    | "sekretaris",
-                                            )
-                                        }
-                                        required
-                                    >
-                                        <option value="petugas_zakat">
-                                            Petugas Zakat (Hanya Input ZISWAF)
-                                        </option>
-                                        <option value="bendahara">
-                                            Bendahara (Akses Penuh Arus Kas
-                                            Masjid)
-                                        </option>
-                                        <option value="sekretaris">
-                                            Sekretaris (Agenda & Laporan)
-                                        </option>
-                                    </select>
+                                <div className="relative group pt-2">
                                     <label
-                                        htmlFor="role"
-                                        className={`absolute text-sm duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 ${
+                                        className={`absolute text-sm z-[10] transform -translate-y-3 scale-75 top-4 origin-[0] left-4 pointer-events-none ${
                                             errors.role
                                                 ? "text-red-500"
                                                 : "text-emerald-600"
@@ -382,6 +352,31 @@ export default function Index({ auth, users }: Props) {
                                     >
                                         Pilih Peran Staf
                                     </label>
+                                    <CustomSelect
+                                        value={data.role}
+                                        onChange={(val) =>
+                                            setData("role", val as any)
+                                        }
+                                        className={`pt-6 pb-2 border-2 ${
+                                            errors.role
+                                                ? "border-red-400 focus:border-red-500"
+                                                : "border-slate-200 focus:border-emerald-500"
+                                        }`}
+                                        options={[
+                                            {
+                                                value: "petugas_zakat",
+                                                label: "Petugas Zakat (Hanya Input ZISWAF)",
+                                            },
+                                            {
+                                                value: "bendahara",
+                                                label: "Bendahara (Akses Penuh Arus Kas Masjid)",
+                                            },
+                                            {
+                                                value: "sekretaris",
+                                                label: "Sekretaris (Agenda & Laporan)",
+                                            },
+                                        ]}
+                                    />
                                     {errors.role && (
                                         <p className="mt-1 text-xs text-red-500 ml-1">
                                             {errors.role}

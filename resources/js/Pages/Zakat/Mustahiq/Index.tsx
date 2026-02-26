@@ -4,6 +4,7 @@ import AppLayout from "@/Layouts/AppLayout";
 import ConfirmDialog from "@/Components/ConfirmDialog";
 import EmptyState from "@/Components/EmptyState";
 import PrimaryButton from "@/Components/PrimaryButton";
+import CustomSelect from "@/Components/CustomSelect";
 import MustahiqForm from "./Components/MustahiqForm";
 import {
     Plus,
@@ -191,35 +192,17 @@ export default function Index({ mustahiqs, filters }: Props) {
                 onSearchChange={setSearch}
                 addon={
                     <>
-                        <select
+                        <CustomSelect
                             value={ashnafFilter}
-                            onChange={(e) => setAshnafFilter(e.target.value)}
-                            className="block w-full px-4 py-2.5 pr-10 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 sm:text-sm transition-colors shadow-sm text-slate-700 appearance-none font-medium cursor-pointer"
-                        >
-                            <option value="">Semua Kategori</option>
-                            {Object.entries(ASHNAF_LABELS).map(
-                                ([value, label]) => (
-                                    <option key={value} value={value}>
-                                        {label}
-                                    </option>
+                            onChange={(val) => setAshnafFilter(val)}
+                            className="w-full sm:w-48"
+                            options={[
+                                { value: "", label: "Semua Kategori" },
+                                ...Object.entries(ASHNAF_LABELS).map(
+                                    ([value, label]) => ({ value, label }),
                                 ),
-                            )}
-                        </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
-                            <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M19 9l-7 7-7-7"
-                                ></path>
-                            </svg>
-                        </div>
+                            ]}
+                        />
                     </>
                 }
             >

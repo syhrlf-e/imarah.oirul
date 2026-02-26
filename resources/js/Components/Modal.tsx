@@ -1,21 +1,19 @@
-import {
-    Dialog,
-    DialogPanel,
-    Transition,
-    TransitionChild,
-} from "@headlessui/react";
-import { PropsWithChildren } from "react";
+import { Dialog, DialogPanel } from "@headlessui/react";
+import { PropsWithChildren, useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function Modal({
     children,
     show = false,
     maxWidth = "2xl",
     closeable = true,
+    position = "center",
     onClose = () => {},
 }: PropsWithChildren<{
     show: boolean;
     maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl";
     closeable?: boolean;
+    position?: "center" | "bottom";
     onClose: CallableFunction;
 }>) {
     const close = () => {
@@ -32,40 +30,79 @@ export default function Modal({
         "2xl": "sm:max-w-2xl",
     }[maxWidth];
 
-    return (
-        <Transition show={show} leave="duration-200">
-            <Dialog
-                as="div"
-                id="modal"
-                className="fixed inset-0 z-50 flex transform items-center overflow-y-auto px-4 py-6 transition-all sm:px-0"
-                onClose={close}
-            >
-                <TransitionChild
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0"
-                    enterTo="opacity-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
-                >
-                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-                </TransitionChild>
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkIsMobile = () => setIsMobile(window.innerWidth < 640);
+        checkIsMobile();
+        window.addEventListener("resize", checkIsMobile);
+        return () => window.removeEventListener("resize", checkIsMobile);
+    }, []);
 
-                <TransitionChild
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    enterTo="opacity-100 translate-y-0 sm:scale-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                    leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+    const isDrawer = position === "bottom" && isMobile;
+
+    return (
+        <AnimatePresence>
+            {show && (
+                <Dialog
+                    static
+                    open={show}
+                    as="div"
+                    id="modal"
+                    className={`fixed inset-0 z-[100] flex transform transition-all ${
+                        position === "bottom"
+                            ? "items-end sm:items-center overflow-hidden sm:overflow-y-auto sm:px-0 sm:py-6"
+                            : "items-center overflow-y-auto px-4 py-6 sm:px-0"
+                    }`}
+                    onClose={close}
                 >
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+                        aria-hidden="true"
+                    />
+
+                    {/* @ts-ignore: type conflict with framer-motion transition prop */}
                     <DialogPanel
-                        className={`mb-6 transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:w-full ${maxWidthClass}`}
+                        as={motion.div}
+                        initial={
+                            isDrawer
+                                ? { y: "100%", opacity: 0 }
+                                : { opacity: 0, scale: 0.95, y: 16 }
+                        }
+                        animate={
+                            isDrawer
+                                ? { y: 0, opacity: 1 }
+                                : { opacity: 1, scale: 1, y: 0 }
+                        }
+                        exit={
+                            isDrawer
+                                ? { y: "100%", opacity: 0 }
+                                : { opacity: 0, scale: 0.95, y: 16 }
+                        }
+                        // @ts-ignore: conflicting transition property from headlessui
+                        transition={{
+                            type: "spring",
+                            bounce: 0,
+                            duration: 0.4,
+                        }}
+                        className={`relative bg-white shadow-xl transition-all flex flex-col overflow-hidden sm:mx-auto sm:w-full ${maxWidthClass} ${
+                            position === "bottom"
+                                ? "w-full rounded-t-3xl mt-auto max-h-[95vh] sm:rounded-lg sm:mb-6 sm:transform"
+                                : "mb-6 transform rounded-lg max-h-[95vh] sm:max-h-[90vh]"
+                        }`}
                     >
+                        {position === "bottom" && (
+                            <div className="shrink-0 flex justify-center pt-3 pb-1 bg-white sm:hidden z-20">
+                                <div className="w-10 h-1.5 bg-slate-200 rounded-full"></div>
+                            </div>
+                        )}
                         {children}
                     </DialogPanel>
-                </TransitionChild>
-            </Dialog>
-        </Transition>
+                </Dialog>
+            )}
+        </AnimatePresence>
     );
 }

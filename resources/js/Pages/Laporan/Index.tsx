@@ -9,6 +9,7 @@ import {
     TrendingUp,
     CalendarDays,
 } from "lucide-react";
+import CustomSelect from "@/Components/CustomSelect";
 
 interface SummaryData {
     pemasukan_bulan_ini: number;
@@ -94,43 +95,29 @@ export default function LaporanIndex({
                 <div className="mb-2 relative z-10 flex flex-col sm:flex-row items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
                     <div className="flex items-center space-x-2 w-full sm:w-auto">
                         <div className="relative flex-1 sm:flex-none">
-                            <select
+                            <CustomSelect
                                 value={selectedMonth}
-                                onChange={(e) =>
-                                    setSelectedMonth(e.target.value)
-                                }
-                                className="appearance-none w-full sm:w-40 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-medium text-slate-700 cursor-pointer"
-                            >
-                                {[...Array(12)].map((_, i) => (
-                                    <option
-                                        key={i + 1}
-                                        value={(i + 1)
-                                            .toString()
-                                            .padStart(2, "0")}
-                                    >
-                                        {new Date(0, i).toLocaleString(
-                                            "id-ID",
-                                            { month: "long" },
-                                        )}
-                                    </option>
-                                ))}
-                            </select>
-                            <CalendarDays className="absolute right-3 top-2.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                                onChange={(val) => setSelectedMonth(val)}
+                                className="w-full sm:w-40 bg-slate-50"
+                                options={[...Array(12)].map((_, i) => ({
+                                    value: (i + 1).toString().padStart(2, "0"),
+                                    label: new Date(0, i).toLocaleString(
+                                        "id-ID",
+                                        { month: "long" },
+                                    ),
+                                }))}
+                            />
                         </div>
                         <div className="relative flex-1 sm:flex-none">
-                            <select
+                            <CustomSelect
                                 value={selectedYear}
-                                onChange={(e) =>
-                                    setSelectedYear(e.target.value)
-                                }
-                                className="appearance-none w-full sm:w-28 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-medium text-slate-700 cursor-pointer"
-                            >
-                                {years.map((y) => (
-                                    <option key={y} value={y}>
-                                        {y}
-                                    </option>
-                                ))}
-                            </select>
+                                onChange={(val) => setSelectedYear(val)}
+                                className="w-full sm:w-32 bg-slate-50"
+                                options={years.map((y) => ({
+                                    value: y.toString(),
+                                    label: y.toString(),
+                                }))}
+                            />
                         </div>
                     </div>
                     <button

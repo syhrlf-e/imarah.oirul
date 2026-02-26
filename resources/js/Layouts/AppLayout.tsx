@@ -105,10 +105,6 @@ export default function AppLayout({ title, children }: Props) {
 
                 {/* Menu Items */}
                 <nav className="flex-1 flex flex-col overflow-y-auto py-6 px-4 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-200 hover:scrollbar-thumb-slate-300">
-                    <div className="mb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                        Menu Utama
-                    </div>
-
                     <Link
                         href="/dashboard"
                         className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
@@ -246,17 +242,10 @@ export default function AppLayout({ title, children }: Props) {
                         </Link>
                     )}
 
-                    {/* ZISWAF / Baitul Mal */}
                     {["super_admin", "bendahara", "petugas_zakat"].includes(
                         auth.user.role,
                     ) && (
                         <>
-                            <div className="mt-6 mb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                                {auth.user.role === "petugas_zakat"
-                                    ? "Manajemen Zakat"
-                                    : "Penerimaan & ZISWAF"}
-                            </div>
-
                             {auth.user.role === "petugas_zakat" ? (
                                 <>
                                     {/* Urutan datar khusus Petugas Zakat */}
@@ -545,62 +534,61 @@ export default function AppLayout({ title, children }: Props) {
                             )}
                         </>
                     )}
-
-                    {/* Pengaturan hanya Super Admin */}
-                    {["super_admin"].includes(auth.user.role) && (
-                        <>
-                            <div className="mt-6 mb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                                Sistem
-                            </div>
-                            <Link
-                                href="/settings"
-                                className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
-                                    isActive("/settings")
-                                        ? "text-emerald-700 font-semibold"
-                                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                                }`}
-                            >
-                                {isActive("/settings") && (
-                                    <motion.div
-                                        layoutId="sidebarActiveMenu"
-                                        className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
-                                        transition={{
-                                            type: "spring",
-                                            stiffness: 400,
-                                            damping: 30,
-                                        }}
-                                    />
-                                )}
-                                <Settings
-                                    className={`w-5 h-5 mr-3 transition-colors ${isActive("/settings") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
-                                />
-                                Pengaturan
-                            </Link>
-                        </>
-                    )}
-
-                    {/* Manajemen Pengguna HANYA Super Admin */}
-                    {auth.user.role === "super_admin" && (
-                        <>
-                            <div className="mt-6 mb-2 px-3 text-xs font-semibold text-purple-400 uppercase tracking-wider">
-                                Keamanan Inti
-                            </div>
-                            <Link
-                                href="/users"
-                                className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
-                                    isActive("/users")
-                                        ? "text-purple-700 font-semibold bg-purple-50"
-                                        : "text-slate-600 hover:bg-purple-50/50 hover:text-purple-900"
-                                }`}
-                            >
-                                <ShieldCheck
-                                    className={`w-5 h-5 mr-3 transition-colors ${isActive("/users") ? "text-purple-600" : "text-slate-400 group-hover:text-purple-600"}`}
-                                />
-                                Pengguna (Admin)
-                            </Link>
-                        </>
-                    )}
                 </nav>
+
+                {/* Manajemen Pengguna & Pengaturan HANYA Super Admin (Mentok Bawah) */}
+                {auth.user.role === "super_admin" && (
+                    <div className="mt-auto p-4 border-t border-slate-100 bg-white/50 backdrop-blur-sm">
+                        <Link
+                            href="/users"
+                            className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 mb-1 ${
+                                isActive("/users")
+                                    ? "text-emerald-700 font-semibold"
+                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                            }`}
+                        >
+                            {isActive("/users") && (
+                                <motion.div
+                                    layoutId="sidebarActiveMenu"
+                                    className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 400,
+                                        damping: 30,
+                                    }}
+                                />
+                            )}
+                            <ShieldCheck
+                                className={`w-5 h-5 mr-3 transition-colors ${isActive("/users") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                            />
+                            Manajemen Pengguna
+                        </Link>
+                        <Link
+                            href="/settings"
+                            className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                isActive("/settings")
+                                    ? "text-emerald-700 font-semibold"
+                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                            }`}
+                        >
+                            {isActive("/settings") && (
+                                <motion.div
+                                    layoutId="sidebarActiveMenu"
+                                    className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 400,
+                                        damping: 30,
+                                    }}
+                                />
+                            )}
+                            <Settings
+                                className={`w-5 h-5 mr-3 transition-colors ${isActive("/settings") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                            />
+                            Pengaturan
+                        </Link>
+                    </div>
+                )}
             </aside>
 
             <main className="flex-1 flex flex-col h-[100dvh] overflow-hidden relative bg-slate-50/50">

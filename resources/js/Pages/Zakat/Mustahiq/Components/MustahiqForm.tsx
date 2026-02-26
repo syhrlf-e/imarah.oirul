@@ -7,10 +7,7 @@ import TextInput from "@/Components/TextInput";
 import InputError from "@/Components/InputError";
 import PrimaryButton from "@/Components/PrimaryButton";
 import SecondaryButton from "@/Components/SecondaryButton";
-import Dropdown from "@/Components/Dropdown"; // Need to check if Dropdown is suitable context-wise, or just use select
-// Checking Components list: Dropdown.tsx exists. Usually for menus.
-// For form select, standard <select> or a custom Select component is better.
-// I'll use standard <select> with Tailwind classes for now to be safe and consistent.
+import CustomSelect from "@/Components/CustomSelect";
 import FormActions from "@/Components/FormActions";
 interface Mustahiq {
     id: string;
@@ -80,28 +77,38 @@ export default function MustahiqForm({ isOpen, onClose, mustahiq }: Props) {
     };
 
     return (
-        <Modal show={isOpen} onClose={onClose} maxWidth="md">
-            <div className="p-6">
-                <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
-                    <h2 className="text-lg font-bold text-slate-800 tracking-tight">
-                        {mustahiq ? "Edit Mustahiq" : "Daftarkan Mustahiq"}
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        type="button"
-                        className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
+        <Modal show={isOpen} onClose={onClose} maxWidth="md" position="bottom">
+            <div className="flex items-center justify-between px-6 py-4 pt-6 sm:pt-4 border-b border-slate-100 shrink-0 bg-white z-10">
+                <h2 className="text-lg font-bold text-slate-800 tracking-tight">
+                    {mustahiq ? "Edit Mustahiq" : "Daftarkan Mustahiq"}
+                </h2>
+                <button
+                    onClick={onClose}
+                    type="button"
+                    className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors -mr-2"
+                >
+                    <X className="w-5 h-5" />
+                </button>
+            </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="p-6 overflow-y-auto flex-1 bg-white min-h-0">
+                <form
+                    id="mustahiq-form"
+                    onSubmit={handleSubmit}
+                    className="space-y-6"
+                >
                     <div>
                         <InputLabel htmlFor="name" value="Nama Penerima *" />
                         <TextInput
                             id="name"
                             value={data.name}
-                            onChange={(e) => setData("name", e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value.replace(
+                                    /[^a-zA-Z\s]/g,
+                                    "",
+                                );
+                                setData("name", val);
+                            }}
                             className="mt-1 block w-full"
                             placeholder="Nama Lengkap / Yayasan"
                             isFocused={isOpen}
@@ -114,25 +121,21 @@ export default function MustahiqForm({ isOpen, onClose, mustahiq }: Props) {
                             htmlFor="ashnaf"
                             value="Kategori Ashnaf *"
                         />
-                        <select
-                            id="ashnaf"
-                            value={data.ashnaf}
-                            onChange={(e) => setData("ashnaf", e.target.value)}
-                            className="mt-1 block w-full border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
-                        >
-                            {ASHNAF_OPTIONS.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
+                        <div className="mt-1">
+                            <CustomSelect
+                                value={data.ashnaf}
+                                onChange={(val) => setData("ashnaf", val)}
+                                options={ASHNAF_OPTIONS}
+                            />
+                        </div>
                         <InputError message={errors.ashnaf} className="mt-2" />
                     </div>
 
                     <div>
-                        <InputLabel htmlFor="address" value="Alamat" />
+                        <InputLabel htmlFor="address" value="Alamat *" />
                         <textarea
                             id="address"
+                            required
                             className="mt-1 block w-full border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
                             value={data.address}
                             onChange={(e) => setData("address", e.target.value)}
@@ -145,7 +148,7 @@ export default function MustahiqForm({ isOpen, onClose, mustahiq }: Props) {
                     <div>
                         <InputLabel
                             htmlFor="description"
-                            value="Keterangan Tambahan"
+                            value="Keterangan (Opsional)"
                         />
                         <textarea
                             id="description"
@@ -162,13 +165,25 @@ export default function MustahiqForm({ isOpen, onClose, mustahiq }: Props) {
                             className="mt-2"
                         />
                     </div>
-
-                    <FormActions
-                        onCancel={onClose}
-                        processing={processing}
-                        submitText="Simpan Data"
-                    />
                 </form>
+            </div>
+
+            <div className="px-6 py-4 border-t border-slate-100 shrink-0 bg-white pb-safe">
+                <div className="flex gap-3">
+                    <SecondaryButton
+                        onClick={onClose}
+                        className="flex-1 justify-center py-2.5 font-medium"
+                    >
+                        Batal
+                    </SecondaryButton>
+                    <PrimaryButton
+                        form="mustahiq-form"
+                        className="flex-1 justify-center py-2.5 font-medium"
+                        disabled={processing}
+                    >
+                        Simpan Data
+                    </PrimaryButton>
+                </div>
             </div>
         </Modal>
     );

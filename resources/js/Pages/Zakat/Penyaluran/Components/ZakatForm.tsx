@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 import RupiahInput from "@/Components/RupiahInput"; // Need to check if this exists
 import { useNetwork } from "@/Hooks/useNetwork";
 import FormActions from "@/Components/FormActions";
+import CustomSelect from "@/Components/CustomSelect";
 // Checking components: RupiahInput.tsx exists.
 
 interface Mustahiq {
@@ -83,21 +84,22 @@ export default function ZakatForm({ isOpen, onClose, mustahiqs }: Props) {
                     {/* Mustahiq Select */}
                     <div>
                         <InputLabel htmlFor="mustahiq_id" value="Mustahiq" />
-                        <select
-                            id="mustahiq_id"
-                            value={data.mustahiq_id}
-                            onChange={(e) =>
-                                setData("mustahiq_id", e.target.value)
-                            }
-                            className="mt-1 block w-full border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
-                        >
-                            <option value="">-- Pilih Mustahiq --</option>
-                            {mustahiqs.map((m) => (
-                                <option key={m.id} value={m.id}>
-                                    {m.name}
-                                </option>
-                            ))}
-                        </select>
+                        <div className="mt-1">
+                            <CustomSelect
+                                value={data.mustahiq_id}
+                                onChange={(val) => setData("mustahiq_id", val)}
+                                options={[
+                                    {
+                                        value: "",
+                                        label: "-- Pilih Mustahiq --",
+                                    },
+                                    ...mustahiqs.map((m) => ({
+                                        value: m.id,
+                                        label: m.name,
+                                    })),
+                                ]}
+                            />
+                        </div>
                         <InputError
                             message={errors.mustahiq_id}
                             className="mt-2"
@@ -249,18 +251,22 @@ export default function ZakatForm({ isOpen, onClose, mustahiqs }: Props) {
                             htmlFor="payment_method"
                             value="Metode Pembayaran"
                         />
-                        <select
-                            id="payment_method"
-                            value={data.payment_method}
-                            onChange={(e) =>
-                                setData("payment_method", e.target.value)
-                            }
-                            className="mt-1 block w-full border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
-                        >
-                            <option value="tunai">Tunai</option>
-                            <option value="transfer">Transfer Bank</option>
-                            <option value="qris">QRIS</option>
-                        </select>
+                        <div className="mt-1">
+                            <CustomSelect
+                                value={data.payment_method}
+                                onChange={(val) =>
+                                    setData("payment_method", val)
+                                }
+                                options={[
+                                    { value: "tunai", label: "Tunai" },
+                                    {
+                                        value: "transfer",
+                                        label: "Transfer Bank",
+                                    },
+                                    { value: "qris", label: "QRIS" },
+                                ]}
+                            />
+                        </div>
                         <InputError
                             message={errors.payment_method}
                             className="mt-2"

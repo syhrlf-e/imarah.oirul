@@ -21,9 +21,9 @@ export default function PageHeader({
 }: PageHeaderProps) {
     return (
         <div
-            className={`mb-6 md:mb-8 flex flex-col md:flex-row md:items-end justify-between gap-3 md:gap-4 md:px-6 ${className}`}
+            className={`mb-6 md:mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6 ${className}`}
         >
-            <div>
+            <div className="px-2 md:px-0">
                 <h1 className="text-xl md:text-2xl font-semibold text-slate-900 tracking-tight">
                     {title}
                 </h1>
@@ -32,7 +32,9 @@ export default function PageHeader({
                 )}
             </div>
             {children && (
-                <div className="flex items-center gap-2">{children}</div>
+                <div className="flex items-center gap-2 self-end md:self-auto px-2 md:px-0">
+                    {children}
+                </div>
             )}
         </div>
     );

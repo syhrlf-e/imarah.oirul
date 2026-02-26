@@ -61,28 +61,38 @@ export default function MuzakkiForm({ isOpen, onClose, muzakki }: Props) {
     };
 
     return (
-        <Modal show={isOpen} onClose={onClose} maxWidth="md">
-            <div className="p-6">
-                <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
-                    <h2 className="text-lg font-bold text-slate-800 tracking-tight">
-                        {muzakki ? "Edit Muzakki" : "Daftarkan Muzakki"}
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        type="button"
-                        className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
+        <Modal show={isOpen} onClose={onClose} maxWidth="md" position="bottom">
+            <div className="flex items-center justify-between px-6 py-4 pt-6 sm:pt-4 border-b border-slate-100 shrink-0 bg-white z-10">
+                <h2 className="text-lg font-bold text-slate-800 tracking-tight">
+                    {muzakki ? "Edit Muzakki" : "Daftarkan Muzakki"}
+                </h2>
+                <button
+                    onClick={onClose}
+                    type="button"
+                    className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors -mr-2"
+                >
+                    <X className="w-5 h-5" />
+                </button>
+            </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="p-6 overflow-y-auto flex-1 bg-white min-h-0">
+                <form
+                    id="muzakki-form"
+                    onSubmit={handleSubmit}
+                    className="space-y-6"
+                >
                     <div>
                         <InputLabel htmlFor="name" value="Nama Lengkap *" />
                         <TextInput
                             id="name"
                             value={data.name}
-                            onChange={(e) => setData("name", e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value.replace(
+                                    /[^a-zA-Z\s]/g,
+                                    "",
+                                );
+                                setData("name", val);
+                            }}
                             className="mt-1 block w-full"
                             placeholder="Contoh: Abdullah"
                             isFocused={isOpen} // Focus when opened
@@ -98,7 +108,28 @@ export default function MuzakkiForm({ isOpen, onClose, muzakki }: Props) {
                         <TextInput
                             id="phone"
                             value={data.phone}
-                            onChange={(e) => setData("phone", e.target.value)}
+                            onChange={(e) => {
+                                let val = e.target.value.replace(/\D/g, ""); // Hanya angka
+
+                                if (val.length > 0) {
+                                    if (val.startsWith("62")) {
+                                        val = "0" + val.slice(2);
+                                    } else if (!val.startsWith("08")) {
+                                        if (val.startsWith("0")) {
+                                            val = "08" + val.slice(1);
+                                        } else if (val.startsWith("8")) {
+                                            val = "0" + val;
+                                        } else {
+                                            val = "08" + val;
+                                        }
+                                    }
+                                }
+
+                                if (val.length > 13) {
+                                    val = val.slice(0, 13);
+                                }
+                                setData("phone", val);
+                            }}
                             className="mt-1 block w-full"
                             placeholder="0812..."
                         />
@@ -109,7 +140,7 @@ export default function MuzakkiForm({ isOpen, onClose, muzakki }: Props) {
                         <InputLabel htmlFor="address" value="Alamat" />
                         <textarea
                             id="address"
-                            className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                            className="mt-1 block w-full border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
                             value={data.address}
                             onChange={(e) => setData("address", e.target.value)}
                             rows={3}
@@ -117,13 +148,29 @@ export default function MuzakkiForm({ isOpen, onClose, muzakki }: Props) {
                         />
                         <InputError message={errors.address} className="mt-2" />
                     </div>
-
-                    <FormActions
-                        onCancel={onClose}
-                        processing={processing}
-                        submitText="Simpan Data"
-                    />
                 </form>
+            </div>
+
+            <div className="px-6 py-4 border-t border-slate-100 shrink-0 bg-white pb-safe">
+                <div className="flex gap-3">
+                    <SecondaryButton
+                        onClick={onClose}
+                        className="flex-1 justify-center py-2.5 font-medium"
+                    >
+                        Batal
+                    </SecondaryButton>
+                    <PrimaryButton
+                        form="muzakki-form"
+                        className="flex-1 justify-center py-2.5 font-medium"
+                        disabled={
+                            processing ||
+                            (data.phone.length > 0 && data.phone.length < 12) ||
+                            data.phone.length > 13
+                        }
+                    >
+                        Simpan Data
+                    </PrimaryButton>
+                </div>
             </div>
         </Modal>
     );

@@ -15,6 +15,8 @@ import {
     ChevronLeft,
     ChevronRight,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import CustomSelect from "@/Components/CustomSelect";
 import PrimaryButton from "@/Components/PrimaryButton";
 import SecondaryButton from "@/Components/SecondaryButton";
 import DangerButton from "@/Components/DangerButton";
@@ -24,7 +26,6 @@ import InputError from "@/Components/InputError";
 import FilterBar from "@/Components/FilterBar";
 import PageHeader from "@/Components/PageHeader";
 import FormActions from "@/Components/FormActions";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface User {
     id: string;
@@ -398,13 +399,13 @@ export default function AgendaIndex({
                                                 "bendahara",
                                                 "petugas_zakat",
                                             ].includes(auth.user.role) && (
-                                                <button
+                                                <PrimaryButton
                                                     onClick={openAddModal}
-                                                    className="inline-flex items-center justify-center px-4 py-2 bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition-colors font-medium border border-green-100"
+                                                    className="inline-flex items-center justify-center !py-2.5 font-medium cursor-pointer"
                                                 >
-                                                    <Plus className="w-4 h-4 mr-2" />
+                                                    <Plus className="w-5 h-5 mr-1" />
                                                     Buat Agenda
-                                                </button>
+                                                </PrimaryButton>
                                             )}
                                         </div>
                                     </td>
@@ -612,27 +613,30 @@ export default function AgendaIndex({
                                             value="Tipe Kegiatan *"
                                             className="mb-1.5"
                                         />
-                                        <select
+                                        <CustomSelect
                                             value={data.type}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "type",
-                                                    e.target.value as any,
-                                                )
+                                            onChange={(val) =>
+                                                setData("type", val as any)
                                             }
-                                            className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 text-sm shadow-sm bg-white text-slate-800"
-                                        >
-                                            <option value="kajian">
-                                                Kajian
-                                            </option>
-                                            <option value="rapat">Rapat</option>
-                                            <option value="kegiatan_sosial">
-                                                Kegiatan Sosial
-                                            </option>
-                                            <option value="lainnya">
-                                                Lainnya
-                                            </option>
-                                        </select>
+                                            options={[
+                                                {
+                                                    value: "kajian",
+                                                    label: "Kajian",
+                                                },
+                                                {
+                                                    value: "rapat",
+                                                    label: "Rapat",
+                                                },
+                                                {
+                                                    value: "kegiatan_sosial",
+                                                    label: "Kegiatan Sosial",
+                                                },
+                                                {
+                                                    value: "lainnya",
+                                                    label: "Lainnya",
+                                                },
+                                            ]}
+                                        />
                                         <InputError
                                             message={errors.type}
                                             className="mt-1"

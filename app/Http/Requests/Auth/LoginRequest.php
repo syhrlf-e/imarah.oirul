@@ -51,6 +51,19 @@ class LoginRequest extends FormRequest
     }
 
     /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'email.email' => 'Format email tidak valid (harus mengandung @ dan domain).',
+            'email.regex' => 'Format email tidak valid (harus mengandung @ dan domain).',
+        ];
+    }
+
+    /**
      * Attempt to authenticate the request's credentials.
      *
      * @throws \Illuminate\Validation\ValidationException

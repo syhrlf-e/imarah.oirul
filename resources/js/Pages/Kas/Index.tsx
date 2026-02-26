@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Head, Link, router, useForm } from "@inertiajs/react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/Layouts/AppLayout";
@@ -30,6 +30,8 @@ import KasSummaryCards from "@/Components/KasSummaryCards";
 import FormActions from "@/Components/FormActions";
 import DataTable, { ColumnDef } from "@/Components/DataTable";
 import PrimaryButton from "@/Components/PrimaryButton";
+import CustomSelect from "@/Components/CustomSelect";
+import RupiahInput from "@/Components/RupiahInput";
 
 const CATEGORY_OPTIONS = [
     { value: "", label: "Semua Kategori" },
@@ -147,7 +149,6 @@ export default function KasIndex({
 
     const [isAddOpen, setIsAddOpen] = useState(false);
     const isOnline = useNetwork();
-    const [formattedAmount, setFormattedAmount] = useState("");
 
     const {
         data: formData,
@@ -168,7 +169,6 @@ export default function KasIndex({
 
     const openAddModal = () => {
         reset();
-        setFormattedAmount("");
         clearErrors();
         setIsAddOpen(true);
     };
@@ -178,16 +178,13 @@ export default function KasIndex({
         setTimeout(() => reset(), 200);
     };
 
-    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
-        let numberVal = parseRupiah(val);
-
-        if (numberVal > 999999999) {
-            numberVal = 999999999;
-        }
-
+    const handleAmountChange = (numberVal: number) => {
         setFormData("amount", numberVal);
-        setFormattedAmount(formatRupiah(numberVal));
+        if (numberVal > 999999999) {
+            setError("amount", "Nominal maks Rp. 999.999.999");
+        } else {
+            clearErrors("amount");
+        }
     };
 
     const submitAdd = (e: React.FormEvent) => {
@@ -202,10 +199,17 @@ export default function KasIndex({
             onSuccess: () => {
                 closeAddModal();
                 reset();
-                setFormattedAmount("");
             },
         });
     };
+
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkIsMobile = () => setIsMobile(window.innerWidth < 640);
+        checkIsMobile();
+        window.addEventListener("resize", checkIsMobile);
+        return () => window.removeEventListener("resize", checkIsMobile);
+    }, []);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat("id-ID", {
@@ -249,9 +253,9 @@ export default function KasIndex({
                 {isBendaharaOrAdmin && (
                     <PrimaryButton
                         onClick={openAddModal}
-                        className="!py-2.5 font-medium cursor-pointer"
+                        className="!py-2 !px-3.5 md:!py-2.5 md:!px-4 text-sm md:text-base font-medium cursor-pointer shadow-sm md:shadow-md"
                     >
-                        <Plus className="w-5 h-5" />
+                        <Plus className="w-4 h-4 md:w-5 md:h-5" />
                         Catat Transaksi
                     </PrimaryButton>
                 )}
@@ -632,214 +636,234 @@ export default function KasIndex({
                 </div>
             )}
 
-            {isAddOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-                    <div
-                        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
-                        onClick={closeAddModal}
-                    ></div>
+            <AnimatePresence>
+                {isAddOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"
+                            onClick={closeAddModal}
+                        ></motion.div>
 
-                    <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
-                        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
-                            <h3 className="text-lg font-bold text-slate-900">
-                                Catat Transaksi
-                            </h3>
-                            <button
-                                onClick={closeAddModal}
-                                className="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 p-1.5 rounded-lg transition-colors"
-                            >
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
+                        <motion.div
+                            initial={
+                                isMobile
+                                    ? { y: "100%", opacity: 0 }
+                                    : { opacity: 0, scale: 0.95, y: 16 }
+                            }
+                            animate={
+                                isMobile
+                                    ? { y: 0, opacity: 1 }
+                                    : { opacity: 1, scale: 1, y: 0 }
+                            }
+                            exit={
+                                isMobile
+                                    ? { y: "100%", opacity: 0 }
+                                    : { opacity: 0, scale: 0.95, y: 16 }
+                            }
+                            transition={{
+                                type: "spring",
+                                bounce: 0,
+                                duration: 0.4,
+                            }}
+                            className="relative bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[95vh]"
+                        >
+                            <div className="sm:hidden absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-slate-200 rounded-full z-20"></div>
+                            <div className="px-5 sm:px-6 py-4 pt-8 sm:pt-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white z-10">
+                                <h3 className="text-lg font-bold text-slate-900">
+                                    Catat Transaksi
+                                </h3>
+                                <button
+                                    onClick={closeAddModal}
+                                    className="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 p-1.5 rounded-lg transition-colors"
                                 >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div className="p-6 overflow-y-auto">
-                            <form onSubmit={submitAdd} className="space-y-5">
-                                {/* Type Selection */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                                        Jenis Transaksi *
-                                    </label>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                setFormData("type", "in")
-                                            }
-                                            className={`py-2.5 px-4 rounded-xl border text-sm font-medium flex items-center justify-center transition-all ${formData.type === "in" ? "bg-emerald-50 border-emerald-500 text-emerald-700 ring-1 ring-emerald-500" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"}`}
-                                        >
-                                            Pemasukan (+In)
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                setFormData("type", "out")
-                                            }
-                                            className={`py-2.5 px-4 rounded-xl border text-sm font-medium flex items-center justify-center transition-all ${formData.type === "out" ? "bg-red-50 border-red-500 text-red-700 ring-1 ring-red-500" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"}`}
-                                        >
-                                            Pengeluaran (-Out)
-                                        </button>
-                                    </div>
-                                    {errors.type && (
-                                        <p className="mt-1 text-xs text-red-500">
-                                            {errors.type}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Category */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                                        Kategori *
-                                    </label>
-                                    <select
-                                        value={formData.category}
-                                        onChange={(e) =>
-                                            setFormData(
-                                                "category",
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm"
+                                    <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
                                     >
-                                        <option value="zakat_fitrah">
-                                            Zakat Fitrah
-                                        </option>
-                                        <option value="zakat_maal">
-                                            Zakat Maal
-                                        </option>
-                                        <option value="infaq">
-                                            Infaq / Sedekah
-                                        </option>
-                                        <option value="infaq_tromol">
-                                            Infaq Tromol
-                                        </option>
-                                        <option value="operasional">
-                                            Operasional
-                                        </option>
-                                        <option value="gaji">Gaji</option>
-                                        <option value="lainnya">Lainnya</option>
-                                    </select>
-                                    {errors.category && (
-                                        <p className="mt-1 text-xs text-red-500">
-                                            {errors.category}
-                                        </p>
-                                    )}
-                                </div>
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M6 18L18 6M6 6l12 12"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
 
-                                {/* Amount */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                                        Nominal (Rp) *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        value={
-                                            formattedAmount ||
-                                            (formData.amount === 0
-                                                ? ""
-                                                : formatRupiah(formData.amount))
-                                        }
-                                        onChange={handleAmountChange}
-                                        className="w-full px-3 py-2 font-mono text-lg font-semibold border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm"
-                                        placeholder="Rp 0"
-                                    />
-                                    <div className="flex justify-between items-start mt-1">
-                                        {errors.amount ? (
-                                            <p className="text-xs text-red-500">
-                                                {errors.amount}
+                            <div className="p-5 sm:p-6 pb-safe flex-1 overflow-y-auto bg-white min-h-0">
+                                <form
+                                    id="kas-form"
+                                    onSubmit={submitAdd}
+                                    className="space-y-4 sm:space-y-5"
+                                >
+                                    {/* Type Selection */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                                            Jenis Transaksi *
+                                        </label>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setFormData("type", "in")
+                                                }
+                                                className={`py-2.5 px-4 rounded-xl border text-sm font-medium flex items-center justify-center transition-all ${formData.type === "in" ? "bg-emerald-50 border-emerald-500 text-emerald-700 ring-1 ring-emerald-500" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"}`}
+                                            >
+                                                Pemasukan (+In)
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setFormData("type", "out")
+                                                }
+                                                className={`py-2.5 px-4 rounded-xl border text-sm font-medium flex items-center justify-center transition-all ${formData.type === "out" ? "bg-red-50 border-red-500 text-red-700 ring-1 ring-red-500" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"}`}
+                                            >
+                                                Pengeluaran (-Out)
+                                            </button>
+                                        </div>
+                                        {errors.type && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.type}
                                             </p>
-                                        ) : (
-                                            <div></div>
                                         )}
-                                        <p className="text-xs text-slate-400 font-medium">
-                                            *maks Rp. 999.999.999
-                                        </p>
                                     </div>
-                                </div>
 
-                                {/* Payment Method */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                                        Metode Pembayaran
-                                    </label>
-                                    <select
-                                        value={formData.payment_method}
-                                        onChange={(e) =>
-                                            setFormData(
-                                                "payment_method",
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm"
-                                    >
-                                        <option value="tunai">Tunai</option>
-                                        <option value="transfer">
-                                            Transfer Bank
-                                        </option>
-                                        <option value="qris">QRIS</option>
-                                    </select>
-                                    {errors.payment_method && (
-                                        <p className="mt-1 text-xs text-red-500">
-                                            {errors.payment_method}
-                                        </p>
-                                    )}
-                                </div>
+                                    {/* Category */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                                            Kategori *
+                                        </label>
+                                        <CustomSelect
+                                            value={formData.category}
+                                            onChange={(val) =>
+                                                setFormData("category", val)
+                                            }
+                                            options={CATEGORY_OPTIONS.filter(
+                                                (opt) => opt.value !== "",
+                                            )}
+                                        />
+                                        {errors.category && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.category}
+                                            </p>
+                                        )}
+                                    </div>
 
-                                {/* Notes */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                                        Keterangan (Opsional)
-                                    </label>
-                                    <textarea
-                                        value={formData.notes}
-                                        onChange={(e) => {
-                                            // Sanitize input: Remove potential XSS characters like < > [ ] { }
-                                            const sanitizedValue =
-                                                e.target.value.replace(
-                                                    /[<>()[\]{}]/g,
-                                                    "",
+                                    {/* Amount */}
+                                    <div>
+                                        <label
+                                            className={`block text-sm font-semibold mb-1.5 ${errors.amount ? "text-red-500" : "text-slate-700"}`}
+                                        >
+                                            Nominal (Rp) *
+                                        </label>
+                                        <RupiahInput
+                                            value={formData.amount}
+                                            onValueChange={handleAmountChange}
+                                            isError={!!errors.amount}
+                                        />
+                                        <div className="flex justify-between items-start mt-1">
+                                            {errors.amount ? (
+                                                <p className="text-xs text-red-500">
+                                                    {errors.amount}
+                                                </p>
+                                            ) : (
+                                                <div></div>
+                                            )}
+                                            <p
+                                                className={`text-xs font-medium ${errors.amount ? "text-red-500" : "text-slate-400"}`}
+                                            >
+                                                *maks Rp. 999.999.999
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Payment Method */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                                            Metode Pembayaran
+                                        </label>
+                                        <CustomSelect
+                                            value={formData.payment_method}
+                                            onChange={(val) =>
+                                                setFormData(
+                                                    "payment_method",
+                                                    val,
+                                                )
+                                            }
+                                            options={[
+                                                {
+                                                    value: "tunai",
+                                                    label: "Tunai",
+                                                },
+                                                {
+                                                    value: "transfer",
+                                                    label: "Transfer Bank",
+                                                },
+                                                {
+                                                    value: "qris",
+                                                    label: "QRIS",
+                                                },
+                                            ]}
+                                        />
+                                        {errors.payment_method && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.payment_method}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Notes */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                                            Keterangan *
+                                        </label>
+                                        <textarea
+                                            required
+                                            value={formData.notes}
+                                            onChange={(e) => {
+                                                // Sanitize input: Remove potential XSS characters like < > [ ] { }
+                                                const sanitizedValue =
+                                                    e.target.value.replace(
+                                                        /[<>()[\]{}]/g,
+                                                        "",
+                                                    );
+                                                setFormData(
+                                                    "notes",
+                                                    sanitizedValue,
                                                 );
-                                            setFormData(
-                                                "notes",
-                                                sanitizedValue,
-                                            );
-                                        }}
-                                        className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm resize-none"
-                                        rows={3}
-                                        placeholder="Contoh: Infaq Hamba Allah, Bayar Listrik Bulan Juni"
-                                    ></textarea>
-                                    {errors.notes && (
-                                        <p className="mt-1 text-xs text-red-500">
-                                            {errors.notes}
-                                        </p>
-                                    )}
-                                </div>
-
+                                            }}
+                                            className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm shadow-sm resize-none"
+                                            rows={3}
+                                            placeholder="Contoh: Infaq Hamba Allah, Bayar Listrik Bulan Juni"
+                                        ></textarea>
+                                        {errors.notes && (
+                                            <p className="mt-1 text-xs text-red-500">
+                                                {errors.notes}
+                                            </p>
+                                        )}
+                                    </div>
+                                </form>
+                            </div>
+                            <div className="p-5 sm:p-6 border-t border-slate-100 shrink-0 bg-white pb-safe">
                                 <FormActions
                                     onCancel={closeAddModal}
                                     processing={processing}
                                     submitDisabled={!isOnline}
                                     layout="full-width"
                                     submitText="Simpan Transaksi"
+                                    formId="kas-form"
                                 />
-                            </form>
-                        </div>
+                            </div>
+                        </motion.div>
                     </div>
-                </div>
-            )}
+                )}
+            </AnimatePresence>
         </AppLayout>
     );
 }
