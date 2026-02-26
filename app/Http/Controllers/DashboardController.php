@@ -6,118 +6,161 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Transaction;
 use App\Models\Agenda;
+use App\Models\Donatur;
+use App\Models\Mustahiq;
+use App\Models\InventoryItem;
+use App\Models\TromolBox;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $userRole = $request->user()->role;
         $now = Carbon::now();
         $startOfMonth = $now->copy()->startOfMonth();
         $endOfMonth = $now->copy()->endOfMonth();
 
-        $kasCategories = ['infaq', 'infaq_tromol', 'operasional', 'gaji', 'lainnya'];
-        $zakatCategories = ['zakat_fitrah', 'zakat_maal'];
+        // Default Data Structure
+        $data = [
+            'totalSaldo' => 0,
+            'totalZakat' => 0,
+            'totalTransaksiBulanIni' => 0,
+            'pemasukanBulanIni' => 0,
+            'pengeluaranBulanIni' => 0,
+            'recentTransactions' => [],
+            'upcomingAgendas' => [],
+            'chartData' => [],
+            'totalKasTransactions' => 0,
+            'zakatStats' => null,
+            'inventarisStats' => null,
+            'tromolStats' => null,
+        ];
 
-        // 1 & 2. Aggregate Queries for Overall and This Month
-        // Secara drastis menghemat beban N+1 query dengan single group-by query.
-        $kasStats = Transaction::whereIn('category', $kasCategories)
-            ->selectRaw('type, COUNT(*) as count, SUM(amount) as total')
-            ->groupBy('type')
-            ->get()
-            ->keyBy('type');
+        // 1. Kas, Bendahara, Super Admin
+        if (in_array($userRole, ['super_admin', 'bendahara'])) {
+            $kasCategories = ['infaq', 'infaq_tromol', 'operasional', 'gaji', 'lainnya'];
+            
+            $kasStats = Transaction::whereIn('category', $kasCategories)
+                ->selectRaw('type, COUNT(*) as count, SUM(amount) as total')
+                ->groupBy('type')
+                ->get()
+                ->keyBy('type');
 
-        $totalPemasukanKas = $kasStats->has('in') ? $kasStats->get('in')->total : 0;
-        $totalPengeluaranKas = $kasStats->has('out') ? $kasStats->get('out')->total : 0;
-        $saldoTotalKas = $totalPemasukanKas - $totalPengeluaranKas;
-        $totalKasTransactions = ($kasStats->has('in') ? $kasStats->get('in')->count : 0) 
-                              + ($kasStats->has('out') ? $kasStats->get('out')->count : 0);
+            $totalPemasukanKas = $kasStats->has('in') ? $kasStats->get('in')->total : 0;
+            $totalPengeluaranKas = $kasStats->has('out') ? $kasStats->get('out')->total : 0;
+            $data['totalSaldo'] = $totalPemasukanKas - $totalPengeluaranKas;
+            $data['totalKasTransactions'] = ($kasStats->has('in') ? $kasStats->get('in')->count : 0) 
+                                  + ($kasStats->has('out') ? $kasStats->get('out')->count : 0);
 
-        $kasBulanIniStats = Transaction::whereIn('category', $kasCategories)
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->selectRaw('type, COUNT(*) as count, SUM(amount) as total')
-            ->groupBy('type')
-            ->get()
-            ->keyBy('type');
+            $kasBulanIniStats = Transaction::whereIn('category', $kasCategories)
+                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                ->selectRaw('type, COUNT(*) as count, SUM(amount) as total')
+                ->groupBy('type')
+                ->get()
+                ->keyBy('type');
 
-        $pemasukanBulanIni = $kasBulanIniStats->has('in') ? $kasBulanIniStats->get('in')->total : 0;
-        $pengeluaranBulanIni = $kasBulanIniStats->has('out') ? $kasBulanIniStats->get('out')->total : 0;
-        $totalTransaksiBulanIni = ($kasBulanIniStats->has('in') ? $kasBulanIniStats->get('in')->count : 0) 
-                                + ($kasBulanIniStats->has('out') ? $kasBulanIniStats->get('out')->count : 0);
+            $data['pemasukanBulanIni'] = $kasBulanIniStats->has('in') ? $kasBulanIniStats->get('in')->total : 0;
+            $data['pengeluaranBulanIni'] = $kasBulanIniStats->has('out') ? $kasBulanIniStats->get('out')->total : 0;
+            $data['totalTransaksiBulanIni'] = ($kasBulanIniStats->has('in') ? $kasBulanIniStats->get('in')->count : 0) 
+                                    + ($kasBulanIniStats->has('out') ? $kasBulanIniStats->get('out')->count : 0);
 
-        $totalZakat = Transaction::whereIn('category', $zakatCategories)
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->sum('amount');
-        
-        // 3. Five Latest Kas Transactions for Widget
-        $recentTransactions = Transaction::with('creator:id,name')
-            ->whereIn('category', $kasCategories)
-            ->latest()
-            ->take(5)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'category' => $item->category,
-                    'type' => $item->type === 'in' ? 'pemasukan' : 'pengeluaran',
-                    'amount' => $item->amount,
-                    'transaction_date' => $item->created_at->format('Y-m-d'),
-                    'description' => $item->notes ?? '',
+            $data['recentTransactions'] = Transaction::with('creator:id,name')
+                ->whereIn('category', $kasCategories)
+                ->latest()
+                ->take(5)
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'category' => $item->category,
+                        'type' => $item->type === 'in' ? 'pemasukan' : 'pengeluaran',
+                        'amount' => $item->amount,
+                        'transaction_date' => $item->created_at->format('Y-m-d'),
+                        'description' => $item->notes ?? '',
+                    ];
+                });
+
+            $sixMonthsAgo = $now->copy()->subMonths(5)->startOfMonth();
+            $chartTransactions = Transaction::whereIn('category', $kasCategories)
+                ->where('created_at', '>=', $sixMonthsAgo)
+                ->select('type', 'amount', 'created_at')
+                ->get();
+
+            $chartData = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $monthStart = $now->copy()->subMonths($i)->startOfMonth();
+                $monthEnd = $now->copy()->subMonths($i)->endOfMonth();
+
+                $monthlyData = $chartTransactions->filter(function ($t) use ($monthStart, $monthEnd) {
+                    return $t->created_at >= $monthStart && $t->created_at <= $monthEnd;
+                });
+
+                $income = $monthlyData->where('type', 'in')->sum('amount');
+                $expense = $monthlyData->where('type', 'out')->sum('amount');
+
+                $chartData[] = [
+                    'name' => $monthStart->translatedFormat('M y'),
+                    'pemasukan' => (float) $income,
+                    'pengeluaran' => (float) $expense,
                 ];
-            });
+            }
+            $data['chartData'] = $chartData;
 
-        // 4. Five Upcoming Agendas
-        $upcomingAgendas = Agenda::where('start_time', '>=', $now)
-            ->orderBy('start_time', 'asc')
-            ->take(5)
-            ->get()
-            ->map(function ($agenda) {
-                return [
-                    'id' => $agenda->id,
-                    'title' => $agenda->title,
-                    'type' => $agenda->type,
-                    'start_time' => $agenda->start_time->format('Y-m-d H:i'),
-                    'location' => $agenda->location,
-                ];
-            });
-
-        // 5. Chart Data (Last 6 Months Income vs Expense) - Diambil 1x via RAM DB
-        $sixMonthsAgo = $now->copy()->subMonths(5)->startOfMonth();
-        $chartTransactions = Transaction::whereIn('category', $kasCategories)
-            ->where('created_at', '>=', $sixMonthsAgo)
-            ->select('type', 'amount', 'created_at')
-            ->get();
-
-        $chartData = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $monthStart = $now->copy()->subMonths($i)->startOfMonth();
-            $monthEnd = $now->copy()->subMonths($i)->endOfMonth();
-
-            $monthlyData = $chartTransactions->filter(function ($t) use ($monthStart, $monthEnd) {
-                return $t->created_at >= $monthStart && $t->created_at <= $monthEnd;
-            });
-
-            $income = $monthlyData->where('type', 'in')->sum('amount');
-            $expense = $monthlyData->where('type', 'out')->sum('amount');
-
-            $chartData[] = [
-                'name' => $monthStart->translatedFormat('M y'), // e.g 'Jan 24'
-                'pemasukan' => (float) $income,
-                'pengeluaran' => (float) $expense,
+            // Tromol Stats
+            $data['tromolStats'] = [
+                'total_boxes' => TromolBox::count(),
+                'active_boxes' => TromolBox::where('status', 'active')->count()
             ];
         }
 
-        return Inertia::render('Dashboard', [
-            'totalSaldo' => $saldoTotalKas,
-            'totalZakat' => $totalZakat,
-            'totalTransaksiBulanIni' => $totalTransaksiBulanIni,
-            'pemasukanBulanIni' => $pemasukanBulanIni,
-            'pengeluaranBulanIni' => $pengeluaranBulanIni,
-            'recentTransactions' => $recentTransactions,
-            'upcomingAgendas' => $upcomingAgendas,
-            'chartData' => $chartData,
-            'totalKasTransactions' => $totalKasTransactions,
-        ]);
+        // 2. Zakat, Petugas Zakat, Super Admin, Bendahara
+        if (in_array($userRole, ['super_admin', 'petugas_zakat', 'bendahara'])) {
+            $zakatCategories = ['zakat_fitrah', 'zakat_maal'];
+            $data['totalZakat'] = Transaction::whereIn('category', $zakatCategories)
+                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                ->sum('amount');
+
+            if ($userRole === 'petugas_zakat') {
+                $data['zakatStats'] = [
+                    'total_muzakki' => Donatur::count(),
+                    'total_mustahiq' => Mustahiq::count(),
+                ];
+            }
+        }
+
+        // 3. Agenda, Super Admin
+        if ($userRole === 'super_admin') {
+            $data['upcomingAgendas'] = Agenda::where('start_time', '>=', $now)
+                ->orderBy('start_time', 'asc')
+                ->take(5)
+                ->get()
+                ->map(function ($agenda) {
+                    return [
+                        'id' => $agenda->id,
+                        'title' => $agenda->title,
+                        'type' => $agenda->type,
+                        'start_time' => $agenda->start_time->format('Y-m-d H:i'),
+                        'location' => $agenda->location,
+                    ];
+                });
+        }
+
+        // 4. Inventaris, Sekretaris, Super Admin
+        if ($userRole === 'sekretaris') {
+            $inventaris = InventoryItem::selectRaw('condition, COUNT(*) as count, SUM(quantity) as total_quantity')
+                ->groupBy('condition')
+                ->get()
+                ->keyBy('condition');
+            
+            $data['inventarisStats'] = [
+                'total_items' => $inventaris->sum('total_quantity'),
+                'good_items' => $inventaris->has('baik') ? $inventaris->get('baik')->total_quantity : 0,
+                'broken_items' => $inventaris->has('rusak') ? $inventaris->get('rusak')->total_quantity : 0,
+            ];
+        }
+
+        return Inertia::render('Dashboard', $data);
     }
 }

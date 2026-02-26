@@ -6,6 +6,7 @@ import {
     FileText,
     UserCircle,
     LogOut,
+    Archive,
 } from "lucide-react";
 
 interface Props {
@@ -53,13 +54,22 @@ export default function BottomNav({ isSidebarOpen, toggleSidebar }: Props) {
                         className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isActive("/kas") ? "text-[#22C55E] font-semibold" : "text-slate-400 hover:text-slate-600 font-normal"}`}
                     >
                         <Wallet
-                            className={`w-5 h-5 ${
-                                isActive("/kas")
-                                    ? "fill-[#22C55E]/20 stroke-2 text-[#22C55E]"
-                                    : "stroke-2"
-                            }`}
+                            className={`w-5 h-5 ${isActive("/kas") ? "fill-[#22C55E]/20 stroke-2 text-[#22C55E]" : "stroke-2"}`}
                         />
                         <span className="text-[10px]">Kas</span>
+                    </Link>
+                )}
+
+                {auth.user?.role === "sekretaris" && (
+                    <Link
+                        href="/inventaris"
+                        onClick={() => setIsProfileOpen(false)}
+                        className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isActive("/inventaris") ? "text-[#22C55E] font-semibold" : "text-slate-400 hover:text-slate-600 font-normal"}`}
+                    >
+                        <Archive
+                            className={`w-5 h-5 ${isActive("/inventaris") ? "fill-[#22C55E]/20 stroke-2 text-[#22C55E]" : "stroke-2"}`}
+                        />
+                        <span className="text-[10px]">Inventaris</span>
                     </Link>
                 )}
 
@@ -67,35 +77,33 @@ export default function BottomNav({ isSidebarOpen, toggleSidebar }: Props) {
                     auth.user?.role,
                 ) && (
                     <Link
-                        href="/zakat"
+                        href={
+                            auth.user?.role === "petugas_zakat"
+                                ? "/zakat/muzakki"
+                                : "/zakat"
+                        }
                         onClick={() => setIsProfileOpen(false)}
                         className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isActive("/zakat") ? "text-[#22C55E] font-semibold" : "text-slate-400 hover:text-slate-600 font-normal"}`}
                     >
                         <UserCircle
-                            className={`w-5 h-5 ${
-                                isActive("/zakat")
-                                    ? "fill-[#22C55E]/20 stroke-2 text-[#22C55E]"
-                                    : "stroke-2"
-                            }`}
+                            className={`w-5 h-5 ${isActive("/zakat") ? "fill-[#22C55E]/20 stroke-2 text-[#22C55E]" : "stroke-2"}`}
                         />
                         <span className="text-[10px]">Zakat</span>
                     </Link>
                 )}
 
-                <Link
-                    href="/laporan"
-                    onClick={() => setIsProfileOpen(false)}
-                    className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isActive("/laporan") ? "text-[#22C55E] font-semibold" : "text-slate-400 hover:text-slate-600 font-normal"}`}
-                >
-                    <FileText
-                        className={`w-5 h-5 ${
-                            isActive("/laporan")
-                                ? "fill-[#22C55E]/20 stroke-2 text-[#22C55E]"
-                                : "stroke-[1.5]"
-                        }`}
-                    />
-                    <span className="text-[10px]">Laporan</span>
-                </Link>
+                {["super_admin", "bendahara"].includes(auth.user?.role) && (
+                    <Link
+                        href="/laporan"
+                        onClick={() => setIsProfileOpen(false)}
+                        className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isActive("/laporan") ? "text-[#22C55E] font-semibold" : "text-slate-400 hover:text-slate-600 font-normal"}`}
+                    >
+                        <FileText
+                            className={`w-5 h-5 ${isActive("/laporan") ? "fill-[#22C55E]/20 stroke-2 text-[#22C55E]" : "stroke-[1.5]"}`}
+                        />
+                        <span className="text-[10px]">Laporan</span>
+                    </Link>
+                )}
 
                 <div className="relative flex flex-col items-center justify-center w-16 h-full">
                     <button

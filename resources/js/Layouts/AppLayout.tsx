@@ -134,110 +134,117 @@ export default function AppLayout({ title, children }: Props) {
                         Dashboard
                     </Link>
 
-                    {/* Kas Masjid & Inventaris (Admin & Bendahara only) */}
+                    {/* Kas Masjid (Admin & Bendahara) */}
                     {["super_admin", "bendahara"].includes(auth.user.role) && (
-                        <>
-                            <Link
-                                href="/kas"
-                                className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
-                                    isActive("/kas")
-                                        ? "text-emerald-700 font-semibold"
-                                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                                }`}
-                            >
-                                {isActive("/kas") && (
-                                    <motion.div
-                                        layoutId="sidebarActiveMenu"
-                                        className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
-                                        transition={{
-                                            type: "spring",
-                                            stiffness: 400,
-                                            damping: 30,
-                                        }}
-                                    />
-                                )}
-                                <Wallet
-                                    className={`w-5 h-5 mr-3 transition-colors ${isActive("/kas") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                        <Link
+                            href="/kas"
+                            className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                isActive("/kas")
+                                    ? "text-emerald-700 font-semibold"
+                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                            }`}
+                        >
+                            {isActive("/kas") && (
+                                <motion.div
+                                    layoutId="sidebarActiveMenu"
+                                    className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 400,
+                                        damping: 30,
+                                    }}
                                 />
-                                Kas Masjid
-                            </Link>
-
-                            <Link
-                                href="/inventaris"
-                                className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
-                                    isActive("/inventaris")
-                                        ? "text-emerald-700 font-semibold"
-                                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                                }`}
-                            >
-                                {isActive("/inventaris") && (
-                                    <motion.div
-                                        layoutId="sidebarActiveMenu"
-                                        className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
-                                        transition={{
-                                            type: "spring",
-                                            stiffness: 400,
-                                            damping: 30,
-                                        }}
-                                    />
-                                )}
-                                <Archive
-                                    className={`w-5 h-5 mr-3 transition-colors ${isActive("/inventaris") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
-                                />
-                                Inventaris
-                            </Link>
-                        </>
+                            )}
+                            <Wallet
+                                className={`w-5 h-5 mr-3 transition-colors ${isActive("/kas") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                            />
+                            Kas Masjid
+                        </Link>
                     )}
 
-                    <Link
-                        href="/agenda"
-                        className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
-                            isActive("/agenda")
-                                ? "text-emerald-700 font-semibold"
-                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                        }`}
-                    >
-                        {isActive("/agenda") && (
-                            <motion.div
-                                layoutId="sidebarActiveMenu"
-                                className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
-                                transition={{
-                                    type: "spring",
-                                    stiffness: 400,
-                                    damping: 30,
-                                }}
+                    {/* Inventaris (Admin & Sekretaris) */}
+                    {["super_admin", "sekretaris"].includes(auth.user.role) && (
+                        <Link
+                            href="/inventaris"
+                            className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                isActive("/inventaris")
+                                    ? "text-emerald-700 font-semibold"
+                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                            }`}
+                        >
+                            {isActive("/inventaris") && (
+                                <motion.div
+                                    layoutId="sidebarActiveMenu"
+                                    className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 400,
+                                        damping: 30,
+                                    }}
+                                />
+                            )}
+                            <Archive
+                                className={`w-5 h-5 mr-3 transition-colors ${isActive("/inventaris") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
                             />
-                        )}
-                        <Calendar
-                            className={`w-5 h-5 mr-3 transition-colors ${isActive("/agenda") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
-                        />
-                        Agenda
-                    </Link>
+                            Inventaris
+                        </Link>
+                    )}
 
-                    <Link
-                        href="/laporan"
-                        className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
-                            isActive("/laporan")
-                                ? "text-emerald-700 font-semibold"
-                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                        }`}
-                    >
-                        {isActive("/laporan") && (
-                            <motion.div
-                                layoutId="sidebarActiveMenu"
-                                className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
-                                transition={{
-                                    type: "spring",
-                                    stiffness: 400,
-                                    damping: 30,
-                                }}
+                    {/* Agenda (Super Admin) */}
+                    {["super_admin"].includes(auth.user.role) && (
+                        <Link
+                            href="/agenda"
+                            className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                isActive("/agenda")
+                                    ? "text-emerald-700 font-semibold"
+                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                            }`}
+                        >
+                            {isActive("/agenda") && (
+                                <motion.div
+                                    layoutId="sidebarActiveMenu"
+                                    className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 400,
+                                        damping: 30,
+                                    }}
+                                />
+                            )}
+                            <Calendar
+                                className={`w-5 h-5 mr-3 transition-colors ${isActive("/agenda") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
                             />
-                        )}
-                        <FileText
-                            className={`w-5 h-5 mr-3 transition-colors ${isActive("/laporan") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
-                        />
-                        Laporan
-                    </Link>
+                            Agenda
+                        </Link>
+                    )}
+
+                    {/* Laporan (Super Admin & Bendahara) */}
+                    {["super_admin", "bendahara"].includes(auth.user.role) && (
+                        <Link
+                            href="/laporan"
+                            className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                isActive("/laporan")
+                                    ? "text-emerald-700 font-semibold"
+                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                            }`}
+                        >
+                            {isActive("/laporan") && (
+                                <motion.div
+                                    layoutId="sidebarActiveMenu"
+                                    className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 400,
+                                        damping: 30,
+                                    }}
+                                />
+                            )}
+                            <FileText
+                                className={`w-5 h-5 mr-3 transition-colors ${isActive("/laporan") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                            />
+                            Laporan
+                        </Link>
+                    )}
 
                     {/* ZISWAF / Baitul Mal */}
                     {["super_admin", "bendahara", "petugas_zakat"].includes(
@@ -245,196 +252,302 @@ export default function AppLayout({ title, children }: Props) {
                     ) && (
                         <>
                             <div className="mt-6 mb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                                Penerimaan & ZISWAF
+                                {auth.user.role === "petugas_zakat"
+                                    ? "Manajemen Zakat"
+                                    : "Penerimaan & ZISWAF"}
                             </div>
 
-                            {/* Zakat Collapsible */}
-                            <div>
-                                <button
-                                    onClick={() => setIsZakatOpen(!isZakatOpen)}
-                                    className={`group relative z-10 w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
-                                        isActive("/zakat") && !isZakatOpen
-                                            ? "text-emerald-700 font-semibold"
-                                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                                    }`}
-                                >
-                                    {isActive("/zakat") && !isZakatOpen && (
-                                        <motion.div
-                                            layoutId="sidebarActiveMenu"
-                                            className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
-                                            transition={{
-                                                type: "spring",
-                                                stiffness: 400,
-                                                damping: 30,
-                                            }}
-                                        />
-                                    )}
-                                    <div className="flex items-center">
+                            {auth.user.role === "petugas_zakat" ? (
+                                <>
+                                    {/* Urutan datar khusus Petugas Zakat */}
+                                    <Link
+                                        href="/zakat/muzakki"
+                                        className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${isActive("/zakat/muzakki") ? "text-emerald-700 font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
+                                    >
+                                        {isActive("/zakat/muzakki") && (
+                                            <motion.div
+                                                layoutId="sidebarActiveMenu"
+                                                className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                                transition={{
+                                                    type: "spring",
+                                                    stiffness: 400,
+                                                    damping: 30,
+                                                }}
+                                            />
+                                        )}
                                         <UserCircle
-                                            className={`w-5 h-5 mr-3 transition-colors ${isActive("/zakat") && !isZakatOpen ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                                            className={`w-5 h-5 mr-3 transition-colors ${isActive("/zakat/muzakki") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
                                         />
-                                        Zakat
-                                    </div>
-                                    <ChevronRight
-                                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isZakatOpen ? "rotate-90" : ""}`}
-                                    />
-                                </button>
+                                        Data Muzakki
+                                    </Link>
+                                    <Link
+                                        href="/zakat/mustahiq"
+                                        className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${isActive("/zakat/mustahiq") ? "text-emerald-700 font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
+                                    >
+                                        {isActive("/zakat/mustahiq") && (
+                                            <motion.div
+                                                layoutId="sidebarActiveMenu"
+                                                className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                                transition={{
+                                                    type: "spring",
+                                                    stiffness: 400,
+                                                    damping: 30,
+                                                }}
+                                            />
+                                        )}
+                                        <UserCircle
+                                            className={`w-5 h-5 mr-3 transition-colors ${isActive("/zakat/mustahiq") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                                        />
+                                        Data Mustahiq
+                                    </Link>
+                                    <Link
+                                        href="/zakat/penerimaan"
+                                        className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${isActive("/zakat/penerimaan") ? "text-emerald-700 font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
+                                    >
+                                        {isActive("/zakat/penerimaan") && (
+                                            <motion.div
+                                                layoutId="sidebarActiveMenu"
+                                                className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                                transition={{
+                                                    type: "spring",
+                                                    stiffness: 400,
+                                                    damping: 30,
+                                                }}
+                                            />
+                                        )}
+                                        <UserCircle
+                                            className={`w-5 h-5 mr-3 transition-colors ${isActive("/zakat/penerimaan") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                                        />
+                                        Penerimaan
+                                    </Link>
+                                    <Link
+                                        href="/zakat/penyaluran"
+                                        className={`group relative z-10 flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${isActive("/zakat/penyaluran") ? "text-emerald-700 font-semibold" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
+                                    >
+                                        {isActive("/zakat/penyaluran") && (
+                                            <motion.div
+                                                layoutId="sidebarActiveMenu"
+                                                className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                                transition={{
+                                                    type: "spring",
+                                                    stiffness: 400,
+                                                    damping: 30,
+                                                }}
+                                            />
+                                        )}
+                                        <UserCircle
+                                            className={`w-5 h-5 mr-3 transition-colors ${isActive("/zakat/penyaluran") ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                                        />
+                                        Penyaluran
+                                    </Link>
+                                </>
+                            ) : (
+                                <>
+                                    {/* Zakat Collapsible (Admin & Bendahara) */}
+                                    <div>
+                                        <button
+                                            onClick={() =>
+                                                setIsZakatOpen(!isZakatOpen)
+                                            }
+                                            className={`group relative z-10 w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                                isActive("/zakat") &&
+                                                !isZakatOpen
+                                                    ? "text-emerald-700 font-semibold"
+                                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                            }`}
+                                        >
+                                            {isActive("/zakat") &&
+                                                !isZakatOpen && (
+                                                    <motion.div
+                                                        layoutId="sidebarActiveMenu"
+                                                        className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                                        transition={{
+                                                            type: "spring",
+                                                            stiffness: 400,
+                                                            damping: 30,
+                                                        }}
+                                                    />
+                                                )}
+                                            <div className="flex items-center">
+                                                <UserCircle
+                                                    className={`w-5 h-5 mr-3 transition-colors ${isActive("/zakat") && !isZakatOpen ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                                                />
+                                                Zakat
+                                            </div>
+                                            <ChevronRight
+                                                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isZakatOpen ? "rotate-90" : ""}`}
+                                            />
+                                        </button>
 
-                                <div
-                                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isZakatOpen ? "max-h-60 opacity-100 mt-1" : "max-h-0 opacity-0"}`}
-                                >
-                                    <div className="pl-11 pr-3 py-1 space-y-1 relative before:absolute before:inset-y-0 before:left-5 before:w-px before:bg-slate-200">
-                                        <Link
-                                            href="/zakat/muzakki"
-                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/muzakki") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                        <div
+                                            className={`overflow-hidden transition-all duration-300 ease-in-out ${isZakatOpen ? "max-h-60 opacity-100 mt-1" : "max-h-0 opacity-0"}`}
                                         >
-                                            {isActive("/zakat/muzakki") && (
-                                                <motion.div
-                                                    layoutId="sidebarActiveMenu"
-                                                    className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
-                                                    transition={{
-                                                        type: "spring",
-                                                        stiffness: 400,
-                                                        damping: 30,
-                                                    }}
-                                                />
-                                            )}
-                                            Muzakki
-                                        </Link>
-                                        <Link
-                                            href="/zakat/mustahiq"
-                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/mustahiq") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
-                                        >
-                                            {isActive("/zakat/mustahiq") && (
-                                                <motion.div
-                                                    layoutId="sidebarActiveMenu"
-                                                    className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
-                                                    transition={{
-                                                        type: "spring",
-                                                        stiffness: 400,
-                                                        damping: 30,
-                                                    }}
-                                                />
-                                            )}
-                                            Mustahiq
-                                        </Link>
-                                        <Link
-                                            href="/zakat/penerimaan"
-                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/penerimaan") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
-                                        >
-                                            {isActive("/zakat/penerimaan") && (
-                                                <motion.div
-                                                    layoutId="sidebarActiveMenu"
-                                                    className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
-                                                    transition={{
-                                                        type: "spring",
-                                                        stiffness: 400,
-                                                        damping: 30,
-                                                    }}
-                                                />
-                                            )}
-                                            Penerimaan
-                                        </Link>
-                                        <Link
-                                            href="/zakat/penyaluran"
-                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/penyaluran") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
-                                        >
-                                            {isActive("/zakat/penyaluran") && (
-                                                <motion.div
-                                                    layoutId="sidebarActiveMenu"
-                                                    className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
-                                                    transition={{
-                                                        type: "spring",
-                                                        stiffness: 400,
-                                                        damping: 30,
-                                                    }}
-                                                />
-                                            )}
-                                            Penyaluran
-                                        </Link>
+                                            <div className="pl-11 pr-3 py-1 space-y-1 relative before:absolute before:inset-y-0 before:left-5 before:w-px before:bg-slate-200">
+                                                <Link
+                                                    href="/zakat/muzakki"
+                                                    className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/muzakki") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                                >
+                                                    {isActive(
+                                                        "/zakat/muzakki",
+                                                    ) && (
+                                                        <motion.div
+                                                            layoutId="sidebarActiveMenu"
+                                                            className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
+                                                            transition={{
+                                                                type: "spring",
+                                                                stiffness: 400,
+                                                                damping: 30,
+                                                            }}
+                                                        />
+                                                    )}
+                                                    Muzakki
+                                                </Link>
+                                                <Link
+                                                    href="/zakat/mustahiq"
+                                                    className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/mustahiq") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                                >
+                                                    {isActive(
+                                                        "/zakat/mustahiq",
+                                                    ) && (
+                                                        <motion.div
+                                                            layoutId="sidebarActiveMenu"
+                                                            className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
+                                                            transition={{
+                                                                type: "spring",
+                                                                stiffness: 400,
+                                                                damping: 30,
+                                                            }}
+                                                        />
+                                                    )}
+                                                    Mustahiq
+                                                </Link>
+                                                <Link
+                                                    href="/zakat/penerimaan"
+                                                    className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/penerimaan") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                                >
+                                                    {isActive(
+                                                        "/zakat/penerimaan",
+                                                    ) && (
+                                                        <motion.div
+                                                            layoutId="sidebarActiveMenu"
+                                                            className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
+                                                            transition={{
+                                                                type: "spring",
+                                                                stiffness: 400,
+                                                                damping: 30,
+                                                            }}
+                                                        />
+                                                    )}
+                                                    Penerimaan
+                                                </Link>
+                                                <Link
+                                                    href="/zakat/penyaluran"
+                                                    className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/zakat/penyaluran") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                                >
+                                                    {isActive(
+                                                        "/zakat/penyaluran",
+                                                    ) && (
+                                                        <motion.div
+                                                            layoutId="sidebarActiveMenu"
+                                                            className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
+                                                            transition={{
+                                                                type: "spring",
+                                                                stiffness: 400,
+                                                                damping: 30,
+                                                            }}
+                                                        />
+                                                    )}
+                                                    Penyaluran
+                                                </Link>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
 
-                            {/* Tromol Collapsible */}
-                            <div>
-                                <button
-                                    onClick={() =>
-                                        setIsTromolOpen(!isTromolOpen)
-                                    }
-                                    className={`group relative z-10 w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
-                                        isActive("/tromol") && !isTromolOpen
-                                            ? "text-emerald-700 font-semibold"
-                                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                                    }`}
-                                >
-                                    {isActive("/tromol") && !isTromolOpen && (
-                                        <motion.div
-                                            layoutId="sidebarActiveMenu"
-                                            className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
-                                            transition={{
-                                                type: "spring",
-                                                stiffness: 400,
-                                                damping: 30,
-                                            }}
-                                        />
-                                    )}
-                                    <div className="flex items-center">
-                                        <Box
-                                            className={`w-5 h-5 mr-3 transition-colors ${isActive("/tromol") && !isTromolOpen ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
-                                        />
-                                        Tromol
-                                    </div>
-                                    <ChevronRight
-                                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isTromolOpen ? "rotate-90" : ""}`}
-                                    />
-                                </button>
-                                <div
-                                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isTromolOpen ? "max-h-32 opacity-100 mt-1" : "max-h-0 opacity-0"}`}
-                                >
-                                    <div className="pl-11 pr-3 py-1 space-y-1 relative before:absolute before:inset-y-0 before:left-5 before:w-px before:bg-slate-200">
-                                        <Link
-                                            href="/tromol"
-                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${url === "/tromol" ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                    {/* Tromol Collapsible (Admin & Bendahara only) */}
+                                    <div>
+                                        <button
+                                            onClick={() =>
+                                                setIsTromolOpen(!isTromolOpen)
+                                            }
+                                            className={`group relative z-10 w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                                isActive("/tromol") &&
+                                                !isTromolOpen
+                                                    ? "text-emerald-700 font-semibold"
+                                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                            }`}
                                         >
-                                            {url === "/tromol" && (
-                                                <motion.div
-                                                    layoutId="sidebarActiveMenu"
-                                                    className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
-                                                    transition={{
-                                                        type: "spring",
-                                                        stiffness: 400,
-                                                        damping: 30,
-                                                    }}
+                                            {isActive("/tromol") &&
+                                                !isTromolOpen && (
+                                                    <motion.div
+                                                        layoutId="sidebarActiveMenu"
+                                                        className="absolute inset-0 bg-emerald-50 rounded-xl shadow-sm shadow-emerald-100/50 -z-10"
+                                                        transition={{
+                                                            type: "spring",
+                                                            stiffness: 400,
+                                                            damping: 30,
+                                                        }}
+                                                    />
+                                                )}
+                                            <div className="flex items-center">
+                                                <Box
+                                                    className={`w-5 h-5 mr-3 transition-colors ${isActive("/tromol") && !isTromolOpen ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"}`}
                                                 />
-                                            )}
-                                            Daftar Kotak
-                                        </Link>
-                                        <Link
-                                            href="/tromol/history"
-                                            className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/tromol/history") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                                Tromol
+                                            </div>
+                                            <ChevronRight
+                                                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isTromolOpen ? "rotate-90" : ""}`}
+                                            />
+                                        </button>
+                                        <div
+                                            className={`overflow-hidden transition-all duration-300 ease-in-out ${isTromolOpen ? "max-h-32 opacity-100 mt-1" : "max-h-0 opacity-0"}`}
                                         >
-                                            {isActive("/tromol/history") && (
-                                                <motion.div
-                                                    layoutId="sidebarActiveMenu"
-                                                    className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
-                                                    transition={{
-                                                        type: "spring",
-                                                        stiffness: 400,
-                                                        damping: 30,
-                                                    }}
-                                                />
-                                            )}
-                                            Riwayat
-                                        </Link>
+                                            <div className="pl-11 pr-3 py-1 space-y-1 relative before:absolute before:inset-y-0 before:left-5 before:w-px before:bg-slate-200">
+                                                <Link
+                                                    href="/tromol"
+                                                    className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${url === "/tromol" ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                                >
+                                                    {url === "/tromol" && (
+                                                        <motion.div
+                                                            layoutId="sidebarActiveMenu"
+                                                            className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
+                                                            transition={{
+                                                                type: "spring",
+                                                                stiffness: 400,
+                                                                damping: 30,
+                                                            }}
+                                                        />
+                                                    )}
+                                                    Daftar Kotak
+                                                </Link>
+                                                <Link
+                                                    href="/tromol/history"
+                                                    className={`block px-3 py-2 text-sm rounded-lg transition-colors relative z-10 ${isActive("/tromol/history") ? "text-emerald-700 font-semibold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+                                                >
+                                                    {isActive(
+                                                        "/tromol/history",
+                                                    ) && (
+                                                        <motion.div
+                                                            layoutId="sidebarActiveMenu"
+                                                            className="absolute inset-0 bg-emerald-50 rounded-lg -z-10"
+                                                            transition={{
+                                                                type: "spring",
+                                                                stiffness: 400,
+                                                                damping: 30,
+                                                            }}
+                                                        />
+                                                    )}
+                                                    Riwayat
+                                                </Link>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
+                                </>
+                            )}
                         </>
                     )}
 
-                    {/* Pengaturan hanya Super Admin & Bendahara */}
-                    {["super_admin", "bendahara"].includes(auth.user.role) && (
+                    {/* Pengaturan hanya Super Admin */}
+                    {["super_admin"].includes(auth.user.role) && (
                         <>
                             <div className="mt-6 mb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                                 Sistem
@@ -495,10 +608,10 @@ export default function AppLayout({ title, children }: Props) {
                 {/* Space Placeholder to prevent content jump due to fixed header */}
 
                 {/* Mobile Header (Expandable Island) */}
-                <div className="md:hidden shrink-0 relative z-50 mb-4 h-14 mt-4 mx-4">
+                <div className="md:hidden shrink-0 relative z-[100] mb-4 h-14 mt-4 mx-4">
                     {/* Dark Overlay placed behind everything when menu is open */}
                     <div
-                        className={`fixed inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300 z-40 ${
+                        className={`fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 z-[90] ${
                             isSidebarOpen
                                 ? "opacity-100 pointer-events-auto"
                                 : "opacity-0 pointer-events-none"
@@ -507,7 +620,7 @@ export default function AppLayout({ title, children }: Props) {
                     />
 
                     {/* Fixed Island Header Container */}
-                    <div className="fixed top-4 left-5 right-5 z-50 bg-white/95 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200/50 overflow-hidden flex flex-col transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] rounded-3xl">
+                    <div className="fixed top-4 left-5 right-5 z-[100] bg-white/95 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200/50 overflow-hidden flex flex-col transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] rounded-3xl">
                         {/* Always visible header portion */}
                         <div className="flex items-center justify-between h-14 px-5 bg-transparent shrink-0">
                             <span className="text-xl font-extrabold text-slate-900 tracking-tight leading-tight font-poppins">
@@ -551,35 +664,70 @@ export default function AppLayout({ title, children }: Props) {
                                         href: "/kas",
                                         label: "Kas Masjid",
                                         icon: Wallet,
-                                        roles: ["super_admin", "bendahara"],
+                                        roles: ["bendahara"],
                                     },
                                     {
                                         href: "/inventaris",
                                         label: "Inventaris",
                                         icon: Archive,
-                                        roles: ["super_admin", "bendahara"],
+                                        roles: ["super_admin", "sekretaris"],
                                     },
                                     {
                                         href: "/agenda",
                                         label: "Agenda",
                                         icon: Calendar,
-                                        roles: "all",
+                                        roles: ["super_admin"],
+                                    },
+                                    {
+                                        href: "/laporan",
+                                        label: "Laporan",
+                                        icon: FileText,
+                                        roles: ["bendahara"],
+                                    },
+                                    {
+                                        href: "/zakat",
+                                        label: "Zakat",
+                                        icon: UserCircle,
+                                        roles: ["bendahara"],
                                     },
                                     {
                                         href: "/tromol",
                                         label: "Kotak Tromol",
                                         icon: Box,
-                                        roles: [
-                                            "super_admin",
-                                            "bendahara",
-                                            "petugas_zakat",
-                                        ],
+                                        roles: ["super_admin", "bendahara"],
                                     },
+
+                                    // Mobile specific for petugas zakat (Flattened menu)
+                                    {
+                                        href: "/zakat/muzakki",
+                                        label: "Data Muzakki",
+                                        icon: UserCircle,
+                                        roles: ["petugas_zakat"],
+                                    },
+                                    {
+                                        href: "/zakat/mustahiq",
+                                        label: "Data Mustahiq",
+                                        icon: UserCircle,
+                                        roles: ["petugas_zakat"],
+                                    },
+                                    {
+                                        href: "/zakat/penerimaan",
+                                        label: "Penerimaan",
+                                        icon: UserCircle,
+                                        roles: ["petugas_zakat"],
+                                    },
+                                    {
+                                        href: "/zakat/penyaluran",
+                                        label: "Penyaluran",
+                                        icon: UserCircle,
+                                        roles: ["petugas_zakat"],
+                                    },
+
                                     {
                                         href: "/settings",
                                         label: "Pengaturan",
                                         icon: Settings,
-                                        roles: ["super_admin", "bendahara"],
+                                        roles: ["super_admin"],
                                     },
                                     {
                                         href: "/users",
@@ -589,12 +737,8 @@ export default function AppLayout({ title, children }: Props) {
                                     },
                                 ].map((item, index) => {
                                     // Check Role
-                                    if (
-                                        item.roles !== "all" &&
-                                        !item.roles.includes(auth.user.role)
-                                    ) {
+                                    if (!item.roles.includes(auth.user.role))
                                         return null;
-                                    }
 
                                     const active = isActive(item.href);
                                     const Icon = item.icon;
