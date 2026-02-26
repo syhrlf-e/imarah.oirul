@@ -42,7 +42,7 @@ class LoginRequest extends FormRequest
             'email' => [
                 'required', 
                 'string', 
-                'email:rfc,dns', 
+                'email:rfc', 
                 'max:254', 
                 'regex:/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/'
             ],
