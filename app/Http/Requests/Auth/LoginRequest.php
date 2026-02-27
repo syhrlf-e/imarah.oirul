@@ -81,26 +81,6 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        // Single Device Login: Cek apakah akun sudah memiliki sesi aktif di perangkat lain
-        $user = Auth::user();
-        $currentSessionId = $this->session()->getId();
-
-        $activeSessions = DB::table('sessions')
-            ->where('user_id', $user->id)
-            ->where('id', '!=', $currentSessionId)
-            ->count();
-
-        if ($activeSessions > 0) {
-            // Logout user yang baru saja diauthentikasi agar tidak masuk
-            Auth::guard('web')->logout();
-
-            RateLimiter::hit($this->throttleKey());
-
-            throw ValidationException::withMessages([
-                'email' => 'Akun ini sedang aktif di perangkat lain. Silakan logout terlebih dahulu.',
-            ]);
-        }
-
         RateLimiter::clear($this->throttleKey());
     }
 
