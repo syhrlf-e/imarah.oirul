@@ -41,8 +41,12 @@ class AuthenticatedSessionController extends Controller
         $lifetime       = config('session.lifetime') * 60;
         $expirationTime = now()->timestamp - $lifetime;
 
+        // Hindari mendeteksi sesi yang baru saja dibuat oleh request authenticate() ini sendiri
+        $currentSessionId = $request->session()->getId();
+
         $hasActiveSession = DB::table('sessions')
             ->where('user_id', $user->id)
+            ->where('id', '!=', $currentSessionId)
             ->where('last_activity', '>=', $expirationTime)
             ->exists();
 
