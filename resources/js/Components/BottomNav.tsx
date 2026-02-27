@@ -118,7 +118,7 @@ export default function BottomNav({ isSidebarOpen, toggleSidebar }: Props) {
     };
 
     return (
-        <nav className="flex md:hidden fixed bottom-0 left-0 right-0 h-[68px] bg-white rounded-t-[20px] shadow-[0_-2px_12px_rgba(0,0,0,0.08)] z-50">
+        <nav className="flex md:hidden fixed bottom-4 left-4 right-4 h-[68px] bg-white/95 backdrop-blur-md rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-200/50 z-50">
             <div className="flex justify-around items-center w-full h-full relative px-2">
                 {visibleItems.map((item) => {
                     const isActive =

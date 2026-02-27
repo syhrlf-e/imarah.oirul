@@ -120,7 +120,7 @@ export default function AppLayout({ title, children }: Props) {
                     toggleSidebar={toggleSidebar}
                 />
 
-                <div className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-20 md:p-6 no-scrollbar md:scrollbar-default relative flex flex-col">
+                <div className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-28 md:p-6 no-scrollbar md:scrollbar-default relative flex flex-col">
                     <AnimatePresence
                         custom={direction}
                         mode="popLayout"
