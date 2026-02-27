@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -85,11 +86,14 @@ class AuthenticatedSessionController extends Controller
                 // Redirect HP B ke halaman waiting dengan token challenge
                 return redirect()->route('login.challenge.waiting', ['token' => $token]);
             } catch (\Throwable $e) {
-                // Berikan response 506 custom untuk menangkap detail error di sisi Frontend/Console
-                return response()->json([
-                    'message' => 'WEBSOCKET_BROADCAST_ERROR',
-                    'error'   => $e->getMessage()
-                ], 506);
+                // Log error Reverb dan logout HP B, lalu redirect ke waiting page supaya challenge tetap berjalan
+                Log::error('LoginChallenge broadcast failed: ' . $e->getMessage());
+
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect()->route('login.challenge.waiting', ['token' => $token]);
             }
         }
 
