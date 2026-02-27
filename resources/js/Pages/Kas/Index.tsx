@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Head, Link, router, useForm } from "@inertiajs/react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation, PanInfo } from "framer-motion";
 import AppLayout from "@/Layouts/AppLayout";
 import { PaginatedResponse, Transaction, User } from "@/types";
 import { formatRupiah, parseRupiah } from "@/utils/formatter";
@@ -23,6 +23,8 @@ import {
     ChevronDown,
     Activity,
     Save,
+    Clock,
+    XCircle,
 } from "lucide-react";
 import FilterBar from "@/Components/FilterBar";
 import PageHeader from "@/Components/PageHeader";
@@ -43,6 +45,128 @@ const CATEGORY_OPTIONS = [
     { value: "gaji", label: "Gaji" },
     { value: "lainnya", label: "Lainnya" },
 ];
+
+function MobileSwipeCard({
+    transaction,
+    activeSwipeId,
+    setActiveSwipeId,
+    isBendaharaOrAdmin,
+    isSuperAdmin,
+    formatDateMobile,
+    handleVerify,
+    handleDelete,
+}: {
+    transaction: Transaction;
+    activeSwipeId: string | null;
+    setActiveSwipeId: (id: string | null) => void;
+    isBendaharaOrAdmin: boolean;
+    isSuperAdmin: boolean;
+    formatDateMobile: (date: string) => string;
+    handleVerify: (id: string) => void;
+    handleDelete: (id: string) => void;
+}) {
+    const hasVerify = isBendaharaOrAdmin && !transaction.verified_at;
+    const hasDelete = isSuperAdmin;
+    const hasActions = hasVerify || hasDelete;
+
+    // Width actions panel per button
+    const dragLimit = hasVerify && hasDelete ? -120 : hasActions ? -72 : 0;
+    const controls = useAnimation();
+
+    useEffect(() => {
+        if (activeSwipeId !== transaction.id) {
+            controls.start({ x: 0 });
+        }
+    }, [activeSwipeId, transaction.id, controls]);
+
+    const handleDragEnd = (_event: any, info: PanInfo) => {
+        if (!hasActions) return;
+
+        const dragThreshold = -30;
+        if (info.offset.x < dragThreshold || info.velocity.x < -200) {
+            controls.start({ x: dragLimit });
+            setActiveSwipeId(transaction.id);
+        } else {
+            controls.start({ x: 0 });
+            if (activeSwipeId === transaction.id) {
+                setActiveSwipeId(null);
+            }
+        }
+    };
+
+    return (
+        <div className="relative w-full overflow-hidden rounded-2xl shadow-sm bg-slate-50 border border-slate-100 overflow-x-hidden">
+            {/* Background Actions (Tersembunyi di bawah panel drag) */}
+            {hasActions && (
+                <div className="absolute inset-y-0 right-0 flex items-center px-4 space-x-2 bg-slate-50 shadow-[inset_4px_0_8px_-4px_rgba(0,0,0,0.05)] border-l border-slate-100">
+                    {hasVerify && (
+                        <button
+                            onClick={() => handleVerify(transaction.id)}
+                            className="w-10 h-10 flex items-center justify-center bg-green-100 text-green-600 rounded-xl active:bg-green-200 transition-colors"
+                            title="Verifikasi"
+                        >
+                            <CheckCircle size={18} />
+                        </button>
+                    )}
+                    {hasDelete && (
+                        <button
+                            onClick={() => handleDelete(transaction.id)}
+                            className="w-10 h-10 flex items-center justify-center bg-red-100 text-red-600 rounded-xl active:bg-red-200 transition-colors"
+                            title="Hapus"
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {/* Foreground Card */}
+            <motion.div
+                drag={hasActions ? "x" : false}
+                dragConstraints={{ left: dragLimit, right: 0 }}
+                dragElastic={0.1}
+                onDragEnd={handleDragEnd}
+                animate={controls}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="relative z-10 w-full bg-white px-4 py-3 flex items-center justify-between"
+            >
+                {/* Kolom kiri */}
+                <div className="flex flex-col gap-0.5 max-w-[55%]">
+                    <span className="text-sm font-semibold text-slate-900 capitalize truncate">
+                        {transaction.category.replace(/_/g, " ")}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                        {formatDateMobile(transaction.created_at)}
+                    </span>
+                </div>
+
+                {/* Kolom kanan */}
+                <div className="flex flex-col gap-0.5 items-end pl-2">
+                    <span
+                        className={`text-sm font-semibold whitespace-nowrap ${
+                            transaction.type === "in"
+                                ? "text-green-500"
+                                : "text-red-500"
+                        }`}
+                    >
+                        {transaction.type === "in" ? "+" : "-"}
+                        {formatRupiah(transaction.amount)}
+                    </span>
+                    <div className="flex items-center gap-1 mt-[1px]">
+                        <span className="text-xs text-slate-400 capitalize">
+                            {transaction.payment_method || "-"}
+                        </span>
+                        {transaction.verified_at ? (
+                            <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+                        ) : (
+                            <Clock className="w-3.5 h-3.5 text-amber-500" />
+                        )}
+                    </div>
+                </div>
+            </motion.div>
+        </div>
+    );
+}
 
 interface Props {
     transactions: PaginatedResponse<Transaction>;
@@ -83,6 +207,7 @@ export default function KasIndex({
         filters?.sort === "terlama" ? "terlama" : "terbaru",
     );
     const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [activeSwipeId, setActiveSwipeId] = useState<string | null>(null);
 
     // --- Single filter function — always server-side partial reload ---
     const applyFilters = useCallback(
@@ -112,6 +237,68 @@ export default function KasIndex({
         },
         [search, typeFilter, categoryFilter, sortOrder],
     );
+
+    const [page, setPage] = useState(1);
+    const [allTransactions, setAllTransactions] = useState(transactions.data);
+    const [hasMore, setHasMore] = useState(transactions.next_page_url !== null);
+    const loaderRef = useRef<HTMLDivElement | null>(null);
+
+    // Reset list saat transactions props berganti (akibat search atau filter diubah dan kembali ke page 1)
+    useEffect(() => {
+        if (transactions.current_page === 1) {
+            setAllTransactions(transactions.data);
+            setPage(1);
+            setHasMore(transactions.next_page_url !== null);
+        }
+    }, [transactions]);
+
+    const loadMore = useCallback(() => {
+        if (!hasMore) return;
+
+        router.get(
+            route("kas.index"),
+            {
+                search,
+                type: typeFilter,
+                category: categoryFilter,
+                sort: sortOrder,
+                page: page + 1,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                only: ["transactions"],
+                onSuccess: (pageProps) => {
+                    const pageData = pageProps.props
+                        .transactions as PaginatedResponse<Transaction>;
+                    setAllTransactions((prev) => {
+                        const existingIds = new Set(prev.map((t) => t.id));
+                        const filtered = pageData.data.filter(
+                            (t) => !existingIds.has(t.id),
+                        );
+                        return [...prev, ...filtered];
+                    });
+                    setPage((prev) => prev + 1);
+                    setHasMore(pageData.next_page_url !== null);
+                },
+            },
+        );
+    }, [page, hasMore, search, typeFilter, categoryFilter, sortOrder]);
+
+    // IntersectionObserver untuk deteksi scroll ke bawah
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && hasMore) {
+                    loadMore();
+                }
+            },
+            { threshold: 0.1 },
+        );
+
+        if (loaderRef.current) observer.observe(loaderRef.current);
+        return () => observer.disconnect();
+    }, [hasMore, loadMore]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
@@ -217,6 +404,11 @@ export default function KasIndex({
             currency: "IDR",
             minimumFractionDigits: 0,
         }).format(amount || 0);
+    };
+
+    const formatDateMobile = (dateString: string) => {
+        const d = new Date(dateString);
+        return `${d.toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} • ${d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }).replace(":", ".")}`;
     };
 
     const getMonthName = (monthNumber: string | number) => {
@@ -394,8 +586,46 @@ export default function KasIndex({
                 </button>
             </FilterBar>
 
+            {/* Mobile Transaction List */}
+            <div className="flex flex-col gap-2 md:hidden">
+                {allTransactions.map((transaction) => (
+                    <MobileSwipeCard
+                        key={transaction.id}
+                        transaction={transaction}
+                        activeSwipeId={activeSwipeId}
+                        setActiveSwipeId={setActiveSwipeId}
+                        isBendaharaOrAdmin={isBendaharaOrAdmin}
+                        isSuperAdmin={isSuperAdmin}
+                        formatDateMobile={formatDateMobile}
+                        handleVerify={handleVerify}
+                        handleDelete={handleDelete}
+                    />
+                ))}
+
+                {allTransactions.length === 0 && (
+                    <div className="flex flex-col items-center justify-center text-slate-400 py-8 bg-white rounded-2xl shadow-sm border border-slate-100 mt-2">
+                        <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                            <Search className="w-6 h-6 text-slate-300" />
+                        </div>
+                        <p className="font-medium text-slate-600 text-sm">
+                            Belum ada data transaksi
+                        </p>
+                    </div>
+                )}
+
+                {/* Loader Ref for Infinite Scroll */}
+                <div
+                    ref={loaderRef}
+                    className="py-2 flex justify-center h-10 shrink-0"
+                >
+                    {hasMore && (
+                        <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                    )}
+                </div>
+            </div>
+
             <DataTable
-                className="flex-1 min-h-[400px]"
+                className="hidden md:flex flex-1 min-h-[400px]"
                 tableFixed
                 columns={
                     [
@@ -548,9 +778,9 @@ export default function KasIndex({
                 }
             />
 
-            {/* Pagination - Muncul dinamis hanya jika lebih dari 1 halaman */}
+            {/* Pagination Desktop - Muncul dinamis hanya jika lebih dari 1 halaman */}
             {transactions.last_page > 1 && (
-                <div className="px-6 py-4 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 mt-2 shrink-0">
+                <div className="hidden md:flex px-6 py-4 bg-white rounded-2xl shadow-sm border border-slate-200 flex-col sm:flex-row items-center justify-between gap-3 mt-2 shrink-0">
                     {/* Info */}
                     <span className="text-sm text-slate-500">
                         <span className="font-semibold text-slate-800">

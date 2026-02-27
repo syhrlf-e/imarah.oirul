@@ -58,7 +58,7 @@ export default function KasSummaryCards({
                 {loading ? (
                     <Skeleton className="h-8 w-32 mt-auto" />
                 ) : (
-                    <h4 className="text-2xl font-bold text-slate-900 mt-auto">
+                    <h4 className="text-xl md:text-2xl font-bold text-slate-900 mt-auto">
                         {formatter(totalSaldo)}
                     </h4>
                 )}
@@ -82,7 +82,7 @@ export default function KasSummaryCards({
                 {loading ? (
                     <Skeleton className="h-6 w-24 mt-auto" />
                 ) : (
-                    <h4 className="text-lg md:text-2xl font-bold text-emerald-500 md:text-slate-900 mt-auto">
+                    <h4 className="text-base md:text-2xl font-semibold md:font-bold text-green-500 md:text-slate-900 mt-auto">
                         {formatter(pemasukanBulanIni)}
                     </h4>
                 )}
@@ -106,7 +106,7 @@ export default function KasSummaryCards({
                 {loading ? (
                     <Skeleton className="h-6 w-24 mt-auto" />
                 ) : (
-                    <h4 className="text-lg md:text-2xl font-bold text-red-500 md:text-slate-900 mt-auto">
+                    <h4 className="text-base md:text-2xl font-semibold md:font-bold text-red-500 md:text-slate-900 mt-auto">
                         {formatter(pengeluaranBulanIni)}
                     </h4>
                 )}
@@ -136,7 +136,7 @@ export default function KasSummaryCards({
                         <Skeleton className="h-6 w-24 mt-auto" />
                     ) : (
                         <h4
-                            className={`text-lg md:text-2xl font-bold mt-auto ${isPositive ? "text-blue-600" : "text-orange-600"}`}
+                            className={`text-base md:text-2xl font-semibold md:font-bold mt-auto ${isPositive ? "text-blue-600" : "text-orange-600"}`}
                         >
                             {surplusDefisit! > 0 ? "+" : ""}
                             {formatter(surplusDefisit!)}

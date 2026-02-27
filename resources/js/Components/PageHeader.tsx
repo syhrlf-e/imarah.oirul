@@ -21,20 +21,20 @@ export default function PageHeader({
 }: PageHeaderProps) {
     return (
         <div
-            className={`mb-6 md:mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:px-6 ${className}`}
+            className={`mb-6 md:mb-8 flex flex-row md:flex-row items-center md:items-end justify-between gap-4 px-0 md:px-6 ${className}`}
         >
-            <div className="px-2 md:px-0">
-                <h1 className="text-xl md:text-2xl font-semibold text-slate-900 tracking-tight">
+            <div className="flex-1">
+                <h1 className="text-xl md:text-2xl font-bold md:font-semibold text-slate-900 tracking-tight">
                     {title}
                 </h1>
                 {description && (
-                    <p className="text-sm text-slate-500 mt-1">{description}</p>
+                    <p className="hidden md:block text-sm text-slate-500 mt-1">
+                        {description}
+                    </p>
                 )}
             </div>
             {children && (
-                <div className="flex items-center gap-2 self-end md:self-auto px-2 md:px-0">
-                    {children}
-                </div>
+                <div className="flex items-center gap-2">{children}</div>
             )}
         </div>
     );
