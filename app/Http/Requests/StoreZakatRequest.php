@@ -23,7 +23,7 @@ class StoreZakatRequest extends FormRequest
             'nominal_per_jiwa' => 'required_if:type,fitrah|integer|min:1',
             'donatur_id' => 'required|exists:donaturs,id',
             'payment_method' => 'required|in:tunai,transfer,qris',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:500|regex:/^[a-zA-Z0-9\s\-\.,]+$/',
         ];
     }
 }

@@ -283,7 +283,7 @@ export default function KasIndex({
                     } as React.ChangeEvent<HTMLInputElement>)
                 }
                 addon={
-                    <div className="flex items-center gap-1.5 shrink-0 bg-slate-100 rounded-xl p-1 relative">
+                    <div className="flex items-center justify-between md:justify-start gap-1 p-1 bg-slate-100 rounded-xl w-full">
                         {(
                             [
                                 { value: "", label: "Semua" },
@@ -295,7 +295,7 @@ export default function KasIndex({
                                 key={opt.value}
                                 type="button"
                                 onClick={() => handleTypeChange(opt.value)}
-                                className={`relative px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors z-10 ${
+                                className={`relative flex-1 md:flex-none px-3 py-1.5 md:px-3.5 rounded-lg text-sm font-medium transition-colors z-10 text-center ${
                                     typeFilter === opt.value
                                         ? "text-green-700"
                                         : "text-slate-500 hover:text-slate-700"
@@ -303,7 +303,7 @@ export default function KasIndex({
                             >
                                 {typeFilter === opt.value && (
                                     <motion.div
-                                        layoutId="activeFilterTab"
+                                        layoutId="activeFilterKasTab"
                                         className="absolute inset-0 bg-white border border-green-500 rounded-lg shadow-sm -z-10"
                                         transition={{
                                             type: "spring",
@@ -331,18 +331,17 @@ export default function KasIndex({
                         onClick={() =>
                             setIsCategoryFilterOpen(!isCategoryFilterOpen)
                         }
-                        className="relative z-50 inline-flex items-center justify-between w-full sm:w-[200px] px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                        className="relative z-50 inline-flex items-center justify-center md:justify-between w-12 sm:w-14 md:w-[200px] px-0 md:px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                        title="Filter Kategori"
                     >
-                        <span className="flex items-center">
-                            <Filter className="w-4 h-4 mr-2 text-slate-400 shrink-0" />
-                            <span className="truncate">
-                                {CATEGORY_OPTIONS.find(
-                                    (opt) => opt.value === categoryFilter,
-                                )?.label || "Semua Kategori"}
-                            </span>
+                        <Filter className="w-4 h-4 md:mr-2 text-slate-500 shrink-0" />
+                        <span className="hidden md:inline truncate">
+                            {CATEGORY_OPTIONS.find(
+                                (opt) => opt.value === categoryFilter,
+                            )?.label || "Semua Kategori"}
                         </span>
                         <ChevronDown
-                            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ml-2 shrink-0 ${isCategoryFilterOpen ? "rotate-180" : ""}`}
+                            className={`hidden md:block w-4 h-4 text-slate-400 transition-transform duration-200 ml-2 shrink-0 ${isCategoryFilterOpen ? "rotate-180" : ""}`}
                         />
                     </button>
                     <AnimatePresence>
@@ -352,7 +351,7 @@ export default function KasIndex({
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 10 }}
                                 transition={{ duration: 0.15 }}
-                                className="absolute right-0 sm:right-auto sm:left-0 mt-2 w-full sm:w-56 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-[60] p-1"
+                                className="absolute right-[-2.5rem] sm:right-auto sm:left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-[60] p-1"
                             >
                                 <div className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200">
                                     {CATEGORY_OPTIONS.map((opt) => (
@@ -385,10 +384,13 @@ export default function KasIndex({
                         setSortOrder(newSort);
                         applyFilters({ sort: newSort, page: 1 });
                     }}
-                    className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer shrink-0"
+                    className="inline-flex items-center justify-center w-12 sm:w-14 md:w-auto px-0 md:px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer shrink-0"
+                    title={sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
                 >
-                    <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-400" />
-                    {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
+                    <SlidersHorizontal className="w-4 h-4 md:mr-2 text-slate-500" />
+                    <span className="hidden md:inline">
+                        {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
+                    </span>
                 </button>
             </FilterBar>
 

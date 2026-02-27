@@ -85,23 +85,33 @@ class DashboardController extends Controller
             $sixMonthsAgo = $now->copy()->subMonths(5)->startOfMonth();
             $chartTransactions = Transaction::whereIn('category', $kasCategories)
                 ->where('created_at', '>=', $sixMonthsAgo)
-                ->select('type', 'amount', 'created_at')
+                ->selectRaw('
+                    EXTRACT(YEAR FROM created_at) as year,
+                    EXTRACT(MONTH FROM created_at) as month,
+                    type,
+                    SUM(amount) as total
+                ')
+                ->groupByRaw('EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at), type')
                 ->get();
 
             $chartData = [];
             for ($i = 5; $i >= 0; $i--) {
-                $monthStart = $now->copy()->subMonths($i)->startOfMonth();
-                $monthEnd = $now->copy()->subMonths($i)->endOfMonth();
+                $monthObj = $now->copy()->subMonths($i);
+                $year = $monthObj->year;
+                $month = $monthObj->month;
 
-                $monthlyData = $chartTransactions->filter(function ($t) use ($monthStart, $monthEnd) {
-                    return $t->created_at >= $monthStart && $t->created_at <= $monthEnd;
-                });
+                $income = $chartTransactions->where('year', $year)
+                                            ->where('month', $month)
+                                            ->where('type', 'in')
+                                            ->sum('total');
 
-                $income = $monthlyData->where('type', 'in')->sum('amount');
-                $expense = $monthlyData->where('type', 'out')->sum('amount');
+                $expense = $chartTransactions->where('year', $year)
+                                             ->where('month', $month)
+                                             ->where('type', 'out')
+                                             ->sum('total');
 
                 $chartData[] = [
-                    'name' => $monthStart->translatedFormat('M y'),
+                    'name' => $monthObj->translatedFormat('M y'),
                     'pemasukan' => (float) $income,
                     'pengeluaran' => (float) $expense,
                 ];

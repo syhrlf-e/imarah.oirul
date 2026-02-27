@@ -80,7 +80,12 @@ class MuzakkiController extends Controller
         $this->authorize('create', Donatur::class);
 
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+            'file' => [
+                'required',
+                'file',
+                'mimetypes:application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain',
+                'max:5120'
+            ],
         ]);
 
         $import = new MuzakkiImport();

@@ -18,4 +18,13 @@ class Mustahiq extends Model
         'address',
         'description',
     ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'address',
+    ];
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Response;
 use Illuminate\Support\Carbon;
 use App\Exports\LaporanBulananExport;
@@ -14,8 +15,7 @@ class ReportController extends Controller
 {
     public function index(Request $request): Response
     {
-        // Viewers (Jamaah umum) dan admin/bendahara diizinkan
-        abort_if(!in_array(auth()->user()->role, ['super_admin', 'bendahara', 'petugas_zakat', 'viewer']), 403, 'Akses ditolak.');
+        Gate::authorize('view-reports');
         
         $month = $request->get('month', date('m'));
         $year = $request->get('year', date('Y'));
@@ -35,7 +35,7 @@ class ReportController extends Controller
      */
     public function export(Request $request)
     {
-        abort_if(!in_array(auth()->user()->role, ['super_admin', 'bendahara', 'petugas_zakat']), 403, 'Akses ditolak.');
+        Gate::authorize('export-reports');
 
         $month = $request->get('month', date('m'));
         $year = $request->get('year', date('Y'));

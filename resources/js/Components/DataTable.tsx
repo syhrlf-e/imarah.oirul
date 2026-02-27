@@ -76,7 +76,7 @@ export default function DataTable<T>({
                                 <th
                                     key={col.key}
                                     scope="col"
-                                    className={`px-4 py-3 md:px-6 md:py-4 ${col.width ?? ""} ${col.headerClassName ?? ""}`}
+                                    className={`px-5 py-3 md:px-6 md:py-4 ${col.width ?? ""} ${col.headerClassName ?? ""}`}
                                 >
                                     {col.header}
                                 </th>
@@ -93,7 +93,7 @@ export default function DataTable<T>({
                                     {columns.map((col) => (
                                         <td
                                             key={col.key}
-                                            className="px-4 py-3 md:px-6 md:py-4"
+                                            className="px-5 py-3 md:px-6 md:py-4"
                                         >
                                             <div className="h-4 bg-slate-200 rounded w-3/4"></div>
                                         </td>
@@ -109,7 +109,7 @@ export default function DataTable<T>({
                                     {columns.map((col) => (
                                         <td
                                             key={col.key}
-                                            className={`px-4 py-3 md:px-6 md:py-4 ${resolveClass(col.cellClassName, row)}`}
+                                            className={`px-5 py-3 md:px-6 md:py-4 ${resolveClass(col.cellClassName, row)}`}
                                         >
                                             {col.render(row)}
                                         </td>

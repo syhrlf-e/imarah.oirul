@@ -20,32 +20,32 @@ export default function FilterBar({
 }: FilterBarProps) {
     return (
         <div className="mb-2 relative z-30 bg-white rounded-2xl shadow-sm border border-slate-200 p-3 md:p-4">
-            <div className="flex flex-col md:flex-row gap-3 md:gap-4">
-                {/* Kiri: Search + Addon */}
-                <div className="flex-1 flex flex-col sm:flex-row gap-4">
-                    <div className="relative w-full sm:flex-1">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-slate-400" />
-                        </div>
-                        <input
-                            type="text"
-                            value={searchValue}
-                            onChange={(e) => onSearchChange(e.target.value)}
-                            className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 sm:text-sm transition-colors shadow-sm"
-                            placeholder={searchPlaceholder}
-                        />
+            <div className="grid grid-cols-[1fr_auto] md:flex md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
+                {/* Search Bar */}
+                <div className="relative order-1 md:flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Search className="h-4 w-4 text-slate-400" />
                     </div>
-                    {addon && (
-                        <div className="relative w-full sm:w-auto shrink-0">
-                            {addon}
-                        </div>
-                    )}
+                    <input
+                        type="text"
+                        value={searchValue}
+                        onChange={(e) => onSearchChange(e.target.value)}
+                        className="block w-full pl-10 pr-3 py-2.5 md:py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 text-sm transition-colors shadow-sm"
+                        placeholder={searchPlaceholder}
+                    />
                 </div>
 
-                {/* Kanan: Filter / Sort Buttons */}
+                {/* Filter / Sort Buttons */}
                 {children && (
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 order-2 md:order-3 shrink-0 justify-end">
                         {children}
+                    </div>
+                )}
+
+                {/* Addon */}
+                {addon && (
+                    <div className="order-3 md:order-2 col-span-2 w-full md:w-auto shrink-0">
+                        {addon}
                     </div>
                 )}
             </div>

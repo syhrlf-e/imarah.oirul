@@ -16,14 +16,29 @@ class MuzakkiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
 
     private int $imported = 0;
 
+    private function sanitizeInput(?string $value): ?string
+    {
+        if (empty($value)) {
+            return $value;
+        }
+
+        // Prevent CSV/Excel Formula Injection
+        $firstChar = substr($value, 0, 1);
+        if (in_array($firstChar, ['=', '+', '-', '@'])) {
+            $value = "'" . $value;
+        }
+
+        return $value;
+    }
+
     public function model(array $row)
     {
         $this->imported++;
 
         return new Donatur([
-            'name'    => $row['nama'],
-            'phone'   => $row['no_hp'] ?? $row['telepon'] ?? $row['phone'] ?? null,
-            'address' => $row['alamat'] ?? $row['address'] ?? null,
+            'name'    => $this->sanitizeInput($row['nama']),
+            'phone'   => $this->sanitizeInput($row['no_hp'] ?? $row['telepon'] ?? $row['phone'] ?? null),
+            'address' => $this->sanitizeInput($row['alamat'] ?? $row['address'] ?? null),
         ]);
     }
 

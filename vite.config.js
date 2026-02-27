@@ -35,6 +35,21 @@ export default defineConfig({
                         },
                         handler: "NetworkOnly",
                     },
+                    {
+                        urlPattern: ({ url }) => {
+                            return url.pathname.match(
+                                /\.(?:png|jpg|jpeg|svg|gif|webp|woff2|woff|ttf)$/i,
+                            );
+                        },
+                        handler: "CacheFirst",
+                        options: {
+                            cacheName: "assets-cache",
+                            expiration: {
+                                maxEntries: 100,
+                                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+                            },
+                        },
+                    },
                 ],
             },
         }),

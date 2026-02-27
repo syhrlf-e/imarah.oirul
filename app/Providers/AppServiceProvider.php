@@ -29,6 +29,14 @@ class AppServiceProvider extends ServiceProvider
             return in_array($user->role, ['super_admin', 'bendahara', 'petugas_zakat']);
         });
 
+        Gate::define('view-reports', function ($user) {
+            return in_array($user->role, ['super_admin', 'bendahara', 'petugas_zakat', 'viewer']);
+        });
+
+        Gate::define('export-reports', function ($user) {
+            return in_array($user->role, ['super_admin', 'bendahara', 'petugas_zakat']);
+        });
+
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }
