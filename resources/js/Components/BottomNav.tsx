@@ -1,4 +1,4 @@
-import { Link, usePage } from "@inertiajs/react";
+import { Link, usePage, router } from "@inertiajs/react";
 import {
     LayoutDashboard,
     Wallet,
@@ -6,8 +6,6 @@ import {
     UserCircle,
     Archive,
 } from "lucide-react";
-import { useNavigation } from "@/Contexts/NavigationContext";
-import { motion } from "framer-motion";
 
 interface Props {
     isSidebarOpen: boolean;
@@ -17,7 +15,6 @@ interface Props {
 export default function BottomNav({ isSidebarOpen, toggleSidebar }: Props) {
     const { props, url } = usePage<any>();
     const { auth } = props;
-    const { navigateTo } = useNavigation();
 
     // Visual rendering rules map to RBAC context roles
     const getVisibleItems = () => {
@@ -88,24 +85,37 @@ export default function BottomNav({ isSidebarOpen, toggleSidebar }: Props) {
 
     const visibleItems = getVisibleItems();
 
-    // Temukan posisi slot (bukan index logika route!)
-    // agar pill indicator memposisikan dirinya dengan tepat dari 0,1,2,3,4.
-    let visualActiveIndex = 0;
     const isDashboard = url === "/" || url === "/dashboard";
 
-    for (let i = 0; i < visibleItems.length; i++) {
-        const item = visibleItems[i];
-        if (isDashboard && item.index === 0) {
-            visualActiveIndex = i;
-            break;
+    // Dapatkan visualActiveIndex saat ini untuk perbandingan saat click
+    const getCurrentIndex = () => {
+        for (let i = 0; i < visibleItems.length; i++) {
+            const item = visibleItems[i];
+            if (isDashboard && item.index === 0) return item.index;
+            if (!isDashboard && url.startsWith(item.href)) return item.index;
         }
-        if (!isDashboard && url.startsWith(item.href)) {
-            visualActiveIndex = i;
-        }
-    }
+        return 0;
+    };
 
-    // Persentase lebar tiap flex div container anak (100% dibagi X flex-1)
-    const pillWidthPercent = 100 / visibleItems.length;
+    const handleNavClick = (
+        href: string,
+        targetIndex: number,
+        e: React.MouseEvent,
+    ) => {
+        e.preventDefault(); // Mencegah link default agar kita bisa set Storage dulu
+        const currentIndex = getCurrentIndex();
+
+        // Simpan direction: 1 mundur/ke kiri, -1 ke kanan.
+        // Pastikan arah logika benar ke AppLayout
+        if (targetIndex !== currentIndex) {
+            sessionStorage.setItem(
+                "swipeDirection",
+                targetIndex > currentIndex ? "1" : "-1",
+            );
+        }
+
+        router.visit(href);
+    };
 
     return (
         <nav className="flex md:hidden fixed bottom-0 left-0 right-0 h-[68px] bg-white rounded-t-[20px] shadow-[0_-2px_12px_rgba(0,0,0,0.08)] z-50">
@@ -117,9 +127,12 @@ export default function BottomNav({ isSidebarOpen, toggleSidebar }: Props) {
                     const Icon = item.icon;
 
                     return (
-                        <button
+                        <a
+                            href={item.href}
                             key={item.href}
-                            onClick={() => navigateTo(item.href, item.index)}
+                            onClick={(e) =>
+                                handleNavClick(item.href, item.index, e)
+                            }
                             className="flex flex-col items-center justify-center gap-[2px] flex-1 h-full pt-2 pb-1"
                         >
                             {item.isAvatar ? (
@@ -150,7 +163,7 @@ export default function BottomNav({ isSidebarOpen, toggleSidebar }: Props) {
                             >
                                 {item.label}
                             </span>
-                        </button>
+                        </a>
                     );
                 })}
             </div>

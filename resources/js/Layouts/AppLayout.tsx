@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { usePage } from "@inertiajs/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Toaster } from "@/Components/Toast";
@@ -9,11 +9,6 @@ import Sidebar from "@/Components/Layout/Sidebar";
 import MobileHeader from "@/Components/Layout/MobileHeader";
 import TopHeader from "@/Components/Layout/TopHeader";
 
-import {
-    NavigationProvider,
-    useNavigation,
-} from "@/Contexts/NavigationContext";
-import { useSwipeGesture } from "@/Hooks/useSwipeGesture";
 import { useIsMobile } from "@/Hooks/useIsMobile";
 
 interface Props {
@@ -21,35 +16,26 @@ interface Props {
     children: React.ReactNode;
 }
 
-const navItems = [
-    { href: "/dashboard", index: 0 },
-    { href: "/kas", index: 1 },
-    { href: "/zakat", index: 2 },
-    { href: "/laporan", index: 3 },
-    { href: "/profil-mobile", index: 4 },
-];
-
 export default function AppLayout({ title, children }: Props) {
-    const { url } = usePage<any>();
-
-    return (
-        <NavigationProvider url={url}>
-            <AppLayoutInner title={title}>{children}</AppLayoutInner>
-        </NavigationProvider>
-    );
-}
-
-function AppLayoutInner({ title, children }: Props) {
     const { props, url, component } = usePage<any>();
     const { auth } = props;
-    const { direction, currentIndex, navigateTo } = useNavigation();
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [isKickedOut, setIsKickedOut] = useState(false);
 
     const isMobile = useIsMobile();
-    const contentRef = useRef<HTMLDivElement>(null);
+
+    // Ambil direction statis dari SessionStorage yang diset oleh BottomNav Tap Item
+    const getDirection = () => {
+        if (typeof window !== "undefined") {
+            const storedDir = sessionStorage.getItem("swipeDirection");
+            return storedDir ? parseInt(storedDir) : 0;
+        }
+        return 0;
+    };
+
+    const direction = getDirection();
 
     // Heartbeat Polling: Cek apakah akun masih aktif / belum dihapus admin
     useEffect(() => {
@@ -85,25 +71,6 @@ function AppLayoutInner({ title, children }: Props) {
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-    const isActive = (route: string) => url.startsWith(route);
-
-    // Mendaftarkan Touch Gestures
-    useSwipeGesture(contentRef, {
-        enabled: isMobile,
-        onSwipeLeft: () => {
-            const next = navItems.find(
-                (item) => item.index === currentIndex + 1,
-            );
-            if (next) navigateTo(next.href, next.index);
-        },
-        onSwipeRight: () => {
-            const prev = navItems.find(
-                (item) => item.index === currentIndex - 1,
-            );
-            if (prev) navigateTo(prev.href, prev.index);
-        },
-    });
-
     const mobileVariants = {
         initial: (dir: number) => ({
             x: dir > 0 ? "100%" : "-100%",
@@ -114,6 +81,7 @@ function AppLayoutInner({ title, children }: Props) {
             opacity: 1,
         },
         exit: (dir: number) => ({
+            // Exit halaman lama geser -30% agar terasa natural seperti native app
             x: dir > 0 ? "-30%" : "30%",
             opacity: 0,
         }),
@@ -152,11 +120,14 @@ function AppLayoutInner({ title, children }: Props) {
                     toggleSidebar={toggleSidebar}
                 />
 
-                <div
-                    ref={contentRef}
-                    className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-20 md:p-6 no-scrollbar md:scrollbar-default relative flex flex-col"
-                >
-                    <AnimatePresence custom={direction} mode="popLayout">
+                <div className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-20 md:p-6 no-scrollbar md:scrollbar-default relative flex flex-col">
+                    <AnimatePresence
+                        custom={direction}
+                        mode="popLayout"
+                        onExitComplete={() =>
+                            sessionStorage.setItem("swipeDirection", "0")
+                        }
+                    >
                         <motion.div
                             key={url}
                             custom={direction}
