@@ -5,6 +5,7 @@ namespace App\Http\Requests\Auth;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -77,6 +78,26 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 'email' => 'Akun Anda tidak terdaftar atau sandi salah.',
+            ]);
+        }
+
+        // Single Device Login: Cek apakah akun sudah memiliki sesi aktif di perangkat lain
+        $user = Auth::user();
+        $currentSessionId = $this->session()->getId();
+
+        $activeSessions = DB::table('sessions')
+            ->where('user_id', $user->id)
+            ->where('id', '!=', $currentSessionId)
+            ->count();
+
+        if ($activeSessions > 0) {
+            // Logout user yang baru saja diauthentikasi agar tidak masuk
+            Auth::guard('web')->logout();
+
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'Akun ini sedang aktif di perangkat lain. Silakan logout terlebih dahulu.',
             ]);
         }
 
