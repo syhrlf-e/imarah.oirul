@@ -15,10 +15,10 @@ class LoginChallengeIssued implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public function __construct(
-        public readonly string $userId,
-        public readonly string $challengeToken,
-        public readonly string $deviceInfo,
-        public readonly int $expiresAt,
+        public string $userId,
+        public string $challengeToken,
+        public string $deviceInfo,
+        public int $expiresAt,
     ) {}
 
     /**
