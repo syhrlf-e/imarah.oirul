@@ -8,11 +8,13 @@ import {
     ArrowRight,
     FileText,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import KasSummaryCards from "@/Components/KasSummaryCards";
-import FinancialChart from "@/Components/Dashboard/FinancialChart";
+const FinancialChart = lazy(
+    () => import("@/Components/Dashboard/FinancialChart"),
+);
 import UpcomingAgendas from "@/Components/Dashboard/UpcomingAgendas";
 import RecentTransactions from "@/Components/Dashboard/RecentTransactions";
 
@@ -315,14 +317,23 @@ export default function Dashboard({
                             />
                         )}
 
-                        {/* 6-Month Chart Trend Kas */}
                         {["super_admin", "bendahara"].includes(
                             auth.user.role,
                         ) && (
-                            <FinancialChart
-                                data={chartData}
-                                loading={loading}
-                            />
+                            <Suspense
+                                fallback={
+                                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/60 h-[350px] flex items-center justify-center w-full">
+                                        <div className="animate-pulse flex items-center text-sm font-medium text-slate-400">
+                                            Memuat Rekapitulasi Grafik...
+                                        </div>
+                                    </div>
+                                }
+                            >
+                                <FinancialChart
+                                    data={chartData}
+                                    loading={loading}
+                                />
+                            </Suspense>
                         )}
                     </div>
 

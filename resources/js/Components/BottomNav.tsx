@@ -34,7 +34,7 @@ export default function BottomNav({ isSidebarOpen, toggleSidebar }: Props) {
             <nav className="flex justify-around items-center w-full h-full relative z-50 px-2">
                 <Link
                     href="/dashboard"
-                    prefetch
+                    prefetch="mount"
                     onClick={() => setIsProfileOpen(false)}
                     className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isActive("/dashboard") ? "text-[#22C55E] font-semibold" : "text-slate-400 hover:text-slate-600 font-normal"}`}
                 >
@@ -51,7 +51,7 @@ export default function BottomNav({ isSidebarOpen, toggleSidebar }: Props) {
                 {["super_admin", "bendahara"].includes(auth.user?.role) && (
                     <Link
                         href="/kas"
-                        prefetch
+                        prefetch="mount"
                         onClick={() => setIsProfileOpen(false)}
                         className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isActive("/kas") ? "text-[#22C55E] font-semibold" : "text-slate-400 hover:text-slate-600 font-normal"}`}
                     >
@@ -65,7 +65,7 @@ export default function BottomNav({ isSidebarOpen, toggleSidebar }: Props) {
                 {auth.user?.role === "sekretaris" && (
                     <Link
                         href="/inventaris"
-                        prefetch
+                        prefetch="mount"
                         onClick={() => setIsProfileOpen(false)}
                         className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isActive("/inventaris") ? "text-[#22C55E] font-semibold" : "text-slate-400 hover:text-slate-600 font-normal"}`}
                     >
@@ -85,7 +85,7 @@ export default function BottomNav({ isSidebarOpen, toggleSidebar }: Props) {
                                 ? "/zakat/muzakki"
                                 : "/zakat"
                         }
-                        prefetch
+                        prefetch="mount"
                         onClick={() => setIsProfileOpen(false)}
                         className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isActive("/zakat") ? "text-[#22C55E] font-semibold" : "text-slate-400 hover:text-slate-600 font-normal"}`}
                     >
@@ -99,7 +99,7 @@ export default function BottomNav({ isSidebarOpen, toggleSidebar }: Props) {
                 {["super_admin", "bendahara"].includes(auth.user?.role) && (
                     <Link
                         href="/laporan"
-                        prefetch
+                        prefetch="mount"
                         onClick={() => setIsProfileOpen(false)}
                         className={`flex flex-col items-center justify-center w-16 h-full space-y-1 ${isActive("/laporan") ? "text-[#22C55E] font-semibold" : "text-slate-400 hover:text-slate-600 font-normal"}`}
                     >
