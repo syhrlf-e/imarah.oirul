@@ -8,7 +8,8 @@ import BottomNav from "@/Components/BottomNav";
 import Sidebar from "@/Components/Layout/Sidebar";
 import MobileHeader from "@/Components/Layout/MobileHeader";
 import TopHeader from "@/Components/Layout/TopHeader";
-
+import LoginChallengeModal from "@/Components/LoginChallengeModal";
+import { useLoginChallenge } from "@/Hooks/useLoginChallenge";
 import { useIsMobile } from "@/Hooks/useIsMobile";
 
 interface Props {
@@ -25,6 +26,11 @@ export default function AppLayout({ title, children }: Props) {
     const [isKickedOut, setIsKickedOut] = useState(false);
 
     const isMobile = useIsMobile();
+
+    // Login Challenge: Deteksi jika ada user lain yang mencoba login via WebSocket
+    const userId = auth?.user?.id ?? "";
+    const { activeChallenge, handleReject, clearChallenge } =
+        useLoginChallenge(userId);
 
     // Ambil direction statis dari SessionStorage yang diset oleh BottomNav Tap Item
     const getDirection = () => {
@@ -97,6 +103,20 @@ export default function AppLayout({ title, children }: Props) {
         <div className="h-screen bg-slate-100 font-sans flex text-slate-900 overflow-hidden text-sm">
             <Toaster />
             <GlobalToastListener />
+
+            {/* Login Challenge Modal */}
+            <AnimatePresence>
+                {activeChallenge && (
+                    <LoginChallengeModal
+                        challengeToken={activeChallenge.challenge_token}
+                        deviceInfo={activeChallenge.device_info}
+                        expiresAt={activeChallenge.expires_at}
+                        onReject={handleReject}
+                        onExpired={clearChallenge}
+                    />
+                )}
+            </AnimatePresence>
+
             {/* PWA Window Controls Overlay - Drag Region */}
             <div className="pwa-titlebar-drag"></div>
             <Sidebar

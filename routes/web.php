@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginChallengeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -7,6 +8,13 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     return redirect()->route('login');
+});
+
+// Login Challenge routes — guest waiting page, dan auth routes untuk reject/approve
+Route::get('/login/waiting', [LoginChallengeController::class, 'waiting'])->name('login.challenge.waiting');
+Route::get('/login/challenge/{token}/status', [LoginChallengeController::class, 'status'])->name('login.challenge.status');
+Route::middleware(['auth'])->group(function () {
+    Route::post('/login/challenge/reject/{token}', [LoginChallengeController::class, 'reject'])->name('login.challenge.reject');
 });
 
 Route::middleware(['auth', 'verified', 'active'])->group(function () {

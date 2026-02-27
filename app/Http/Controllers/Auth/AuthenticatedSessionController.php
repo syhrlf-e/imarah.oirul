@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Events\LoginChallengeIssued;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -33,30 +35,55 @@ class AuthenticatedSessionController extends Controller
         // Langkah 1: Verifikasi kredensial (email + password)
         $request->authenticate();
 
-        // Langkah 2: Regenerasi sesi — ini menyebabkan Laravel menulis sesi baru
-        // ke tabel `sessions` dengan user_id yang sudah dikaitkan dengan user yang login
-        $request->session()->regenerate();
-
-        // Langkah 3: SEKARANG baru aman untuk mengecek sesi aktif lain di DB,
-        // karena sesi saat ini sudah tersimpan dengan user_id yang benar
         $user = Auth::user();
-        $currentSessionId = $request->session()->getId();
 
-        $activeSessions = DB::table('sessions')
+        // Langkah 2: Cek apakah ada sesi aktif lain untuk user ini
+        $lifetime       = config('session.lifetime') * 60;
+        $expirationTime = now()->timestamp - $lifetime;
+
+        $hasActiveSession = DB::table('sessions')
             ->where('user_id', $user->id)
-            ->where('id', '!=', $currentSessionId)
-            ->count();
+            ->where('last_activity', '>=', $expirationTime)
+            ->exists();
 
-        if ($activeSessions > 0) {
-            // Rollback: logout user, hapus sesi yang baru dibuat, kembalikan ke login
+        if ($hasActiveSession) {
+            // Ada sesi aktif di HP lain → Trigger Login Challenge
+            // Buat token challenge dan simpan di cache
+            $token      = Str::uuid()->toString();
+            $deviceInfo = $request->header('User-Agent', 'Perangkat tidak dikenal');
+            $ip         = $request->ip();
+            $expiresAt  = now()->addSeconds(15)->timestamp;
+
+            Cache::put("login_challenge_{$token}", [
+                'user_id'    => $user->id,
+                'status'     => 'pending',
+                'ip'         => $ip,
+                'device'     => $deviceInfo,
+                'expires_at' => $expiresAt,
+                // Simpan kredensial session HP B agar bisa dilanjutkan setelah approved
+                'session_id' => $request->session()->getId(),
+            ], 20);
+
+            // Broadcast event ke HP A via Reverb WebSocket
+            broadcast(new LoginChallengeIssued(
+                userId:         (string) $user->id,
+                challengeToken: $token,
+                deviceInfo:     "IP: {$ip} | " . substr($deviceInfo, 0, 80),
+                expiresAt:      $expiresAt,
+            ));
+
+            // Logout HP B sementara (sesi challenge belum dikonfirmasi)
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login')->withErrors([
-                'email' => 'Akun ini sedang aktif di perangkat lain. Silakan logout terlebih dahulu.',
-            ]);
+            // Redirect HP B ke halaman waiting dengan token challenge
+            return redirect()->route('login.challenge.waiting', ['token' => $token]);
         }
+
+        // Tidak ada konflik — langsung masuk dashboard
+        DB::table('sessions')->where('user_id', $user->id)->delete();
+        $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
