@@ -104,14 +104,14 @@ class AuthenticatedSessionController extends Controller
     /**
      * Destroy an authenticated session via beacon (when app is closed).
      */
-    public function destroyBeacon(Request $request): \Illuminate\Http\Response
+    public function destroyBeacon(Request $request): \Symfony\Component\HttpFoundation\Response
     {
         // Poin 3: Amankan endpoint beacon dari domain luar
         $origin = $request->headers->get('Origin') ?? $request->headers->get('Referer');
         $allowedOrigin = rtrim(config('app.url'), '/');
 
         if ($origin && !str_starts_with($origin, $allowedOrigin)) {
-            return response()->json(['message' => 'Unauthorized origin'], 403);
+            return response('Unauthorized origin', 403);
         }
 
         if (Auth::check()) {
