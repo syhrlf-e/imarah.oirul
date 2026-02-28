@@ -28,61 +28,69 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request): \Illuminate\Http\JsonResponse|RedirectResponse
     {
-        // Langkah 1: Verifikasi kredensial (email + password)
-        $request->authenticate();
+        try {
+            // Langkah 1: Verifikasi kredensial (email + password)
+            $request->authenticate();
 
-        $user = Auth::user();
+            $user = Auth::user();
 
-        // Langkah 2: Cek apakah ada sesi aktif lain untuk user ini
-        $lifetime       = config('session.lifetime') * 60;
-        $expirationTime = now()->timestamp - $lifetime;
+            // Langkah 2: Cek apakah ada sesi aktif lain untuk user ini
+            $lifetime       = config('session.lifetime') * 60;
+            $expirationTime = now()->timestamp - $lifetime;
 
-        $currentSessionId = $request->session()->getId();
+            $currentSessionId = $request->session()->getId();
 
-        $hasActiveSession = DB::table('sessions')
-            ->where('user_id', $user->id)
-            ->where('id', '!=', $currentSessionId)
-            ->where('last_activity', '>=', $expirationTime)
-            ->exists();
+            $hasActiveSession = DB::table('sessions')
+                ->where('user_id', $user->id)
+                ->where('id', '!=', $currentSessionId)
+                ->where('last_activity', '>=', $expirationTime)
+                ->exists();
 
-        if ($hasActiveSession) {
-            // Ada sesi aktif di perangkat lain → Trigger Login Challenge
-            $token      = Str::uuid()->toString();
-            $deviceInfo = $request->header('User-Agent', 'Perangkat tidak dikenal');
-            $ip         = $request->ip();
-            $expiresAt  = now()->addSeconds(15)->timestamp;
+            if ($hasActiveSession) {
+                // Ada sesi aktif di perangkat lain → Trigger Login Challenge
+                $token      = Str::uuid()->toString();
+                $deviceInfo = $request->header('User-Agent', 'Perangkat tidak dikenal');
+                $ip         = $request->ip();
+                $expiresAt  = now()->addSeconds(15)->timestamp;
 
-            $challengeData = [
-                'user_id'         => $user->id,
-                'status'          => 'pending',
-                'ip'              => $ip,
-                'device'          => $deviceInfo,
-                'expires_at'      => $expiresAt,
-                'challenge_token' => $token,
-            ];
+                $challengeData = [
+                    'user_id'         => $user->id,
+                    'status'          => 'pending',
+                    'ip'              => $ip,
+                    'device'          => $deviceInfo,
+                    'expires_at'      => $expiresAt,
+                    'challenge_token' => $token,
+                ];
 
-            // Cache 1: Untuk HP B polling status via token
-            Cache::put("login_challenge_{$token}", $challengeData, 20);
+                // Cache 1: Untuk HP B polling status via token
+                Cache::put("login_challenge_{$token}", $challengeData, 20);
 
-            // Cache 2: Untuk HP A polling check via user_id (HP A tidak tahu token)
-            Cache::put("login_challenge_user_{$user->id}", $challengeData, 20);
+                // Cache 2: Untuk HP A polling check via user_id (HP A tidak tahu token)
+                Cache::put("login_challenge_user_{$user->id}", $challengeData, 20);
 
-            // Logout HP B sementara (challenge belum dikonfirmasi)
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+                // Logout HP B sementara (challenge belum dikonfirmasi)
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
 
-            // Redirect HP B ke halaman waiting
-            return redirect()->route('login.challenge.waiting', ['token' => $token]);
+                // Redirect HP B ke halaman waiting
+                return redirect()->route('login.challenge.waiting', ['token' => $token]);
+            }
+
+            // Tidak ada konflik — langsung masuk dashboard
+            DB::table('sessions')->where('user_id', $user->id)->delete();
+            $request->session()->regenerate();
+
+            return redirect()->intended(route('dashboard', absolute: false));
+        } catch (\Throwable $e) {
+            return response()->json([
+                'CRITICAL_ERROR' => $e->getMessage(),
+                'FILE' => $e->getFile(),
+                'LINE' => $e->getLine()
+            ], 506);
         }
-
-        // Tidak ada konflik — langsung masuk dashboard
-        DB::table('sessions')->where('user_id', $user->id)->delete();
-        $request->session()->regenerate();
-
-        return redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**
