@@ -99,4 +99,19 @@ class AuthenticatedSessionController extends Controller
 
         return redirect('/');
     }
+
+    /**
+     * Destroy an authenticated session via beacon (when app is closed).
+     */
+    public function destroyBeacon(Request $request): \Illuminate\Http\Response
+    {
+        if (Auth::check()) {
+            DB::table('sessions')->where('user_id', Auth::id())->delete();
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        return response()->noContent();
+    }
 }

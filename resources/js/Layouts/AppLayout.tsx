@@ -66,6 +66,35 @@ export default function AppLayout({ title, children }: Props) {
         return () => clearInterval(interval);
     }, []);
 
+    // Instant Logout on App Close
+    useEffect(() => {
+        const handleUnload = () => {
+            if (auth?.user) {
+                // Gunakan sendBeacon karena window sedang ditutup,
+                // ini paling reliabel dibanding fetch/axios biasa untuk fire-and-forget.
+                navigator.sendBeacon(route("logout.beacon"));
+            }
+        };
+
+        const handleVisibilityChange = () => {
+            // Jika di mobile PWA, visibilitychange sering lebih reliabel dibanding beforeunload
+            if (document.visibilityState === "hidden") {
+                handleUnload();
+            }
+        };
+
+        window.addEventListener("beforeunload", handleUnload);
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleUnload);
+            document.removeEventListener(
+                "visibilitychange",
+                handleVisibilityChange,
+            );
+        };
+    }, [auth?.user]);
+
     // Handle scroll for glassmorphism header effect on mobile
     useEffect(() => {
         const handleScroll = () => {
