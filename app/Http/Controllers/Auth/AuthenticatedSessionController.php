@@ -49,34 +49,42 @@ class AuthenticatedSessionController extends Controller
             ->exists();
 
         if ($hasActiveSession) {
-            // Ada sesi aktif di perangkat lain → Trigger Login Challenge
-            $token      = Str::uuid()->toString();
-            $deviceInfo = $request->header('User-Agent', 'Perangkat tidak dikenal');
-            $ip         = $request->ip();
-            $expiresAt  = now()->addSeconds(15)->timestamp;
+            try {
+                // Ada sesi aktif di perangkat lain → Trigger Login Challenge
+                $token      = Str::uuid()->toString();
+                $deviceInfo = $request->header('User-Agent', 'Perangkat tidak dikenal');
+                $ip         = $request->ip();
+                $expiresAt  = now()->addSeconds(15)->timestamp;
 
-            $challengeData = [
-                'user_id'         => $user->id,
-                'status'          => 'pending',
-                'ip'              => $ip,
-                'device'          => $deviceInfo,
-                'expires_at'      => $expiresAt,
-                'challenge_token' => $token,
-            ];
+                $challengeData = [
+                    'user_id'         => $user->id,
+                    'status'          => 'pending',
+                    'ip'              => $ip,
+                    'device'          => $deviceInfo,
+                    'expires_at'      => $expiresAt,
+                    'challenge_token' => $token,
+                ];
 
-            // Cache 1: Untuk HP B polling status via token
-            Cache::put("login_challenge_{$token}", $challengeData, 20);
+                // Cache 1: Untuk HP B polling status via token
+                Cache::put("login_challenge_{$token}", $challengeData, 20);
 
-            // Cache 2: Untuk HP A polling check via user_id (HP A tidak tahu token)
-            Cache::put("login_challenge_user_{$user->id}", $challengeData, 20);
+                // Cache 2: Untuk HP A polling check via user_id (HP A tidak tahu token)
+                Cache::put("login_challenge_user_{$user->id}", $challengeData, 20);
 
-            // Logout HP B sementara (challenge belum dikonfirmasi)
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+                // Logout HP B sementara (challenge belum dikonfirmasi)
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
 
-            // Redirect HP B ke halaman waiting
-            return redirect()->route('login.challenge.waiting', ['token' => $token]);
+                // Redirect HP B ke halaman waiting
+                return redirect()->route('login.challenge.waiting', ['token' => $token]);
+            } catch (\Throwable $e) {
+                return response()->json([
+                    'CHALLENGE_ERROR' => $e->getMessage(),
+                    'FILE'            => $e->getFile(),
+                    'LINE'            => $e->getLine()
+                ], 506);
+            }
         }
 
         // Tidak ada konflik — langsung masuk dashboard
