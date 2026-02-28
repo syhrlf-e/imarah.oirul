@@ -43,8 +43,11 @@ Route::middleware('auth')->group(function () {
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
-
-    Route::post('logout/beacon', [AuthenticatedSessionController::class, 'destroyBeacon'])
-        ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
-        ->name('logout.beacon');
 });
+
+// Beacon logout harus diluar middleware auth karena navigator.sendBeacon
+// saat app ditutup bisa saja tidak membawa session cookie yang valid.
+// Keamanan ditangani oleh validasi Origin header di controller.
+Route::post('logout/beacon', [AuthenticatedSessionController::class, 'destroyBeacon'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    ->name('logout.beacon');
