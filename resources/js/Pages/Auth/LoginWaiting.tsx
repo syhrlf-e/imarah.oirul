@@ -45,9 +45,16 @@ export default function LoginWaiting({ token, timeout }: Props) {
                 if (data.status === "rejected") {
                     clearInterval(pollInterval);
                     clearInterval(countdownInterval);
-                    setStatus("rejected");
-                    setMessage(
-                        "Login ditolak oleh perangkat yang sedang aktif.",
+                    // Langsung redirect ke login dengan flash message dari sisi frontend jika dimungkinkan,
+                    // atau cukup redirect saja karena session sudah ditolak
+                    router.get(
+                        route("login"),
+                        {},
+                        {
+                            onFinish: () => {
+                                // Opsional: window.toast.error("Login ditolak perangkat utama") jika ada global toast
+                            },
+                        },
                     );
                 } else if (data.status === "expired") {
                     // Timeout — HP A tidak merespons → HP B diizinkan masuk
@@ -181,43 +188,13 @@ export default function LoginWaiting({ token, timeout }: Props) {
                             </div>
                         )}
 
-                        {status === "rejected" && (
-                            <div className="mb-4 flex justify-center">
-                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-500/20">
-                                    <svg
-                                        className="h-8 w-8 text-red-400"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M6 18L18 6M6 6l12 12"
-                                        />
-                                    </svg>
-                                </div>
-                            </div>
-                        )}
-
                         <h2 className="mb-2 text-center text-xl font-bold text-white">
                             {status === "pending" && "Menunggu Konfirmasi"}
                             {status === "approved" && "Mengalihkan..."}
-                            {status === "rejected" && "Login Ditolak"}
                         </h2>
                         <p className="text-center text-sm text-white/60">
                             {message}
                         </p>
-
-                        {status === "rejected" && (
-                            <button
-                                onClick={() => router.get(route("login"))}
-                                className="mt-6 w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-emerald-600"
-                            >
-                                Kembali ke Login
-                            </button>
-                        )}
                     </div>
                 </div>
             </div>

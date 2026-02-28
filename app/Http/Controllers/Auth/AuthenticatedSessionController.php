@@ -41,17 +41,11 @@ class AuthenticatedSessionController extends Controller
 
         $currentSessionId = $request->session()->getId();
 
-        try {
-            $hasActiveSession = DB::table('sessions')
-                ->where('user_id', $user->id)
-                ->where('id', '!=', $currentSessionId)
-                ->where('last_activity', '>=', $expirationTime)
-                ->exists();
-        } catch (\Throwable $e) {
-            return response()->json([
-                'DB_QUERY_ERROR' => 'Query error: ' . $e->getMessage()
-            ], 506);
-        }
+        $hasActiveSession = DB::table('sessions')
+            ->where('user_id', $user->id)
+            ->where('id', '!=', $currentSessionId)
+            ->where('last_activity', '>=', $expirationTime)
+            ->exists();
 
         if ($hasActiveSession) {
             // Ada sesi aktif di perangkat lain → Trigger Login Challenge
