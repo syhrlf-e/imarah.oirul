@@ -35,16 +35,17 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // Langkah 2: Cek apakah ada sesi aktif lain untuk user ini
-        $lifetime       = config('session.lifetime') * 60;
-        $expirationTime = now()->timestamp - $lifetime;
+        // Langkah 2: Cek apakah ada sesi ONLINE lain untuk user ini
+        // Kita anggap "online" jika ada aktivitas dalam 3 menit terakhir
+        // (karena AppLayout.tsx mengirim heartbeat setiap 2 menit)
+        $onlineThreshold = now()->subMinutes(3)->timestamp;
 
         $currentSessionId = $request->session()->getId();
 
         $hasActiveSession = DB::table('sessions')
             ->where('user_id', $user->id)
             ->where('id', '!=', $currentSessionId)
-            ->where('last_activity', '>=', $expirationTime)
+            ->where('last_activity', '>=', $onlineThreshold)
             ->exists();
 
         if ($hasActiveSession) {
