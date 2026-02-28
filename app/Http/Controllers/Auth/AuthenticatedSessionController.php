@@ -111,7 +111,7 @@ class AuthenticatedSessionController extends Controller
         $allowedOrigin = rtrim(config('app.url'), '/');
 
         if ($origin && !str_starts_with($origin, $allowedOrigin)) {
-            abort(403, 'Unauthorized origin');
+            return response()->json(['message' => 'Unauthorized origin'], 403);
         }
 
         if (Auth::check()) {
