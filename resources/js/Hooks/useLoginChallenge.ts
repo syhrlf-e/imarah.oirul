@@ -88,22 +88,21 @@ export function useLoginChallenge(userId: string): UseLoginChallengeResult {
         };
     }, [userId]);
 
-    const handleReject = () => {
+    const handleReject = async () => {
         if (!activeChallenge) return;
 
-        router.post(
-            route("login.challenge.reject", {
-                token: activeChallenge.challenge_token,
-            }),
-            {},
-            {
-                onFinish: () => {
-                    if (expiryTimerRef.current)
-                        clearTimeout(expiryTimerRef.current);
-                    setActiveChallenge(null);
-                },
-            },
-        );
+        try {
+            await window.axios.post(
+                route("login.challenge.reject", {
+                    token: activeChallenge.challenge_token,
+                }),
+            );
+        } catch (error) {
+            console.error("Failed to set reject status", error);
+        } finally {
+            if (expiryTimerRef.current) clearTimeout(expiryTimerRef.current);
+            setActiveChallenge(null);
+        }
     };
 
     const clearChallenge = () => {
