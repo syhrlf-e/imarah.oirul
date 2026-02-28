@@ -15,6 +15,7 @@ Route::get('/login/waiting', [LoginChallengeController::class, 'waiting'])->name
 Route::get('/login/challenge/{token}/status', [LoginChallengeController::class, 'status'])->name('login.challenge.status');
 Route::middleware(['auth'])->group(function () {
     Route::post('/login/challenge/reject/{token}', [LoginChallengeController::class, 'reject'])->name('login.challenge.reject');
+    Route::get('/login/challenge/check', [LoginChallengeController::class, 'check'])->name('login.challenge.check');
 });
 
 Route::middleware(['auth', 'verified', 'active'])->group(function () {

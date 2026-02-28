@@ -129,4 +129,30 @@ class LoginChallengeController extends Controller
 
         return response()->json(['status' => 'approved']);
     }
+
+    /**
+     * Dipanggil HP A via polling setiap 3 detik untuk cek apakah ada challenge.
+     */
+    public function check(Request $request): JsonResponse
+    {
+        $userId = Auth::id();
+        $challenge = Cache::get("login_challenge_user_{$userId}");
+
+        if (! $challenge || $challenge['status'] !== 'pending') {
+            return response()->json(['has_challenge' => false]);
+        }
+
+        // Cek apakah challenge sudah expired
+        if (now()->timestamp > $challenge['expires_at']) {
+            Cache::forget("login_challenge_user_{$userId}");
+            return response()->json(['has_challenge' => false]);
+        }
+
+        return response()->json([
+            'has_challenge'   => true,
+            'challenge_token' => $challenge['challenge_token'],
+            'device_info'     => "IP: {$challenge['ip']} | " . substr($challenge['device'], 0, 80),
+            'expires_at'      => $challenge['expires_at'],
+        ]);
+    }
 }
