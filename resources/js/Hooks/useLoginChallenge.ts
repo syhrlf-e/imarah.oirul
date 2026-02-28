@@ -92,10 +92,26 @@ export function useLoginChallenge(userId: string): UseLoginChallengeResult {
         if (!activeChallenge) return;
 
         try {
-            await window.axios.post(
+            // Gunakan native fetch (bukan axios) agar tidak terkena interceptor Inertia
+            // yang memunculkan overlay "plain JSON response was received"
+            await fetch(
                 route("login.challenge.reject", {
                     token: activeChallenge.challenge_token,
                 }),
+                {
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "X-XSRF-TOKEN": decodeURIComponent(
+                            document.cookie
+                                .split("; ")
+                                .find((c) => c.startsWith("XSRF-TOKEN="))
+                                ?.split("=")[1] ?? "",
+                        ),
+                        Accept: "application/json",
+                    },
+                    credentials: "same-origin",
+                },
             );
         } catch (error) {
             console.error("Failed to set reject status", error);
