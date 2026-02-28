@@ -106,11 +106,11 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroyBeacon(Request $request): \Symfony\Component\HttpFoundation\Response
     {
-        // Poin 3: Amankan endpoint beacon dari domain luar
+        // Poin 3: Amankan endpoint beacon dari domain luar (bandingkan hostname saja, abaikan http/https)
         $origin = $request->headers->get('Origin') ?? $request->headers->get('Referer');
-        $allowedOrigin = rtrim(config('app.url'), '/');
+        $allowedHost = parse_url(config('app.url'), PHP_URL_HOST);
 
-        if ($origin && !str_starts_with($origin, $allowedOrigin)) {
+        if ($origin && parse_url($origin, PHP_URL_HOST) !== $allowedHost) {
             return response('Unauthorized origin', 403);
         }
 
