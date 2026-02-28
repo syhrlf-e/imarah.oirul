@@ -46,9 +46,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
             // Rendisi fallback component via Inertia khusus untuk error page (bukan environment DEV)
             if (!app()->environment('local') && in_array($status, [ 500, 503, 404, 403 ])) {
-                return \Inertia\Inertia::render('Error', ['status' => $status])
-                    ->toResponse($request)
-                    ->setStatusCode($status);
+                // TEMPORARY DEBUG TRAP:
+                return response()->json([
+                    'GLOBAL_TRAP_ERROR' => $e->getMessage(),
+                    'FILE' => $e->getFile(),
+                    'LINE' => $e->getLine()
+                ], 506);
             }
 
             return null; // Biarkan default handling Laravel bekerja (menampilkan laravel ignition debug if app_debug=true)
