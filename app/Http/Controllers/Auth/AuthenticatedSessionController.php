@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Services\ChallengeAttemptService;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -28,15 +29,30 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request, ChallengeAttemptService $attemptService): RedirectResponse
     {
+        $ip = $request->ip();
+
+        // 1. Cek apakah IP ini sedang diblokir SEBELUM validasi kredensial
+        $blockStatus = $attemptService->isBlocked($ip);
+        if ($blockStatus['blocked']) {
+            if ($blockStatus['permanent']) {
+                return back()->withErrors([
+                    'email' => 'Akses Anda telah diblokir secara permanen dari sistem ini.',
+                ]);
+            }
+            return back()->withErrors([
+                'email' => "Akses sementara diblokir. Silakan coba lagi dalam {$blockStatus['minutes_left']} menit.",
+            ]);
+        }
+
         // Langkah 1: Verifikasi kredensial (email + password)
         $request->authenticate();
 
         $user = Auth::user();
 
         // Langkah 2: Cek apakah ada sesi ONLINE lain untuk user ini menggunakan transaksi dan lock
-        return DB::transaction(function () use ($request, $user) {
+        return DB::transaction(function () use ($request, $user, $ip, $attemptService) {
             $onlineThreshold = now()->subMinutes(3)->timestamp;
             $currentSessionId = $request->session()->getId();
 
@@ -49,6 +65,9 @@ class AuthenticatedSessionController extends Controller
                 ->exists();
 
             if ($hasActiveSession) {
+                // 3. Catat percobaan log in karena menabrak sesi yang ada
+                $attemptService->recordAttempt($ip);
+
                 // Buat challenge token
                 $token = Str::uuid()->toString();
                 $expiresAt = now()->addSeconds(45)->timestamp; // Ubah dari 20 → 45 detik
