@@ -155,6 +155,10 @@ class AuthenticatedSessionController extends Controller
         Cache::put("login_challenge_{$token}", $challenge, 30);
         Cache::put("login_challenge_user_{$challenge['user_id']}", $challenge, 30);
 
+        // Hapus sesi HP A dari DB secara eksplisit sebelum logout
+        // (Auth::logout() saja tidak menghapus baris dari tabel sessions)
+        DB::table('sessions')->where('user_id', Auth::id())->delete();
+
         // Logout HP A (dirinya sendiri yang menyetujui)
         Auth::guard('web')->logout();
         $request->session()->invalidate();

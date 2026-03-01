@@ -67,7 +67,7 @@ class LoginChallengeController extends Controller
         Cache::forget("login_challenge_{$token}");
         Cache::forget("login_challenge_user_{$user->id}");
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()->route('dashboard');
     }
 
     /**
