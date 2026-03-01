@@ -9,7 +9,10 @@ export default defineConfig({
     },
     plugins: [
         laravel({
-            input: "resources/js/app.tsx",
+            input: [
+                "resources/js/app.tsx",
+                "resources/js/Pages/Dashboard.tsx", // explicit entry agar muncul di manifest sebagai top-level key
+            ],
             refresh: true,
         }),
         react(),
