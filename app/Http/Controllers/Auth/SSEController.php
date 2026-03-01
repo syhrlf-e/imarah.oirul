@@ -15,6 +15,15 @@ class SSEController extends Controller
         $user = Auth::user();
 
         return response()->stream(function () use ($user) {
+            // Matikan semua buffering di level PHP agar SSE bisa streaming real-time
+            // Penting untuk PHP-FPM yang secara default men-buffer output
+            set_time_limit(0);
+            ini_set('output_buffering', 'off');
+            ini_set('zlib.output_compression', false);
+            while (ob_get_level() > 0) {
+                ob_end_flush();
+            }
+
             // Set header untuk SSE
             header('Content-Type: text/event-stream');
             header('Cache-Control: no-cache');
