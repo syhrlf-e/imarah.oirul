@@ -57,10 +57,10 @@ export default function LoginWaiting({ token, expiresIn = 45 }: Props) {
 
                 if (data.status === "approved") {
                     setStatus("approved");
-                    // Gunakan router.visit agar Inertia handle lazy chunk Dashboard.tsx
-                    // (window.location.href menyebabkan full reload yang bypass dynamic import)
+                    // Navigasi full ke finalize agar server bisa set session cookie HP B
+                    // router.visit() tidak bisa dipakai karena HP B belum punya sesi
                     setTimeout(() => {
-                        router.visit("/dashboard", { replace: true });
+                        window.location.href = `/login/challenge/${token}/finalize`;
                     }, 1500);
                 } else if (data.status === "rejected") {
                     setStatus("rejected");
