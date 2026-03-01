@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Events\LoginChallengeIssued;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,54 +17,22 @@ class LoginChallengeController extends Controller
     /**
      * Tampilkan halaman waiting untuk HP B.
      */
-    public function waiting(Request $request): Response
+    public function waiting(Request $request): Response|\Illuminate\Http\RedirectResponse
     {
         $token = $request->query('token');
 
+        // Validasi token ada dan masih valid
+        if (!$token || !Cache::has("login_challenge_{$token}")) {
+            return redirect()->route('login');
+        }
+
         return Inertia::render('Auth/LoginWaiting', [
-            'token'    => $token,
-            'timeout'  => 10,
+            'token'      => $token,
+            'expiresIn'  => 45, // Waktu tunggu baru (di handle frontend)
         ]);
     }
 
-    /**
-     * Dipanggil dari AuthenticatedSessionController saat conflict terdeteksi.
-     * Broadcast event ke HP A dan kembalikan token challenge ke HP B.
-     */
-    public function issue(Request $request): JsonResponse
-    {
-        $user = Auth::user();
 
-        // Buat token unik untuk challenge ini
-        $token = Str::uuid()->toString();
-
-        // Device info HP B (yang mau masuk)
-        $deviceInfo = $request->header('User-Agent', 'Perangkat tidak dikenal');
-        $ip         = $request->ip();
-        $expiresAt  = now()->addSeconds(15)->timestamp;
-
-        // Simpan challenge di cache selama 15 detik (buffer lebih dari 10 det countdown)
-        Cache::put("login_challenge_{$token}", [
-            'user_id'    => $user->id,
-            'status'     => 'pending',
-            'ip'         => $ip,
-            'device'     => $deviceInfo,
-            'expires_at' => $expiresAt,
-        ], 15);
-
-        // Broadcast ke HP A via Reverb WebSocket
-        broadcast(new LoginChallengeIssued(
-            userId:        $user->id,
-            challengeToken: $token,
-            deviceInfo:    "IP: {$ip} | " . substr($deviceInfo, 0, 80),
-            expiresAt:     $expiresAt,
-        ));
-
-        return response()->json([
-            'status' => 'challenge_pending',
-            'token'  => $token,
-        ]);
-    }
 
     /**
      * Dipanggil HP A saat menekan tombol "Tolak".
@@ -74,33 +41,31 @@ class LoginChallengeController extends Controller
     {
         $challenge = Cache::get("login_challenge_{$token}");
 
-        if (! $challenge || $challenge['user_id'] !== Auth::id()) {
-            return response()->json(['status' => 'not_found'], 404);
+        if (!$challenge) {
+            return response()->json(['message' => 'Challenge tidak ditemukan'], 404);
         }
 
-        // Tandai sebagai rejected
+        // Update status → rejected
         $challenge['status'] = 'rejected';
-        Cache::put("login_challenge_{$token}", $challenge, 10);
+        Cache::put("login_challenge_{$token}", $challenge, 30);
+        Cache::put("login_challenge_user_{$challenge['user_id']}", $challenge, 30);
 
-        return response()->json(['status' => 'rejected']);
+        return response()->json(['message' => 'Challenge ditolak']);
     }
 
     /**
      * Dipanggil HP B secara polling setiap 1 detik untuk cek status.
      */
-    public function status(string $token): JsonResponse
+    public function status(Request $request, string $token): JsonResponse
     {
         $challenge = Cache::get("login_challenge_{$token}");
 
-        if (! $challenge) {
-            // Cache sudah expired = timeout, HP B diizinkan masuk
+        if (!$challenge) {
+            // Cache expired = default TOLAK (karena timeout 45s habis dan HP A diam)
             return response()->json(['status' => 'expired']);
         }
 
-        return response()->json([
-            'status'     => $challenge['status'],
-            'expires_at' => $challenge['expires_at'],
-        ]);
+        return response()->json(['status' => $challenge['status']]);
     }
 
     /**
@@ -131,7 +96,8 @@ class LoginChallengeController extends Controller
     }
 
     /**
-     * Dipanggil HP A via polling setiap 3 detik untuk cek apakah ada challenge.
+     * @deprecated Digantikan oleh SSE endpoint di SSEController
+     * Method ini dipertahankan untuk backward compatibility sementara waktu
      */
     public function check(Request $request): JsonResponse
     {

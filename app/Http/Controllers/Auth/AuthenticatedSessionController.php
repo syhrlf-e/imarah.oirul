@@ -49,28 +49,22 @@ class AuthenticatedSessionController extends Controller
                 ->exists();
 
             if ($hasActiveSession) {
-                // Ada sesi aktif di perangkat lain → Trigger Login Challenge
-                $token      = Str::uuid()->toString();
-                $deviceInfo = $request->header('User-Agent', 'Perangkat tidak dikenal');
-                $ip         = $request->ip();
-                $expiresAt  = now()->addSeconds(15)->timestamp;
+                // Buat challenge token
+                $token = Str::uuid()->toString();
+                $expiresAt = now()->addSeconds(45)->timestamp; // Ubah dari 20 → 45 detik
 
                 $challengeData = [
-                    'user_id'         => $user->id,
-                    'status'          => 'pending',
-                    'ip'              => $ip,
-                    'device'          => $deviceInfo,
-                    'expires_at'      => $expiresAt,
-                    'challenge_token' => $token,
+                    'token'      => $token,
+                    'user_id'    => $user->id,
+                    'status'     => 'pending',
+                    'expires_at' => $expiresAt,
                 ];
 
-                // Cache 1: Untuk HP B polling status via token
-                Cache::put("login_challenge_{$token}", $challengeData, 20);
+                // Simpan di Cache dengan TTL 45 detik
+                Cache::put("login_challenge_{$token}", $challengeData, 45);
+                Cache::put("login_challenge_user_{$user->id}", $challengeData, 45);
 
-                // Cache 2: Untuk HP A polling check via user_id (HP A tidak tahu token)
-                Cache::put("login_challenge_user_{$user->id}", $challengeData, 20);
-
-                // Logout HP B sementara (challenge belum dikonfirmasi)
+                // Logout HP B sementara
                 Auth::guard('web')->logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
@@ -122,5 +116,32 @@ class AuthenticatedSessionController extends Controller
         }
 
         return response()->noContent();
+    }
+
+    /**
+     * Dipanggil HP A saat menekan tombol "Ya, Izinkan".
+     * Mengubah status challenge menjadi approved lalu me-logout HP A itu sendiri.
+     */
+    public function approveChallengeAndLogout(Request $request): RedirectResponse
+    {
+        $token = $request->input('token');
+        $challenge = Cache::get("login_challenge_{$token}");
+
+        if (!$challenge || $challenge['status'] !== 'pending') {
+            return redirect()->route('dashboard');
+        }
+
+        // Update status challenge → approved
+        $challenge['status'] = 'approved';
+        Cache::put("login_challenge_{$token}", $challenge, 30);
+        Cache::put("login_challenge_user_{$challenge['user_id']}", $challenge, 30);
+
+        // Logout HP A (dirinya sendiri yang menyetujui)
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Redirect HP A ke form login dengan visual sukses logout
+        return redirect()->route('login')->with('status', 'Anda telah berhasil keluar untuk mengizinkan login di perangkat baru.');
     }
 }

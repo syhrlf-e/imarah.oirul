@@ -76,22 +76,10 @@ export default function AppLayout({ title, children }: Props) {
             }
         };
 
-        const handleVisibilityChange = () => {
-            // Jika di mobile PWA, visibilitychange sering lebih reliabel dibanding beforeunload
-            if (document.visibilityState === "hidden") {
-                handleUnload();
-            }
-        };
-
         window.addEventListener("beforeunload", handleUnload);
-        document.addEventListener("visibilitychange", handleVisibilityChange);
 
         return () => {
             window.removeEventListener("beforeunload", handleUnload);
-            document.removeEventListener(
-                "visibilitychange",
-                handleVisibilityChange,
-            );
         };
     }, [auth?.user]);
 

@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginChallengeController;
+use App\Http\Controllers\Auth\SSEController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -10,13 +10,22 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Login Challenge routes — guest waiting page, dan auth routes untuk reject/approve
-Route::get('/login/waiting', [LoginChallengeController::class, 'waiting'])->name('login.challenge.waiting');
+// Halaman waiting HP B — tidak perlu auth karena HP B belum login
+Route::get('/login/waiting', [LoginChallengeController::class, 'waiting'])->middleware('guest')->name('login.challenge.waiting');
 Route::get('/login/challenge/{token}/status', [LoginChallengeController::class, 'status'])->name('login.challenge.status');
+
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+
 Route::middleware(['auth'])->group(function () {
     Route::post('/login/challenge/reject/{token}', [LoginChallengeController::class, 'reject'])->name('login.challenge.reject');
+    Route::post('/login/challenge/approve', [AuthenticatedSessionController::class, 'approveChallengeAndLogout'])->name('login.challenge.approve');
     Route::get('/login/challenge/check', [LoginChallengeController::class, 'check'])->name('login.challenge.check');
 });
+
+// SSE untuk notifikasi realtime HP A
+Route::get('/api/sse/notifications', [SSEController::class, 'stream'])
+    ->middleware(['auth', 'verified', 'active'])
+    ->name('sse.notifications');
 
 Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
