@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginChallengeController;
 use App\Http\Controllers\Auth\SSEController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -11,7 +12,7 @@ Route::get('/', function () {
 });
 
 // Halaman waiting HP B — tidak perlu auth karena HP B belum login
-Route::get('/login/waiting', [LoginChallengeController::class, 'waiting'])->middleware('guest')->name('login.challenge.waiting');
+Route::get('/login/waiting', [LoginChallengeController::class, 'waiting'])->middleware('guest')->name('login.waiting');
 Route::get('/login/challenge/{token}/status', [LoginChallengeController::class, 'status'])->name('login.challenge.status');
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;

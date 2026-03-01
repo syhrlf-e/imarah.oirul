@@ -89,7 +89,7 @@ class AuthenticatedSessionController extends Controller
                 $request->session()->regenerateToken();
 
                 // Redirect HP B ke halaman waiting
-                return redirect()->route('login.challenge.waiting', ['token' => $token]);
+                return redirect()->route('login.waiting', ['token' => $token]);
             }
 
             // Tidak ada konflik — langsung masuk dashboard
@@ -161,6 +161,6 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         // Redirect HP A ke form login dengan visual sukses logout
-        return redirect()->route('login')->with('status', 'Anda telah berhasil keluar untuk mengizinkan login di perangkat baru.');
+        return redirect()->route('login')->with('challenge_approved', true);
     }
 }
