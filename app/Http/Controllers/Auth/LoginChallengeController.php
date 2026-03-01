@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -33,6 +35,40 @@ class LoginChallengeController extends Controller
     }
 
 
+
+    /**
+     * Dipanggil HP B untuk finalize login setelah challenge diapprove HP A.
+     * Membuat sesi baru untuk HP B dan redirect ke dashboard.
+     */
+    public function finalize(Request $request, string $token): RedirectResponse
+    {
+        $challenge = Cache::get("login_challenge_{$token}");
+
+        // Cek token valid dan statusnya approved
+        if (!$challenge || $challenge['status'] !== 'approved') {
+            return redirect()->route('login')->withErrors([
+                'email' => 'Link konfirmasi tidak valid atau sudah kadaluarsa.',
+            ]);
+        }
+
+        $user = User::find($challenge['user_id']);
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        // Hapus semua sesi lama user ini (HP A sudah logout duluan)
+        DB::table('sessions')->where('user_id', $user->id)->delete();
+
+        // Login HP B dan buat sesi baru
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        // Bersihkan challenge dari cache
+        Cache::forget("login_challenge_{$token}");
+        Cache::forget("login_challenge_user_{$user->id}");
+
+        return redirect()->intended(route('dashboard'));
+    }
 
     /**
      * Dipanggil HP A saat menekan tombol "Tolak".

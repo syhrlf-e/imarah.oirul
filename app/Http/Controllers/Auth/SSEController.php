@@ -31,7 +31,8 @@ class SSEController extends Controller
                 // Cek challenge pending untuk user ini
                 $challenge = Cache::get("login_challenge_user_{$user->id}");
 
-                if ($challenge && $challenge !== $lastCheck) {
+                // HANYA kirim event jika challenge MASIH pending (bukan rejected/expired/approved)
+                if ($challenge && $challenge['status'] === 'pending' && $challenge !== $lastCheck) {
                     $lastCheck = $challenge;
 
                     // Kirim event ke HP A

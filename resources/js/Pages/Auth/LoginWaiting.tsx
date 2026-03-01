@@ -57,9 +57,13 @@ export default function LoginWaiting({ token, expiresIn = 45 }: Props) {
 
                 if (data.status === "approved") {
                     setStatus("approved");
-                    // Splash sukses 1.5 detik baru redirect
+                    // Full redirect ke finalize endpoint agar HP B mendapat sesi baru dari server
+                    // (tidak bisa pakai router.get karena HP B belum punya sesi)
                     setTimeout(() => {
-                        router.get(route("dashboard"));
+                        window.location.href = route(
+                            "login.challenge.finalize",
+                            { token },
+                        );
                     }, 1500);
                 } else if (data.status === "rejected") {
                     setStatus("rejected");

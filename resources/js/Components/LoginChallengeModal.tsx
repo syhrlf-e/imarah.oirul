@@ -43,7 +43,7 @@ export default function LoginChallengeModal({
     // STEP 1 — Modal notifikasi utama
     if (step === "notify") {
         return (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-5 relative h-[100dvh]">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-5">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -103,7 +103,7 @@ export default function LoginChallengeModal({
     // STEP 2 — Modal konfirmasi sebelum izinkan
     if (step === "confirm") {
         return (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-5 relative h-[100dvh]">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-5">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -154,7 +154,7 @@ export default function LoginChallengeModal({
     // STEP 3 — Splash screen transisi sebelum HP A logout
     if (step === "leaving") {
         return (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white px-5 relative h-[100dvh]">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

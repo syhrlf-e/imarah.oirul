@@ -14,6 +14,8 @@ Route::get('/', function () {
 // Halaman waiting HP B — tidak perlu auth karena HP B belum login
 Route::get('/login/waiting', [LoginChallengeController::class, 'waiting'])->middleware('guest')->name('login.waiting');
 Route::get('/login/challenge/{token}/status', [LoginChallengeController::class, 'status'])->name('login.challenge.status');
+// Finalize login HP B setelah challenge diapprove HP A
+Route::get('/login/challenge/{token}/finalize', [LoginChallengeController::class, 'finalize'])->middleware('guest')->name('login.challenge.finalize');
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 

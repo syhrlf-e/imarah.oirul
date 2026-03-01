@@ -11,6 +11,8 @@ export const useLoginChallenge = (userId: string | null) => {
         null,
     );
     const eventSourceRef = useRef<EventSource | null>(null);
+    // Set untuk mencegah token yang sudah ditolak muncul lagi
+    const rejectedTokensRef = useRef<Set<string>>(new Set());
 
     useEffect(() => {
         if (!userId) return;
@@ -22,6 +24,8 @@ export const useLoginChallenge = (userId: string | null) => {
         // Terima event challenge dari server
         eventSource.addEventListener("challenge", (e) => {
             const data = JSON.parse(e.data);
+            // Jangan tampilkan modal jika token ini sudah pernah ditolak
+            if (rejectedTokensRef.current.has(data.token)) return;
             setActiveChallenge(data);
         });
 
@@ -39,6 +43,10 @@ export const useLoginChallenge = (userId: string | null) => {
     }, [userId]);
 
     const handleReject = async (token: string) => {
+        // Tandai token ini sebagai ditolak SEBELUM request — mencegah race condition dari SSE
+        rejectedTokensRef.current.add(token);
+        setActiveChallenge(null);
+
         try {
             await fetch(
                 route("login.challenge.reject", {
@@ -62,7 +70,6 @@ export const useLoginChallenge = (userId: string | null) => {
         } catch (error) {
             console.error("Failed to reject challenge:", error);
         }
-        setActiveChallenge(null);
     };
 
     const handleApprove = (token: string) => {
