@@ -29,8 +29,17 @@ export default function AppLayout({ title, children }: Props) {
 
     // Login Challenge: Deteksi jika ada user lain yang mencoba login via WebSocket
     const userId = auth?.user?.id ?? "";
-    const { activeChallenge, handleReject, clearChallenge } =
+    const { activeChallenge, handleReject, handleApprove, clearChallenge } =
         useLoginChallenge(userId);
+
+    // Toast state untuk rejection
+    const [showRejectedToast, setShowRejectedToast] = useState(false);
+
+    const handleRejectWithToast = async (token: string) => {
+        await handleReject(token);
+        setShowRejectedToast(true);
+        setTimeout(() => setShowRejectedToast(false), 3000);
+    };
 
     // Ambil direction statis dari SessionStorage yang diset oleh BottomNav Tap Item
     const getDirection = () => {
@@ -121,14 +130,31 @@ export default function AppLayout({ title, children }: Props) {
             <Toaster />
             <GlobalToastListener />
 
+            {/* Login Reject Toast */}
+            <AnimatePresence>
+                {showRejectedToast && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="fixed top-4 left-1/2 -translate-x-1/2 z-[200]
+                                   bg-slate-900 text-white text-sm font-medium
+                                   px-4 py-2 rounded-full shadow-lg"
+                    >
+                        ✕ Permintaan login telah ditolak
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Login Challenge Modal */}
             <AnimatePresence>
                 {activeChallenge && (
                     <LoginChallengeModal
-                        challengeToken={activeChallenge.challenge_token}
-                        deviceInfo={activeChallenge.device_info}
-                        expiresAt={activeChallenge.expires_at}
-                        onReject={handleReject}
+                        challenge={activeChallenge}
+                        onReject={() =>
+                            handleRejectWithToast(activeChallenge.token)
+                        }
+                        onApprove={() => handleApprove(activeChallenge.token)}
                         onExpired={clearChallenge}
                     />
                 )}

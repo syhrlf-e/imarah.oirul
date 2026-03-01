@@ -1,214 +1,229 @@
-import { useEffect, useState } from "react";
-import { Head, router } from "@inertiajs/react";
+import { useState, useEffect, useRef } from "react";
+import { router } from "@inertiajs/react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Props {
     token: string;
-    timeout: number; // detik countdown (misal 10)
+    expiresIn: number;
 }
 
-type ChallengeStatus = "pending" | "rejected" | "expired" | "approved";
+type Status = "waiting" | "approved" | "rejected" | "expired";
 
-/**
- * Halaman waiting untuk HP B saat menunggu konfirmasi dari HP A.
- * Melakukan polling setiap 1.5 detik ke endpoint status challenge.
- */
-export default function LoginWaiting({ token, timeout }: Props) {
-    const [status, setStatus] = useState<ChallengeStatus>("pending");
-    const [secondsLeft, setSecondsLeft] = useState(timeout);
-    const [message, setMessage] = useState(
-        "Menunggu konfirmasi dari perangkat yang sedang aktif...",
-    );
+export default function LoginWaiting({ token, expiresIn = 45 }: Props) {
+    const [status, setStatus] = useState<Status>("waiting");
+    const [secondsLeft, setSecondsLeft] = useState(expiresIn);
+    const pollingRef = useRef<NodeJS.Timeout | null>(null);
+    const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Hitung warna berdasarkan sisa waktu
+    const getColor = () => {
+        if (secondsLeft > 20) return "#22C55E";
+        if (secondsLeft > 10) return "#F59E0B";
+        return "#EF4444";
+    };
+
+    // Hitung progress untuk SVG circle
+    const radius = 54;
+    const circumference = 2 * Math.PI * radius;
+    const progress = (secondsLeft / expiresIn) * circumference;
+
+    // Countdown timer
     useEffect(() => {
-        let pollInterval: ReturnType<typeof setInterval>;
-        let countdownInterval: ReturnType<typeof setInterval>;
+        if (status !== "waiting") return;
 
-        // Countdown visual
-        countdownInterval = setInterval(() => {
+        countdownRef.current = setInterval(() => {
             setSecondsLeft((prev) => {
                 if (prev <= 1) {
-                    clearInterval(countdownInterval);
+                    clearInterval(countdownRef.current!);
                     return 0;
                 }
                 return prev - 1;
             });
         }, 1000);
 
-        // Polling setiap 1.5 detik
-        pollInterval = setInterval(async () => {
-            try {
-                const res = await fetch(
-                    route("login.challenge.status", { token }),
-                );
-                const data: { status: ChallengeStatus } = await res.json();
+        return () => {
+            if (countdownRef.current) clearInterval(countdownRef.current);
+        };
+    }, [status]);
 
-                if (data.status === "rejected") {
-                    clearInterval(pollInterval);
-                    clearInterval(countdownInterval);
-                    // Langsung redirect ke login dengan flash message dari sisi frontend jika dimungkinkan,
-                    // atau cukup redirect saja karena session sudah ditolak
-                    router.get(
-                        route("login"),
-                        {},
-                        {
-                            onFinish: () => {
-                                // Opsional: window.toast.error("Login ditolak perangkat utama") jika ada global toast
-                            },
-                        },
-                    );
-                } else if (data.status === "expired") {
-                    // Timeout — HP A tidak merespons → HP B diizinkan masuk
-                    clearInterval(pollInterval);
-                    clearInterval(countdownInterval);
+    // Polling status setiap 2 detik
+    useEffect(() => {
+        if (status !== "waiting") return;
+
+        const poll = async () => {
+            try {
+                const res = await fetch(`/login/challenge/${token}/status`);
+                const data = await res.json();
+
+                if (data.status === "approved") {
                     setStatus("approved");
-                    setMessage("Mengalihkan ke dasbor...");
-                    // Redirect ke login ulang untuk mendapatkan sesi baru (karena sesi HP A sudah di-kick)
+                    // Splash sukses 1.5 detik baru redirect
                     setTimeout(() => {
-                        router.get(route("login"));
-                    }, 1000);
+                        router.get(route("dashboard"));
+                    }, 1500);
+                } else if (data.status === "rejected") {
+                    setStatus("rejected");
+                } else if (data.status === "expired") {
+                    setStatus("expired");
                 }
-            } catch {
-                // Network error - ignore, tetap polling
+            } catch (error) {
+                // Abaikan network error — polling akan coba lagi
             }
-        }, 1500);
+        };
+
+        pollingRef.current = setInterval(poll, 2000);
 
         return () => {
-            clearInterval(pollInterval);
-            clearInterval(countdownInterval);
+            if (pollingRef.current) clearInterval(pollingRef.current);
         };
-    }, [token]);
+    }, [token, status]);
 
-    const progress = secondsLeft / timeout;
-    const circumference = 2 * Math.PI * 36;
-    const strokeDashoffset = circumference * (1 - progress);
+    // TAMPILAN WAITING — Progress bar melingkar
+    if (status === "waiting") {
+        return (
+            <div className="min-h-[100dvh] bg-slate-50 flex items-center justify-center px-5">
+                <div className="flex flex-col items-center text-center">
+                    {/* Progress bar melingkar dengan SVG */}
+                    <div className="relative w-36 h-36 mb-8">
+                        <svg
+                            className="w-full h-full -rotate-90"
+                            viewBox="0 0 120 120"
+                        >
+                            {/* Track (background) */}
+                            <circle
+                                cx="60"
+                                cy="60"
+                                r={radius}
+                                fill="none"
+                                stroke="#E2E8F0"
+                                strokeWidth="8"
+                            />
+                            {/* Progress */}
+                            <circle
+                                cx="60"
+                                cy="60"
+                                r={radius}
+                                fill="none"
+                                stroke={getColor()}
+                                strokeWidth="8"
+                                strokeLinecap="round"
+                                strokeDasharray={circumference}
+                                strokeDashoffset={circumference - progress}
+                                style={{
+                                    transition:
+                                        "stroke-dashoffset 1s linear, stroke 0.5s ease",
+                                }}
+                            />
+                        </svg>
 
-    return (
-        <>
-            <Head title="Menunggu Konfirmasi Login" />
-
-            <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 p-6">
-                <div
-                    className="w-full max-w-sm overflow-hidden rounded-2xl bg-white/10 shadow-2xl backdrop-blur-xl"
-                    style={{ animation: "fadeIn 0.4s ease-out" }}
-                >
-                    <div className="p-8">
-                        {/* Logo / Icon */}
-                        <div className="mb-6 flex justify-center">
-                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/20">
-                                <svg
-                                    className="h-8 w-8 text-emerald-400"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={1.5}
-                                        d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
-                                    />
-                                </svg>
-                            </div>
+                        {/* Angka di tengah */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span
+                                className="text-3xl font-bold transition-colors duration-500"
+                                style={{ color: getColor() }}
+                            >
+                                {secondsLeft}
+                            </span>
+                            <span className="text-xs text-slate-400">
+                                detik
+                            </span>
                         </div>
-
-                        {status === "pending" && (
-                            <>
-                                {/* Countdown Ring */}
-                                <div className="mb-5 flex justify-center">
-                                    <div className="relative flex h-24 w-24 items-center justify-center">
-                                        <svg
-                                            className="absolute inset-0 -rotate-90"
-                                            viewBox="0 0 80 80"
-                                        >
-                                            <circle
-                                                cx="40"
-                                                cy="40"
-                                                r="36"
-                                                fill="none"
-                                                stroke="rgba(255,255,255,0.1)"
-                                                strokeWidth="5"
-                                            />
-                                            <circle
-                                                cx="40"
-                                                cy="40"
-                                                r="36"
-                                                fill="none"
-                                                stroke={
-                                                    secondsLeft <= 3
-                                                        ? "#ef4444"
-                                                        : "#10b981"
-                                                }
-                                                strokeWidth="5"
-                                                strokeLinecap="round"
-                                                strokeDasharray={circumference}
-                                                strokeDashoffset={
-                                                    strokeDashoffset
-                                                }
-                                                className="transition-all duration-500"
-                                            />
-                                        </svg>
-                                        <span className="text-3xl font-bold text-white">
-                                            {secondsLeft}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* Spinning dots */}
-                                <div className="mb-4 flex justify-center gap-1.5">
-                                    {[0, 1, 2].map((i) => (
-                                        <div
-                                            key={i}
-                                            className="h-2 w-2 rounded-full bg-emerald-400"
-                                            style={{
-                                                animation: `bounce 1.2s infinite ${i * 0.2}s`,
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-                            </>
-                        )}
-
-                        {status === "approved" && (
-                            <div className="mb-4 flex justify-center">
-                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20">
-                                    <svg
-                                        className="h-8 w-8 text-emerald-400"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M5 13l4 4L19 7"
-                                        />
-                                    </svg>
-                                </div>
-                            </div>
-                        )}
-
-                        <h2 className="mb-2 text-center text-xl font-bold text-white">
-                            {status === "pending" && "Menunggu Konfirmasi"}
-                            {status === "approved" && "Mengalihkan..."}
-                        </h2>
-                        <p className="text-center text-sm text-white/60">
-                            {message}
-                        </p>
                     </div>
+
+                    {/* Icon */}
+                    <span className="text-4xl mb-4">🔐</span>
+
+                    {/* Teks */}
+                    <h2 className="text-lg font-bold text-slate-900 mb-2">
+                        Menunggu Konfirmasi
+                    </h2>
+                    <p className="text-sm text-slate-500 max-w-xs">
+                        Permintaan login Anda sedang dikonfirmasi oleh pengguna
+                        yang sedang aktif.
+                    </p>
                 </div>
             </div>
+        );
+    }
 
-            <style>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: scale(0.95); }
-                    to   { opacity: 1; transform: scale(1); }
-                }
-                @keyframes bounce {
-                    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-                    40% { transform: scale(1); opacity: 1; }
-                }
-            `}</style>
-        </>
-    );
+    // TAMPILAN APPROVED — Splash sukses
+    if (status === "approved") {
+        return (
+            <div className="min-h-[100dvh] bg-slate-50 flex items-center justify-center px-5">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center text-center"
+                >
+                    <span className="text-5xl mb-6">✅</span>
+                    <h2 className="text-xl font-bold text-slate-900 mb-2">
+                        Login Berhasil!
+                    </h2>
+                    <p className="text-sm text-slate-500">
+                        Anda akan masuk ke dashboard sebentar lagi...
+                    </p>
+                </motion.div>
+            </div>
+        );
+    }
+
+    // TAMPILAN REJECTED — Ditolak HP A
+    if (status === "rejected") {
+        return (
+            <div className="min-h-[100dvh] bg-slate-50 flex items-center justify-center px-5">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col items-center text-center"
+                >
+                    <span className="text-5xl mb-6">✕</span>
+                    <h2 className="text-xl font-bold text-slate-900 mb-2">
+                        Login Ditolak
+                    </h2>
+                    <p className="text-sm text-slate-500 mb-8 max-w-xs">
+                        Permintaan Anda tidak diizinkan oleh pengguna yang
+                        sedang aktif.
+                    </p>
+                    <button
+                        onClick={() => router.get(route("login"))}
+                        className="px-6 py-3 bg-slate-900 text-white font-semibold rounded-2xl
+                       hover:bg-slate-800 transition-colors"
+                    >
+                        Kembali ke Login
+                    </button>
+                </motion.div>
+            </div>
+        );
+    }
+
+    // TAMPILAN EXPIRED — Waktu habis, tidak ada respon
+    if (status === "expired") {
+        return (
+            <div className="min-h-[100dvh] bg-slate-50 flex items-center justify-center px-5">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col items-center text-center"
+                >
+                    <span className="text-5xl mb-6">⏱️</span>
+                    <h2 className="text-xl font-bold text-slate-900 mb-2">
+                        Waktu Habis
+                    </h2>
+                    <p className="text-sm text-slate-500 mb-8 max-w-xs">
+                        Tidak ada konfirmasi dari pengguna yang sedang aktif.
+                        Silakan coba lagi nanti.
+                    </p>
+                    <button
+                        onClick={() => router.get(route("login"))}
+                        className="px-6 py-3 bg-slate-900 text-white font-semibold rounded-2xl
+                       hover:bg-slate-800 transition-colors"
+                    >
+                        Kembali ke Login
+                    </button>
+                </motion.div>
+            </div>
+        );
+    }
+
+    return null;
 }
