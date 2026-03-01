@@ -56,7 +56,9 @@ class SSEController extends Controller
                 echo "event: ping\n";
                 echo "data: " . json_encode(['time' => now()->timestamp]) . "\n\n";
 
-                ob_flush();
+                if (ob_get_level() > 0) {
+                    ob_flush();
+                }
                 flush();
 
                 // Cek setiap 1 detik
