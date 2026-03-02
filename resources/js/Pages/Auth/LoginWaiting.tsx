@@ -46,13 +46,17 @@ export default function LoginWaiting({ token, expiresIn = 45 }: Props) {
         };
     }, [status]);
 
-    // Polling status setiap 2 detik
+    // Polling status setiap 2 detik dengan AbortController
     useEffect(() => {
         if (status !== "waiting") return;
 
+        let controller = new AbortController();
+
         const poll = async () => {
             try {
-                const res = await fetch(`/login/challenge/${token}/status`);
+                const res = await fetch(`/login/challenge/${token}/status`, {
+                    signal: controller.signal,
+                });
                 const data = await res.json();
 
                 if (data.status === "approved") {
@@ -67,15 +71,25 @@ export default function LoginWaiting({ token, expiresIn = 45 }: Props) {
                 } else if (data.status === "expired") {
                     setStatus("expired");
                 }
-            } catch (error) {
-                // Abaikan network error — polling akan coba lagi
+            } catch (error: unknown) {
+                if (error instanceof Error && error.name === "AbortError")
+                    return; // Fetch di-abort — normal, abaikan
+                // Network error lain — polling akan coba lagi
             }
         };
 
-        pollingRef.current = setInterval(poll, 2000);
+        // Panggil langsung pertama kali
+        poll();
+
+        pollingRef.current = setInterval(() => {
+            controller.abort(); // Cancel request sebelumnya
+            controller = new AbortController(); // Buat controller baru
+            poll();
+        }, 2000);
 
         return () => {
-            if (pollingRef.current) clearInterval(pollingRef.current);
+            clearInterval(pollingRef.current!);
+            controller.abort(); // Cancel request saat unmount
         };
     }, [token, status]);
 
