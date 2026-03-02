@@ -45,9 +45,9 @@ export default function MobileHeader({
     const initial = getInitial(auth?.user?.name ?? "");
 
     return (
-        <div className="md:hidden shrink-0 relative z-[100] mb-4 h-14 mt-4 mx-4">
-            {/* Fixed Island Header */}
-            <div className="fixed top-4 left-5 right-5 z-[100] bg-white/95 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200/50 flex items-center justify-between h-14 px-5 rounded-3xl">
+        <div className="md:hidden shrink-0 relative z-[100] h-14">
+            {/* Fixed Full-Width Header */}
+            <div className="fixed top-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-md border-b border-slate-200 flex items-center justify-between h-14 px-4">
                 {/* Judul: "Imarah" di dashboard, nama halaman di halaman lain */}
                 <span
                     className={`leading-tight ${

@@ -192,7 +192,7 @@ export default function AppLayout({ title, children }: Props) {
                         }
                     >
                         <motion.div
-                            key={url}
+                            key={url.split("?")[0]}
                             custom={direction}
                             variants={
                                 isMobile ? mobileVariants : desktopVariants

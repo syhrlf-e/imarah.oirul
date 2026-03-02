@@ -456,96 +456,65 @@ export default function KasIndex({
         <AppLayout title="Pengelola Kas">
             <Head title="Kas Masjid" />
 
-            {/* ── MOBILE: Sticky Layout ── */}
+            {/* ── MOBILE: Scroll-then-Stick Layout ── */}
+            {/* Fixed height = screen - header (56px) - bottom nav (68px) */}
             <div
                 className="flex flex-col md:hidden -mx-4 -mt-2"
                 style={{ height: "calc(100dvh - 56px - 68px)" }}
             >
-                {/* STICKY — Toggle Tampilan | Catat */}
-                <div className="shrink-0 bg-white border-b border-slate-100 px-4 py-2">
-                    <div className="flex bg-slate-100 rounded-xl p-1 w-full">
-                        <button
-                            onClick={() => setActiveTab("tampilan")}
-                            className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
-                                activeTab === "tampilan"
-                                    ? "bg-white text-slate-900 shadow-sm"
-                                    : "text-slate-500"
-                            }`}
-                        >
-                            Tampilan
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("catat")}
-                            className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
-                                activeTab === "catat"
-                                    ? "bg-white text-slate-900 shadow-sm"
-                                    : "text-slate-500"
-                            }`}
-                        >
-                            Catat
-                        </button>
-                    </div>
-                </div>
-
-                {/* STICKY — Search + Filter (hanya muncul di tab Catat) */}
-                {activeTab === "catat" && (
-                    <div className="shrink-0 bg-white px-4 pt-3 pb-2 border-b border-slate-100 space-y-2">
-                        {/* Search bar */}
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="Cari keterangan transaksi..."
-                                value={search}
-                                onChange={handleSearchChange}
-                                className="w-full pl-9 pr-3 py-2 bg-slate-100 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                            />
-                        </div>
-                        {/* Filter Tabs */}
-                        <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl">
-                            {(
-                                [
-                                    { value: "", label: "Semua" },
-                                    { value: "in", label: "Masuk" },
-                                    { value: "out", label: "Keluar" },
-                                ] as {
-                                    value: "" | "in" | "out";
-                                    label: string;
-                                }[]
-                            ).map((opt) => (
-                                <button
-                                    key={opt.value}
-                                    type="button"
-                                    onClick={() => handleTypeChange(opt.value)}
-                                    className={`relative flex-1 py-1.5 rounded-lg text-sm font-medium transition-colors z-10 text-center ${
-                                        typeFilter === opt.value
-                                            ? "text-green-700"
-                                            : "text-slate-500 hover:text-slate-700"
-                                    }`}
-                                >
-                                    {typeFilter === opt.value && (
-                                        <motion.div
-                                            layoutId="activeFilterKasTabMobile"
-                                            className="absolute inset-0 bg-white border border-green-500 rounded-lg shadow-sm -z-10"
-                                            transition={{
-                                                type: "spring",
-                                                stiffness: 400,
-                                                damping: 30,
-                                            }}
-                                        />
-                                    )}
-                                    {opt.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* SCROLLABLE — Area Konten */}
+                {/* Scroll container UTAMA — seluruh konten scroll di sini */}
                 <div className="flex-1 overflow-y-auto">
+                    {/* Toggle — ikut scroll, posisi tengah */}
+                    <div className="flex justify-center px-4 py-3 bg-white">
+                        <div className="flex bg-slate-100 rounded-full p-1 shadow-inner">
+                            <button
+                                onClick={() => setActiveTab("tampilan")}
+                                className={`relative px-6 py-1.5 rounded-full text-sm font-semibold transition-colors z-10 ${
+                                    activeTab === "tampilan"
+                                        ? "text-white"
+                                        : "text-slate-500"
+                                }`}
+                            >
+                                {activeTab === "tampilan" && (
+                                    <motion.div
+                                        layoutId="activeToggleKas"
+                                        className="absolute inset-0 bg-emerald-500 rounded-full shadow-sm shadow-emerald-500/30 -z-10"
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 400,
+                                            damping: 30,
+                                        }}
+                                    />
+                                )}
+                                Tampilan
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("catat")}
+                                className={`relative px-6 py-1.5 rounded-full text-sm font-semibold transition-colors z-10 ${
+                                    activeTab === "catat"
+                                        ? "text-white"
+                                        : "text-slate-500"
+                                }`}
+                            >
+                                {activeTab === "catat" && (
+                                    <motion.div
+                                        layoutId="activeToggleKas"
+                                        className="absolute inset-0 bg-emerald-500 rounded-full shadow-sm shadow-emerald-500/30 -z-10"
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 400,
+                                            damping: 30,
+                                        }}
+                                    />
+                                )}
+                                Catat
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* ── Tab Tampilan ── */}
                     {activeTab === "tampilan" && (
-                        <div className="px-4 py-4 space-y-3">
-                            {/* Summary Cards */}
+                        <div className="px-4 pb-4 space-y-3">
                             <KasSummaryCards
                                 totalSaldo={summary.saldo_total_kas}
                                 pemasukanBulanIni={summary.pemasukan_bulan_ini}
@@ -656,59 +625,137 @@ export default function KasIndex({
                         </div>
                     )}
 
+                    {/* ── Tab Catat ── */}
                     {activeTab === "catat" && (
-                        <div className="px-4 pt-3 pb-2 flex flex-col gap-2">
-                            {/* Tombol Tambah Transaksi */}
-                            {isBendaharaOrAdmin && (
-                                <PrimaryButton
-                                    onClick={openAddModal}
-                                    className="w-full !py-2.5 font-medium cursor-pointer shadow-sm"
-                                >
-                                    <Plus className="w-4 h-4" />
-                                    Catat Transaksi Baru
-                                </PrimaryButton>
-                            )}
-
-                            {/* Transaction List */}
-                            {allTransactions.map((transaction) => (
-                                <MobileSwipeCard
-                                    key={transaction.id}
-                                    transaction={transaction}
-                                    activeSwipeId={activeSwipeId}
-                                    setActiveSwipeId={setActiveSwipeId}
-                                    isBendaharaOrAdmin={isBendaharaOrAdmin}
-                                    isSuperAdmin={isSuperAdmin}
-                                    formatDateMobile={formatDateMobile}
-                                    handleVerify={handleVerify}
-                                    handleDelete={handleDelete}
-                                />
-                            ))}
-
-                            {allTransactions.length === 0 && (
-                                <div className="flex flex-col items-center justify-center text-slate-400 py-8 bg-white rounded-2xl shadow-sm border border-slate-100 mt-2">
-                                    <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
-                                        <Search className="w-6 h-6 text-slate-300" />
-                                    </div>
-                                    <p className="font-medium text-slate-600 text-sm">
-                                        Belum ada data transaksi
-                                    </p>
+                        <div className="flex flex-col">
+                            {/* Search + Filter — STICKY top-0 saat toggle scroll hilang. z-30 agar card tidak overlap */}
+                            <div className="sticky top-0 bg-slate-50 border-b border-slate-100 px-4 pb-2 pt-1 z-30 shadow-sm relative space-y-2">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Cari keterangan transaksi..."
+                                        value={search}
+                                        onChange={handleSearchChange}
+                                        className="w-full pl-9 pr-3 py-2 bg-white rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 border border-slate-200"
+                                    />
                                 </div>
-                            )}
+                                <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl">
+                                    {(
+                                        [
+                                            { value: "", label: "Semua" },
+                                            { value: "in", label: "Masuk" },
+                                            { value: "out", label: "Keluar" },
+                                        ] as {
+                                            value: "" | "in" | "out";
+                                            label: string;
+                                        }[]
+                                    ).map((opt) => (
+                                        <button
+                                            key={opt.value}
+                                            type="button"
+                                            onClick={() =>
+                                                handleTypeChange(opt.value)
+                                            }
+                                            className={`relative flex-1 py-1.5 rounded-lg text-sm font-medium transition-colors z-10 text-center ${
+                                                typeFilter === opt.value
+                                                    ? "text-green-700"
+                                                    : "text-slate-500 hover:text-slate-700"
+                                            }`}
+                                        >
+                                            {typeFilter === opt.value && (
+                                                <motion.div
+                                                    layoutId="activeFilterKasTabMobile"
+                                                    className="absolute inset-0 bg-white border border-green-500 rounded-lg shadow-sm -z-10"
+                                                    transition={{
+                                                        type: "spring",
+                                                        stiffness: 400,
+                                                        damping: 30,
+                                                    }}
+                                                />
+                                            )}
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
 
-                            {/* Loader Ref for Infinite Scroll */}
+                            {/* Cards — mengikuti flow normal. Jika data kosong, pb dihilangkan agar tidak bisa di-scroll kosong */}
                             <div
-                                ref={loaderRef}
-                                className="py-2 flex justify-center h-10 shrink-0"
+                                className={`px-4 pt-3 flex flex-col gap-2 relative z-0 ${allTransactions.length > 0 ? "pb-24" : "pb-4"}`}
                             >
-                                {hasMore && (
-                                    <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                                <AnimatePresence mode="popLayout">
+                                    {allTransactions.map((transaction) => (
+                                        <motion.div
+                                            key={transaction.id}
+                                            layout
+                                            initial={{
+                                                opacity: 0,
+                                                scale: 0.95,
+                                            }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            transition={{ duration: 0.2 }}
+                                        >
+                                            <MobileSwipeCard
+                                                transaction={transaction}
+                                                activeSwipeId={activeSwipeId}
+                                                setActiveSwipeId={
+                                                    setActiveSwipeId
+                                                }
+                                                isBendaharaOrAdmin={
+                                                    isBendaharaOrAdmin
+                                                }
+                                                isSuperAdmin={isSuperAdmin}
+                                                formatDateMobile={
+                                                    formatDateMobile
+                                                }
+                                                handleVerify={handleVerify}
+                                                handleDelete={handleDelete}
+                                            />
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+                                {allTransactions.length === 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="flex flex-col items-center justify-center text-slate-400 py-8 bg-white rounded-2xl shadow-sm border border-slate-100 mt-2"
+                                    >
+                                        <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                                            <Search className="w-6 h-6 text-slate-300" />
+                                        </div>
+                                        <p className="font-medium text-slate-600 text-sm">
+                                            Belum ada data transaksi
+                                        </p>
+                                    </motion.div>
                                 )}
+                                {/* Infinite scroll loader */}
+                                <div
+                                    ref={loaderRef}
+                                    className="py-2 flex justify-center h-10 shrink-0"
+                                >
+                                    {hasMore && (
+                                        <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
                 </div>
             </div>
-            {/* end mobile sticky layout */}
+            {/* end mobile layout */}
+
+            {/* FAB — Floating Action Button (mobile only, tab Catat) */}
+            {isBendaharaOrAdmin && activeTab === "catat" && (
+                <button
+                    onClick={openAddModal}
+                    className="md:hidden fixed bottom-[104px] right-4 z-50 flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-medium text-xs px-4 py-2.5 rounded-full shadow-md shadow-emerald-500/25 transition-all"
+                >
+                    <Plus className="w-4 h-4" />
+                    Catat
+                </button>
+            )}
 
             {/* ── DESKTOP ONLY: Summary Cards + FilterBar + DataTable ── */}
             <div className="hidden md:contents">
@@ -721,7 +768,19 @@ export default function KasIndex({
                     className="mb-8 md:px-6 shrink-0"
                 />
 
-                <div className="border-t border-slate-200 mb-6 md:mx-6"></div>
+                {/* Separator + Catat Transaksi button — Bendahara/Admin only */}
+                <div className="flex items-center gap-4 mb-6 md:mx-6">
+                    <div className="flex-1 border-t border-slate-200" />
+                    {isBendaharaOrAdmin && (
+                        <button
+                            onClick={openAddModal}
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white text-sm font-semibold rounded-full shadow-md shadow-emerald-500/25 transition-all shrink-0"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Catat Transaksi
+                        </button>
+                    )}
+                </div>
 
                 {/* Desktop Toolbar — search, filter, sort */}
                 <FilterBar
