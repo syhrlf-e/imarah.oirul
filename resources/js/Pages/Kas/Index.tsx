@@ -25,6 +25,7 @@ import {
     Save,
     Clock,
     XCircle,
+    Download,
 } from "lucide-react";
 import FilterBar from "@/Components/FilterBar";
 import PageHeader from "@/Components/PageHeader";
@@ -168,6 +169,11 @@ function MobileSwipeCard({
     );
 }
 
+interface BreakdownItem {
+    category: string;
+    total: number;
+}
+
 interface Props {
     transactions: PaginatedResponse<Transaction>;
     auth: {
@@ -185,6 +191,10 @@ interface Props {
         saldo_akhir_bulan: number;
         saldo_total_kas: number;
     };
+    breakdown: {
+        pemasukan: BreakdownItem[];
+        pengeluaran: BreakdownItem[];
+    };
     month: string | number;
     year: string | number;
 }
@@ -193,10 +203,14 @@ export default function KasIndex({
     transactions,
     auth,
     summary,
+    breakdown,
     month,
     year,
     filters,
 }: Props) {
+    const [activeTab, setActiveTab] = useState<"tampilan" | "catat">(
+        "tampilan",
+    );
     const [search, setSearch] = useState(filters?.search ?? "");
     const [typeFilter, setTypeFilter] = useState(filters?.type ?? "");
     const [categoryFilter, setCategoryFilter] = useState(
@@ -433,350 +447,569 @@ export default function KasIndex({
         }
     };
 
+    const formatCat = (cat: string) => {
+        const withSpaces = cat.replace(/_/g, " ");
+        return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
+    };
+
     return (
         <AppLayout title="Pengelola Kas">
             <Head title="Kas Masjid" />
 
-            {/* Header Section */}
-            <PageHeader
-                title="Kas Masjid"
-                description="Kelola dan pantau seluruh pemasukan serta pengeluaran operasional masjid."
+            {/* ── MOBILE: Sticky Layout ── */}
+            <div
+                className="flex flex-col md:hidden -mx-4 -mt-2"
+                style={{ height: "calc(100dvh - 56px - 68px)" }}
             >
-                {isBendaharaOrAdmin && (
-                    <PrimaryButton
-                        onClick={openAddModal}
-                        className="!py-2 !px-3.5 md:!py-2.5 md:!px-4 text-sm md:text-base font-medium cursor-pointer shadow-sm md:shadow-md"
-                    >
-                        <Plus className="w-4 h-4 md:w-5 md:h-5" />
-                        Catat Transaksi
-                    </PrimaryButton>
-                )}
-            </PageHeader>
-
-            {/* Stat Cards - Ringkasan Keuangan */}
-            <KasSummaryCards
-                totalSaldo={summary.saldo_total_kas}
-                pemasukanBulanIni={summary.pemasukan_bulan_ini}
-                pengeluaranBulanIni={summary.pengeluaran_bulan_ini}
-                surplusDefisit={summary.saldo_akhir_bulan}
-                monthLabel={getMonthName(month)}
-                className="mb-8 md:px-6 shrink-0"
-            />
-
-            <div className="border-t border-slate-200 mb-6 md:mx-6"></div>
-
-            {/* Toolbar Area (Search & Filters) */}
-            <FilterBar
-                searchPlaceholder="Cari keterangan transaksi..."
-                searchValue={search}
-                onSearchChange={(val) =>
-                    handleSearchChange({
-                        target: { value: val },
-                    } as React.ChangeEvent<HTMLInputElement>)
-                }
-                addon={
-                    <div className="flex items-center justify-between md:justify-start gap-1 p-1 bg-slate-100 rounded-xl w-full">
-                        {(
-                            [
-                                { value: "", label: "Semua" },
-                                { value: "in", label: "Masuk" },
-                                { value: "out", label: "Keluar" },
-                            ] as { value: "" | "in" | "out"; label: string }[]
-                        ).map((opt) => (
-                            <button
-                                key={opt.value}
-                                type="button"
-                                onClick={() => handleTypeChange(opt.value)}
-                                className={`relative flex-1 md:flex-none px-3 py-1.5 md:px-3.5 rounded-lg text-sm font-medium transition-colors z-10 text-center ${
-                                    typeFilter === opt.value
-                                        ? "text-green-700"
-                                        : "text-slate-500 hover:text-slate-700"
-                                }`}
-                            >
-                                {typeFilter === opt.value && (
-                                    <motion.div
-                                        layoutId="activeFilterKasTab"
-                                        className="absolute inset-0 bg-white border border-green-500 rounded-lg shadow-sm -z-10"
-                                        transition={{
-                                            type: "spring",
-                                            stiffness: 400,
-                                            damping: 30,
-                                        }}
-                                    />
-                                )}
-                                {opt.label}
-                            </button>
-                        ))}
+                {/* STICKY — Toggle Tampilan | Catat */}
+                <div className="shrink-0 bg-white border-b border-slate-100 px-4 py-2">
+                    <div className="flex bg-slate-100 rounded-xl p-1 w-full">
+                        <button
+                            onClick={() => setActiveTab("tampilan")}
+                            className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
+                                activeTab === "tampilan"
+                                    ? "bg-white text-slate-900 shadow-sm"
+                                    : "text-slate-500"
+                            }`}
+                        >
+                            Tampilan
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("catat")}
+                            className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
+                                activeTab === "catat"
+                                    ? "bg-white text-slate-900 shadow-sm"
+                                    : "text-slate-500"
+                            }`}
+                        >
+                            Catat
+                        </button>
                     </div>
-                }
-            >
-                {/* Kategori Filter Dropdown */}
-                <div className="relative shrink-0 z-50">
-                    {isCategoryFilterOpen && (
-                        <div
-                            className="fixed inset-0 z-40"
-                            onClick={() => setIsCategoryFilterOpen(false)}
-                        ></div>
-                    )}
-                    <button
-                        type="button"
-                        onClick={() =>
-                            setIsCategoryFilterOpen(!isCategoryFilterOpen)
-                        }
-                        className="relative z-50 inline-flex items-center justify-center md:justify-between w-12 sm:w-14 md:w-[200px] px-0 md:px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
-                        title="Filter Kategori"
-                    >
-                        <Filter className="w-4 h-4 md:mr-2 text-slate-500 shrink-0" />
-                        <span className="hidden md:inline truncate">
-                            {CATEGORY_OPTIONS.find(
-                                (opt) => opt.value === categoryFilter,
-                            )?.label || "Semua Kategori"}
-                        </span>
-                        <ChevronDown
-                            className={`hidden md:block w-4 h-4 text-slate-400 transition-transform duration-200 ml-2 shrink-0 ${isCategoryFilterOpen ? "rotate-180" : ""}`}
-                        />
-                    </button>
-                    <AnimatePresence>
-                        {isCategoryFilterOpen && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 10 }}
-                                transition={{ duration: 0.15 }}
-                                className="absolute right-[-2.5rem] sm:right-auto sm:left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-[60] p-1"
-                            >
-                                <div className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200">
-                                    {CATEGORY_OPTIONS.map((opt) => (
-                                        <button
-                                            key={opt.value}
-                                            type="button"
-                                            onClick={() =>
-                                                handleCategoryChange(opt.value)
-                                            }
-                                            className={`w-full text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                                                categoryFilter === opt.value
-                                                    ? "bg-green-50 text-green-700 font-semibold"
-                                                    : "text-slate-600 hover:bg-slate-50"
-                                            }`}
-                                        >
-                                            {opt.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
                 </div>
-                {/* Urutkan */}
-                <button
-                    type="button"
-                    onClick={() => {
-                        const newSort =
-                            sortOrder === "terbaru" ? "terlama" : "terbaru";
-                        setSortOrder(newSort);
-                        applyFilters({ sort: newSort, page: 1 });
-                    }}
-                    className="inline-flex items-center justify-center w-12 sm:w-14 md:w-auto px-0 md:px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer shrink-0"
-                    title={sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
-                >
-                    <SlidersHorizontal className="w-4 h-4 md:mr-2 text-slate-500" />
-                    <span className="hidden md:inline">
-                        {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
-                    </span>
-                </button>
-            </FilterBar>
 
-            {/* Mobile Transaction List */}
-            <div className="flex flex-col gap-2 md:hidden">
-                {allTransactions.map((transaction) => (
-                    <MobileSwipeCard
-                        key={transaction.id}
-                        transaction={transaction}
-                        activeSwipeId={activeSwipeId}
-                        setActiveSwipeId={setActiveSwipeId}
-                        isBendaharaOrAdmin={isBendaharaOrAdmin}
-                        isSuperAdmin={isSuperAdmin}
-                        formatDateMobile={formatDateMobile}
-                        handleVerify={handleVerify}
-                        handleDelete={handleDelete}
-                    />
-                ))}
-
-                {allTransactions.length === 0 && (
-                    <div className="flex flex-col items-center justify-center text-slate-400 py-8 bg-white rounded-2xl shadow-sm border border-slate-100 mt-2">
-                        <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
-                            <Search className="w-6 h-6 text-slate-300" />
+                {/* STICKY — Search + Filter (hanya muncul di tab Catat) */}
+                {activeTab === "catat" && (
+                    <div className="shrink-0 bg-white px-4 pt-3 pb-2 border-b border-slate-100 space-y-2">
+                        {/* Search bar */}
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="Cari keterangan transaksi..."
+                                value={search}
+                                onChange={handleSearchChange}
+                                className="w-full pl-9 pr-3 py-2 bg-slate-100 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            />
                         </div>
-                        <p className="font-medium text-slate-600 text-sm">
-                            Belum ada data transaksi
-                        </p>
+                        {/* Filter Tabs */}
+                        <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl">
+                            {(
+                                [
+                                    { value: "", label: "Semua" },
+                                    { value: "in", label: "Masuk" },
+                                    { value: "out", label: "Keluar" },
+                                ] as {
+                                    value: "" | "in" | "out";
+                                    label: string;
+                                }[]
+                            ).map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => handleTypeChange(opt.value)}
+                                    className={`relative flex-1 py-1.5 rounded-lg text-sm font-medium transition-colors z-10 text-center ${
+                                        typeFilter === opt.value
+                                            ? "text-green-700"
+                                            : "text-slate-500 hover:text-slate-700"
+                                    }`}
+                                >
+                                    {typeFilter === opt.value && (
+                                        <motion.div
+                                            layoutId="activeFilterKasTabMobile"
+                                            className="absolute inset-0 bg-white border border-green-500 rounded-lg shadow-sm -z-10"
+                                            transition={{
+                                                type: "spring",
+                                                stiffness: 400,
+                                                damping: 30,
+                                            }}
+                                        />
+                                    )}
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 )}
 
-                {/* Loader Ref for Infinite Scroll */}
-                <div
-                    ref={loaderRef}
-                    className="py-2 flex justify-center h-10 shrink-0"
-                >
-                    {hasMore && (
-                        <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                {/* SCROLLABLE — Area Konten */}
+                <div className="flex-1 overflow-y-auto">
+                    {activeTab === "tampilan" && (
+                        <div className="px-4 py-4 space-y-3">
+                            {/* Summary Cards */}
+                            <KasSummaryCards
+                                totalSaldo={summary.saldo_total_kas}
+                                pemasukanBulanIni={summary.pemasukan_bulan_ini}
+                                pengeluaranBulanIni={
+                                    summary.pengeluaran_bulan_ini
+                                }
+                                surplusDefisit={summary.saldo_akhir_bulan}
+                                monthLabel={getMonthName(month)}
+                            />
+
+                            {/* Card Rincian Pemasukan */}
+                            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                                <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                                    <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                                        <TrendingUp className="w-4 h-4 text-emerald-500" />
+                                        Rincian Pemasukan
+                                    </h3>
+                                    <span className="text-xs text-slate-400">
+                                        {getMonthName(month)}
+                                    </span>
+                                </div>
+                                {breakdown.pemasukan.length > 0 ? (
+                                    <ul className="divide-y divide-slate-50">
+                                        {breakdown.pemasukan.map(
+                                            (item, idx) => (
+                                                <li
+                                                    key={idx}
+                                                    className="flex justify-between items-center px-4 py-3"
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                                                        <span className="text-sm text-slate-700">
+                                                            {formatCat(
+                                                                item.category,
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-sm font-semibold text-emerald-600">
+                                                        {formatCurrency(
+                                                            item.total,
+                                                        )}
+                                                    </span>
+                                                </li>
+                                            ),
+                                        )}
+                                    </ul>
+                                ) : (
+                                    <p className="text-center text-sm text-slate-400 py-6">
+                                        Belum ada pemasukan bulan ini
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Card Rincian Pengeluaran */}
+                            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                                <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                                    <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                                        <TrendingDown className="w-4 h-4 text-red-500" />
+                                        Rincian Pengeluaran
+                                    </h3>
+                                    <span className="text-xs text-slate-400">
+                                        {getMonthName(month)}
+                                    </span>
+                                </div>
+                                {breakdown.pengeluaran.length > 0 ? (
+                                    <ul className="divide-y divide-slate-50">
+                                        {breakdown.pengeluaran.map(
+                                            (item, idx) => (
+                                                <li
+                                                    key={idx}
+                                                    className="flex justify-between items-center px-4 py-3"
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-red-500" />
+                                                        <span className="text-sm text-slate-700">
+                                                            {formatCat(
+                                                                item.category,
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-sm font-semibold text-red-600">
+                                                        {formatCurrency(
+                                                            item.total,
+                                                        )}
+                                                    </span>
+                                                </li>
+                                            ),
+                                        )}
+                                    </ul>
+                                ) : (
+                                    <p className="text-center text-sm text-slate-400 py-6">
+                                        Belum ada pengeluaran bulan ini
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Tombol Filter & Download */}
+                            <div className="flex gap-3 pb-2">
+                                <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 bg-white hover:bg-slate-50 transition-colors">
+                                    <SlidersHorizontal size={15} />
+                                    Filter
+                                </button>
+                                <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 bg-white hover:bg-slate-50 transition-colors">
+                                    <Download size={15} />
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === "catat" && (
+                        <div className="px-4 pt-3 pb-2 flex flex-col gap-2">
+                            {/* Tombol Tambah Transaksi */}
+                            {isBendaharaOrAdmin && (
+                                <PrimaryButton
+                                    onClick={openAddModal}
+                                    className="w-full !py-2.5 font-medium cursor-pointer shadow-sm"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Catat Transaksi Baru
+                                </PrimaryButton>
+                            )}
+
+                            {/* Transaction List */}
+                            {allTransactions.map((transaction) => (
+                                <MobileSwipeCard
+                                    key={transaction.id}
+                                    transaction={transaction}
+                                    activeSwipeId={activeSwipeId}
+                                    setActiveSwipeId={setActiveSwipeId}
+                                    isBendaharaOrAdmin={isBendaharaOrAdmin}
+                                    isSuperAdmin={isSuperAdmin}
+                                    formatDateMobile={formatDateMobile}
+                                    handleVerify={handleVerify}
+                                    handleDelete={handleDelete}
+                                />
+                            ))}
+
+                            {allTransactions.length === 0 && (
+                                <div className="flex flex-col items-center justify-center text-slate-400 py-8 bg-white rounded-2xl shadow-sm border border-slate-100 mt-2">
+                                    <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                                        <Search className="w-6 h-6 text-slate-300" />
+                                    </div>
+                                    <p className="font-medium text-slate-600 text-sm">
+                                        Belum ada data transaksi
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Loader Ref for Infinite Scroll */}
+                            <div
+                                ref={loaderRef}
+                                className="py-2 flex justify-center h-10 shrink-0"
+                            >
+                                {hasMore && (
+                                    <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                                )}
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>
+            {/* end mobile sticky layout */}
 
-            <DataTable
-                className="hidden md:flex flex-1 min-h-[400px]"
-                tableFixed
-                columns={
-                    [
-                        {
-                            key: "tanggal",
-                            header: "Tanggal",
-                            width: "w-[13%]",
-                            cellClassName:
-                                "whitespace-nowrap text-slate-600 font-medium text-sm",
-                            render: (item) => (
-                                <>
-                                    <div>
-                                        {new Date(
-                                            item.created_at,
-                                        ).toLocaleDateString("id-ID", {
-                                            day: "2-digit",
-                                            month: "short",
-                                            year: "numeric",
-                                        })}
+            {/* ── DESKTOP ONLY: Summary Cards + FilterBar + DataTable ── */}
+            <div className="hidden md:contents">
+                <KasSummaryCards
+                    totalSaldo={summary.saldo_total_kas}
+                    pemasukanBulanIni={summary.pemasukan_bulan_ini}
+                    pengeluaranBulanIni={summary.pengeluaran_bulan_ini}
+                    surplusDefisit={summary.saldo_akhir_bulan}
+                    monthLabel={getMonthName(month)}
+                    className="mb-8 md:px-6 shrink-0"
+                />
+
+                <div className="border-t border-slate-200 mb-6 md:mx-6"></div>
+
+                {/* Desktop Toolbar — search, filter, sort */}
+                <FilterBar
+                    searchPlaceholder="Cari keterangan transaksi..."
+                    searchValue={search}
+                    onSearchChange={(val) =>
+                        handleSearchChange({
+                            target: { value: val },
+                        } as React.ChangeEvent<HTMLInputElement>)
+                    }
+                    addon={
+                        <div className="flex items-center justify-start gap-1 p-1 bg-slate-100 rounded-xl">
+                            {(
+                                [
+                                    { value: "", label: "Semua" },
+                                    { value: "in", label: "Masuk" },
+                                    { value: "out", label: "Keluar" },
+                                ] as {
+                                    value: "" | "in" | "out";
+                                    label: string;
+                                }[]
+                            ).map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => handleTypeChange(opt.value)}
+                                    className={`relative flex-none px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors z-10 ${
+                                        typeFilter === opt.value
+                                            ? "text-green-700"
+                                            : "text-slate-500 hover:text-slate-700"
+                                    }`}
+                                >
+                                    {typeFilter === opt.value && (
+                                        <motion.div
+                                            layoutId="activeFilterKasTab"
+                                            className="absolute inset-0 bg-white border border-green-500 rounded-lg shadow-sm -z-10"
+                                            transition={{
+                                                type: "spring",
+                                                stiffness: 400,
+                                                damping: 30,
+                                            }}
+                                        />
+                                    )}
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
+                    }
+                >
+                    {/* Kategori Filter Dropdown */}
+                    <div className="relative shrink-0 z-50">
+                        {isCategoryFilterOpen && (
+                            <div
+                                className="fixed inset-0 z-40"
+                                onClick={() => setIsCategoryFilterOpen(false)}
+                            ></div>
+                        )}
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setIsCategoryFilterOpen(!isCategoryFilterOpen)
+                            }
+                            className="relative z-50 inline-flex items-center justify-between w-[200px] px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                        >
+                            <Filter className="w-4 h-4 mr-2 text-slate-500 shrink-0" />
+                            <span className="truncate flex-1 text-left">
+                                {CATEGORY_OPTIONS.find(
+                                    (opt) => opt.value === categoryFilter,
+                                )?.label || "Semua Kategori"}
+                            </span>
+                            <ChevronDown
+                                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ml-2 shrink-0 ${isCategoryFilterOpen ? "rotate-180" : ""}`}
+                            />
+                        </button>
+                        <AnimatePresence>
+                            {isCategoryFilterOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-[60] p-1"
+                                >
+                                    <div className="max-h-[300px] overflow-y-auto">
+                                        {CATEGORY_OPTIONS.map((opt) => (
+                                            <button
+                                                key={opt.value}
+                                                type="button"
+                                                onClick={() =>
+                                                    handleCategoryChange(
+                                                        opt.value,
+                                                    )
+                                                }
+                                                className={`w-full text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
+                                                    categoryFilter === opt.value
+                                                        ? "bg-green-50 text-green-700 font-semibold"
+                                                        : "text-slate-600 hover:bg-slate-50"
+                                                }`}
+                                            >
+                                                {opt.label}
+                                            </button>
+                                        ))}
                                     </div>
-                                    <div className="text-xs text-slate-400 mt-0.5">
-                                        {new Date(
-                                            item.created_at,
-                                        ).toLocaleTimeString("id-ID", {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        })}
-                                    </div>
-                                </>
-                            ),
-                        },
-                        {
-                            key: "pengimput",
-                            header: "Pengimput",
-                            width: "w-[16%]",
-                            cellClassName: "whitespace-nowrap",
-                            render: (item) => (
-                                <span className="text-sm text-slate-700 font-medium">
-                                    {item.user?.name ?? "-"}
-                                </span>
-                            ),
-                        },
-                        {
-                            key: "kategori",
-                            header: "Kategori",
-                            width: "w-[12%]",
-                            render: (item) => (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 capitalize border border-slate-200">
-                                    {item.category.replace(/_/g, " ")}
-                                </span>
-                            ),
-                        },
-                        {
-                            key: "metode",
-                            header: "Metode",
-                            width: "w-[10%]",
-                            cellClassName: "capitalize text-slate-600 text-sm",
-                            render: (item) => item.payment_method || "-",
-                        },
-                        {
-                            key: "nominal",
-                            header: "Nominal",
-                            width: "w-[15%]",
-                            cellClassName: (item) =>
-                                `whitespace-nowrap font-bold text-sm ${
-                                    item.type === "in"
-                                        ? "text-green-600"
-                                        : "text-red-500"
-                                }`,
-                            render: (item) =>
-                                `${item.type === "in" ? "+" : "-"} ${formatRupiah(item.amount)}`,
-                        },
-                        {
-                            key: "keterangan",
-                            header: "Keterangan",
-                            width: "w-[24%]",
-                            render: (item) => (
-                                <p className="text-slate-600 text-sm whitespace-normal break-words">
-                                    {item.notes || "-"}
-                                </p>
-                            ),
-                        },
-                        {
-                            key: "status",
-                            header: "Status",
-                            width: "w-[12%]",
-                            cellClassName: "whitespace-nowrap",
-                            render: (item) =>
-                                item.verified_at ? (
-                                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-green-50 text-green-700 border border-green-200/50">
-                                        <CheckCircle className="w-3 h-3 mr-1" />
-                                        Terverifikasi
-                                    </span>
-                                ) : (
-                                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200/50">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse" />
-                                        Pending
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                    {/* Urutkan */}
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const newSort =
+                                sortOrder === "terbaru" ? "terlama" : "terbaru";
+                            setSortOrder(newSort);
+                            applyFilters({ sort: newSort, page: 1 });
+                        }}
+                        className="inline-flex items-center justify-center w-auto px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm cursor-pointer shrink-0"
+                    >
+                        <SlidersHorizontal className="w-4 h-4 mr-2 text-slate-500" />
+                        {sortOrder === "terbaru" ? "Terbaru" : "Terlama"}
+                    </button>
+                    {/* Desktop: Filter & Download buttons */}
+                    <button className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-700 bg-white hover:bg-slate-50 transition-colors">
+                        <SlidersHorizontal size={15} />
+                        Filter
+                    </button>
+                    <button className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-700 bg-white hover:bg-slate-50 transition-colors">
+                        <Download size={15} />
+                        Download
+                    </button>
+                </FilterBar>
+
+                <DataTable
+                    className="flex flex-1 min-h-[400px]"
+                    tableFixed
+                    columns={
+                        [
+                            {
+                                key: "tanggal",
+                                header: "Tanggal",
+                                width: "w-[13%]",
+                                cellClassName:
+                                    "whitespace-nowrap text-slate-600 font-medium text-sm",
+                                render: (item) => (
+                                    <>
+                                        <div>
+                                            {new Date(
+                                                item.created_at,
+                                            ).toLocaleDateString("id-ID", {
+                                                day: "2-digit",
+                                                month: "short",
+                                                year: "numeric",
+                                            })}
+                                        </div>
+                                        <div className="text-xs text-slate-400 mt-0.5">
+                                            {new Date(
+                                                item.created_at,
+                                            ).toLocaleTimeString("id-ID", {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                        </div>
+                                    </>
+                                ),
+                            },
+                            {
+                                key: "pengimput",
+                                header: "Pengimput",
+                                width: "w-[16%]",
+                                cellClassName: "whitespace-nowrap",
+                                render: (item) => (
+                                    <span className="text-sm text-slate-700 font-medium">
+                                        {item.user?.name ?? "-"}
                                     </span>
                                 ),
-                        },
-                        {
-                            key: "aksi",
-                            header: "Aksi",
-                            width: "w-[10%]",
-                            cellClassName: "whitespace-nowrap text-sm",
-                            render: (item) => (
-                                <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {isBendaharaOrAdmin &&
-                                        !item.verified_at && (
+                            },
+                            {
+                                key: "kategori",
+                                header: "Kategori",
+                                width: "w-[12%]",
+                                render: (item) => (
+                                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 capitalize border border-slate-200">
+                                        {item.category.replace(/_/g, " ")}
+                                    </span>
+                                ),
+                            },
+                            {
+                                key: "metode",
+                                header: "Metode",
+                                width: "w-[10%]",
+                                cellClassName:
+                                    "capitalize text-slate-600 text-sm",
+                                render: (item) => item.payment_method || "-",
+                            },
+                            {
+                                key: "nominal",
+                                header: "Nominal",
+                                width: "w-[15%]",
+                                cellClassName: (item) =>
+                                    `whitespace-nowrap font-bold text-sm ${
+                                        item.type === "in"
+                                            ? "text-green-600"
+                                            : "text-red-500"
+                                    }`,
+                                render: (item) =>
+                                    `${item.type === "in" ? "+" : "-"} ${formatRupiah(item.amount)}`,
+                            },
+                            {
+                                key: "keterangan",
+                                header: "Keterangan",
+                                width: "w-[24%]",
+                                render: (item) => (
+                                    <p className="text-slate-600 text-sm whitespace-normal break-words">
+                                        {item.notes || "-"}
+                                    </p>
+                                ),
+                            },
+                            {
+                                key: "status",
+                                header: "Status",
+                                width: "w-[12%]",
+                                cellClassName: "whitespace-nowrap",
+                                render: (item) =>
+                                    item.verified_at ? (
+                                        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-green-50 text-green-700 border border-green-200/50">
+                                            <CheckCircle className="w-3 h-3 mr-1" />
+                                            Terverifikasi
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200/50">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-pulse" />
+                                            Pending
+                                        </span>
+                                    ),
+                            },
+                            {
+                                key: "aksi",
+                                header: "Aksi",
+                                width: "w-[10%]",
+                                cellClassName: "whitespace-nowrap text-sm",
+                                render: (item) => (
+                                    <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {isBendaharaOrAdmin &&
+                                            !item.verified_at && (
+                                                <button
+                                                    onClick={() =>
+                                                        handleVerify(item.id)
+                                                    }
+                                                    className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                                    title="Verifikasi Transaksi"
+                                                >
+                                                    <CheckCircle size={18} />
+                                                </button>
+                                            )}
+                                        {isSuperAdmin && (
                                             <button
                                                 onClick={() =>
-                                                    handleVerify(item.id)
+                                                    handleDelete(item.id)
                                                 }
-                                                className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                                                title="Verifikasi Transaksi"
+                                                className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Hapus Transaksi"
                                             >
-                                                <CheckCircle size={18} />
+                                                <Trash2 size={18} />
                                             </button>
                                         )}
-                                    {isSuperAdmin && (
-                                        <button
-                                            onClick={() =>
-                                                handleDelete(item.id)
-                                            }
-                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                            title="Hapus Transaksi"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
-                                    )}
-                                </div>
-                            ),
-                        },
-                    ] satisfies ColumnDef<(typeof transactions.data)[0]>[]
-                }
-                data={transactions.data}
-                keyExtractor={(row) => row.id}
-                emptyState={
-                    <div className="flex flex-col items-center justify-center text-slate-400 py-2">
-                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
-                            <Search className="w-8 h-8 text-slate-300" />
+                                    </div>
+                                ),
+                            },
+                        ] satisfies ColumnDef<(typeof transactions.data)[0]>[]
+                    }
+                    data={transactions.data}
+                    keyExtractor={(row) => row.id}
+                    emptyState={
+                        <div className="flex flex-col items-center justify-center text-slate-400 py-2">
+                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                                <Search className="w-8 h-8 text-slate-300" />
+                            </div>
+                            <p className="font-medium text-slate-600">
+                                Belum ada data transaksi
+                            </p>
+                            <p className="text-xs text-slate-400 mt-1">
+                                Transaksi yang ditambahkan akan muncul di sini.
+                            </p>
                         </div>
-                        <p className="font-medium text-slate-600">
-                            Belum ada data transaksi
-                        </p>
-                        <p className="text-xs text-slate-400 mt-1">
-                            Transaksi yang ditambahkan akan muncul di sini.
-                        </p>
-                    </div>
-                }
-            />
+                    }
+                />
+            </div>
+            {/* end hidden md:contents */}
 
             {/* Pagination Desktop - Muncul dinamis hanya jika lebih dari 1 halaman */}
             {transactions.last_page > 1 && (

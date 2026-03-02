@@ -46,6 +46,26 @@ class TransactionController extends Controller
 
         $summaryData = $this->transactionService->getSummary($month, $year);
 
+        // Rincian pemasukan per kategori bulan ini
+        $rincianPemasukan = Transaction::where('type', 'in')
+            ->whereMonth('created_at', (int) $month)
+            ->whereYear('created_at', (int) $year)
+            ->selectRaw('category, SUM(amount) as total')
+            ->groupBy('category')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn ($item) => ['category' => $item->category, 'total' => (int) $item->total]);
+
+        // Rincian pengeluaran per kategori bulan ini
+        $rincianPengeluaran = Transaction::where('type', 'out')
+            ->whereMonth('created_at', (int) $month)
+            ->whereYear('created_at', (int) $year)
+            ->selectRaw('category, SUM(amount) as total')
+            ->groupBy('category')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn ($item) => ['category' => $item->category, 'total' => (int) $item->total]);
+
         return Inertia::render('Kas/Index', [
             'transactions' => $transactions,
             'summary'      => $summaryData['summary'],
@@ -56,6 +76,10 @@ class TransactionController extends Controller
                 'category' => $category,
                 'search'   => $search,
                 'sort'     => $sort,
+            ],
+            'breakdown'    => [
+                'pemasukan'   => $rincianPemasukan,
+                'pengeluaran' => $rincianPengeluaran,
             ],
         ]);
     }
