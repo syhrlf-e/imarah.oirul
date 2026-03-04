@@ -42,10 +42,10 @@ export default function TromolInput({ tromolBox, auth }: Props) {
                 <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
                     <CheckCircle className="w-10 h-10 text-emerald-600" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                <h1 className="text-2xl font-bold text-slate-800 mb-2">
                     Alhamdulillah!
                 </h1>
-                <p className="text-gray-600 mb-8 max-w-xs">
+                <p className="text-slate-500 mb-8 max-w-xs">
                     Infaq Tromol <strong>{tromolBox.name}</strong> berhasil
                     dicatat.
                 </p>
@@ -53,7 +53,7 @@ export default function TromolInput({ tromolBox, auth }: Props) {
                     {/* In a real app, this might redirect to scanning another QR code */}
                     <button
                         onClick={() => window.location.reload()}
-                        className="w-full py-3 bg-white border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 flex items-center justify-center"
+                        className="w-full py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50 flex items-center justify-center"
                     >
                         <RefreshCw className="w-5 h-5 mr-2" />
                         Input Lagi
@@ -70,7 +70,7 @@ export default function TromolInput({ tromolBox, auth }: Props) {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen bg-slate-50 flex flex-col">
             <Head title="Input Tromol" />
 
             {/* Header */}
@@ -78,14 +78,14 @@ export default function TromolInput({ tromolBox, auth }: Props) {
                 <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-4 text-blue-600">
                     <Box size={32} />
                 </div>
-                <h1 className="text-xl font-bold text-gray-900 text-center">
+                <h1 className="text-xl font-bold text-slate-800 text-center">
                     {tromolBox.name}
                 </h1>
-                <p className="text-sm text-gray-500 flex items-center mt-1">
+                <p className="text-sm text-slate-500 flex items-center mt-1">
                     <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                     {tromolBox.location || "Lokasi tidak spesifik"}
                 </p>
-                <p className="text-xs text-gray-400 mt-4">
+                <p className="text-xs text-slate-400 mt-4">
                     Petugas: {auth.user.name}
                 </p>
             </div>
@@ -96,7 +96,7 @@ export default function TromolInput({ tromolBox, auth }: Props) {
                     <div>
                         <label
                             htmlFor="amount"
-                            className="block text-center text-sm font-medium text-gray-600 mb-4"
+                            className="block text-center text-sm font-medium text-slate-500 mb-4"
                         >
                             Masukkan Jumlah Uang di Kotak
                         </label>
@@ -112,7 +112,7 @@ export default function TromolInput({ tromolBox, auth }: Props) {
                                         : formatRupiah(data.amount))
                                 }
                                 onChange={handleAmountChange}
-                                className="w-full text-center text-4xl font-bold text-gray-800 border-none bg-transparent focus:ring-0 placeholder-gray-300 p-0"
+                                className="w-full text-center text-4xl font-bold text-slate-800 border-none bg-transparent focus:ring-0 placeholder-gray-300 p-0"
                                 placeholder="Rp 0"
                                 autoFocus
                             />
@@ -142,7 +142,7 @@ export default function TromolInput({ tromolBox, auth }: Props) {
             </div>
 
             <div className="p-6 text-center">
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-slate-400">
                     Pastikan jumlah uang sesuai dengan fisik.
                 </p>
             </div>

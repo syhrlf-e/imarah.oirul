@@ -108,7 +108,7 @@ export default function ZakatForm({ isOpen, onClose, mustahiqs }: Props) {
                             message={errors.mustahiq_id}
                             className="mt-2"
                         />
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-xs text-slate-500">
                             Belum ada?{" "}
                             <a
                                 href={route("zakat.mustahiq")}
@@ -225,7 +225,7 @@ export default function ZakatForm({ isOpen, onClose, mustahiqs }: Props) {
                                 onValueChange={(val) => setData("amount", val)}
                                 className="mt-1 block w-full"
                             />
-                            <p className="mt-1 text-xs text-gray-500">
+                            <p className="mt-1 text-xs text-slate-500">
                                 Masukkan nominal zakat yang akan disalurkan.
                             </p>
                             <InputError
@@ -285,7 +285,7 @@ export default function ZakatForm({ isOpen, onClose, mustahiqs }: Props) {
                         />
                         <textarea
                             id="notes"
-                            className="mt-1 block w-full border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
+                            className="mt-1 block w-full border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
                             value={data.notes}
                             onChange={(e) => setData("notes", e.target.value)}
                             rows={2}

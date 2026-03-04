@@ -140,7 +140,7 @@ export default function MuzakkiForm({ isOpen, onClose, muzakki }: Props) {
                         <InputLabel htmlFor="address" value="Alamat" />
                         <textarea
                             id="address"
-                            className="mt-1 block w-full border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
+                            className="mt-1 block w-full border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
                             value={data.address}
                             onChange={(e) => setData("address", e.target.value)}
                             rows={3}

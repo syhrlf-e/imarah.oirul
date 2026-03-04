@@ -63,10 +63,10 @@ export default function Login({ status }: { status?: string }) {
             )}
 
             <div className="mb-8 text-center">
-                <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">
+                <h2 className="text-3xl font-extrabold tracking-tight text-slate-800">
                     Imarah
                 </h2>
-                <p className="mt-2 text-sm font-medium text-gray-500">
+                <p className="mt-2 text-sm font-medium text-slate-500">
                     Sistem Manajemen Masjid Digital Terpadu
                 </p>
             </div>
@@ -79,10 +79,10 @@ export default function Login({ status }: { status?: string }) {
                             type="email"
                             name="email"
                             value={data.email}
-                            className={`peer block w-full px-4 pt-6 pb-2 rounded-xl bg-gray-50 focus:bg-white transition-colors shadow-sm text-sm ${
+                            className={`peer block w-full px-4 pt-6 pb-2 rounded-xl bg-slate-50 focus:bg-white transition-colors shadow-sm text-sm ${
                                 errors.email
                                     ? "!border-red-500 focus:!ring-2 focus:!ring-red-500/20 focus:!border-red-500 !ring-1 !ring-red-500"
-                                    : "!border-gray-200 focus:!ring-2 focus:!ring-emerald-500/20 focus:!border-emerald-500"
+                                    : "!border-slate-200 focus:!ring-2 focus:!ring-emerald-500/20 focus:!border-emerald-500"
                             }`}
                             autoComplete="username"
                             isFocused={true}
@@ -118,10 +118,10 @@ export default function Login({ status }: { status?: string }) {
                             type="password"
                             name="password"
                             value={data.password}
-                            className={`peer block w-full px-4 pt-6 pb-2 rounded-xl bg-gray-50 focus:bg-white transition-colors shadow-sm text-sm ${
+                            className={`peer block w-full px-4 pt-6 pb-2 rounded-xl bg-slate-50 focus:bg-white transition-colors shadow-sm text-sm ${
                                 errors.password
                                     ? "!border-red-500 focus:!ring-2 focus:!ring-red-500/20 focus:!border-red-500 !ring-1 !ring-red-500"
-                                    : "!border-gray-200 focus:!ring-2 focus:!ring-emerald-500/20 focus:!border-emerald-500"
+                                    : "!border-slate-200 focus:!ring-2 focus:!ring-emerald-500/20 focus:!border-emerald-500"
                             }`}
                             autoComplete="current-password"
                             onChange={(e) => {
@@ -163,9 +163,9 @@ export default function Login({ status }: { status?: string }) {
                                     (e.target.checked || false) as false,
                                 )
                             }
-                            className="rounded border-gray-300 text-emerald-600 shadow-sm focus:!ring-0 focus:!ring-offset-0 focus:outline-none w-5 h-5 cursor-pointer outline-none"
+                            className="rounded border-slate-200 text-emerald-600 shadow-sm focus:!ring-0 focus:!ring-offset-0 focus:outline-none w-5 h-5 cursor-pointer outline-none"
                         />
-                        <span className="ms-3 text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+                        <span className="ms-3 text-sm text-slate-500 group-hover:text-slate-800 transition-colors">
                             Ingat saya
                         </span>
                     </label>

@@ -192,7 +192,7 @@ export default function Dashboard({
                         <span className="text-lg font-bold text-slate-900">
                             {auth.user.name}
                         </span>
-                        <span className="text-[10px] font-medium text-[#22C55E] bg-white border border-[#22C55E] rounded-full px-1.5 py-[2px] capitalize">
+                        <span className="text-[10px] font-semibold border border-amber-700 text-amber-700 rounded-full px-2.5 py-1 capitalize">
                             {auth.user.role.replace("_", " ")}
                         </span>
                     </div>
@@ -225,12 +225,12 @@ export default function Dashboard({
                 </div>
 
                 {/* Main Layout Area */}
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 flex-1 lg:min-h-0">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 md:gap-6 flex-1 lg:min-h-0">
                     {/* Left Section: Stats & Chart */}
-                    <div className="lg:col-span-3 flex flex-col gap-4 md:gap-6 lg:min-h-0">
+                    <div className="lg:col-span-3 flex flex-col gap-3 md:gap-6 lg:min-h-0">
                         {/* Summary Zakat (Petugas Zakat) */}
                         {auth.user.role === "petugas_zakat" && zakatStats && (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <div className="bg-white rounded-2xl p-5 border border-slate-200">
                                     <p className="text-slate-500 text-sm mb-1">
                                         Total Muzakki
@@ -266,7 +266,7 @@ export default function Dashboard({
 
                         {/* Summary Inventaris (Sekretaris) */}
                         {auth.user.role === "sekretaris" && inventarisStats && (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <div className="bg-white rounded-2xl p-5 border border-slate-200">
                                     <p className="text-slate-500 text-sm mb-1">
                                         Total Item Inventaris
@@ -338,7 +338,7 @@ export default function Dashboard({
                     </div>
 
                     {/* Right Section: Agenda & Recent Transactions */}
-                    <div className="lg:col-span-1 flex flex-col gap-4 md:gap-6 lg:min-h-0">
+                    <div className="lg:col-span-1 flex flex-col gap-3 md:gap-6 lg:min-h-0">
                         {/* Upcoming Agendas Widget (Hanya Super Admin) */}
                         {auth.user.role === "super_admin" && (
                             <UpcomingAgendas
@@ -362,7 +362,7 @@ export default function Dashboard({
 
                 {/* Monthly Report Full-width Shortcut (Super Admin & Bendahara) */}
                 {["super_admin", "bendahara"].includes(auth.user.role) && (
-                    <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 md:mt-6 shrink-0">
+                    <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-3 md:mt-6 shrink-0">
                         <div className="flex items-center">
                             <div className="hidden md:flex p-3 bg-emerald-50 text-emerald-600 rounded-xl mr-4 shrink-0">
                                 <FileText className="w-6 h-6" />

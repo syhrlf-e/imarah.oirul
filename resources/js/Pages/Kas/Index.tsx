@@ -466,10 +466,10 @@ export default function KasIndex({
                 <div className="flex-1 overflow-y-auto">
                     {/* Toggle — ikut scroll, posisi tengah */}
                     <div className="flex justify-center px-4 py-3 bg-white">
-                        <div className="flex bg-slate-100 rounded-full p-1 shadow-inner">
+                        <div className="flex bg-slate-100 rounded-xl p-1 shadow-inner">
                             <button
                                 onClick={() => setActiveTab("tampilan")}
-                                className={`relative px-6 py-1.5 rounded-full text-sm font-semibold transition-colors z-10 ${
+                                className={`relative px-8 py-2 rounded-lg text-sm font-semibold transition-colors z-10 ${
                                     activeTab === "tampilan"
                                         ? "text-white"
                                         : "text-slate-500"
@@ -478,7 +478,7 @@ export default function KasIndex({
                                 {activeTab === "tampilan" && (
                                     <motion.div
                                         layoutId="activeToggleKas"
-                                        className="absolute inset-0 bg-emerald-500 rounded-full shadow-sm shadow-emerald-500/30 -z-10"
+                                        className="absolute inset-0 bg-emerald-500 rounded-lg shadow-sm shadow-emerald-500/30 -z-10"
                                         transition={{
                                             type: "spring",
                                             stiffness: 400,
@@ -490,7 +490,7 @@ export default function KasIndex({
                             </button>
                             <button
                                 onClick={() => setActiveTab("catat")}
-                                className={`relative px-6 py-1.5 rounded-full text-sm font-semibold transition-colors z-10 ${
+                                className={`relative px-8 py-2 rounded-lg text-sm font-semibold transition-colors z-10 ${
                                     activeTab === "catat"
                                         ? "text-white"
                                         : "text-slate-500"
@@ -499,7 +499,7 @@ export default function KasIndex({
                                 {activeTab === "catat" && (
                                     <motion.div
                                         layoutId="activeToggleKas"
-                                        className="absolute inset-0 bg-emerald-500 rounded-full shadow-sm shadow-emerald-500/30 -z-10"
+                                        className="absolute inset-0 bg-emerald-500 rounded-lg shadow-sm shadow-emerald-500/30 -z-10"
                                         transition={{
                                             type: "spring",
                                             stiffness: 400,
@@ -521,9 +521,36 @@ export default function KasIndex({
                                 pengeluaranBulanIni={
                                     summary.pengeluaran_bulan_ini
                                 }
-                                surplusDefisit={summary.saldo_akhir_bulan}
                                 monthLabel={getMonthName(month)}
                             />
+
+                            {/* Card Surplus (Khusus Kas Tampilan) */}
+                            <div className="rounded-2xl bg-teal-50 border border-teal-200 px-4 py-3 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Activity
+                                        size={16}
+                                        className="text-teal-600"
+                                    />
+                                    <span className="text-teal-700 text-sm font-medium">
+                                        Surplus Bersih
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-teal-600 text-[10px] md:text-xs bg-teal-100 px-2.5 py-1 rounded-full font-medium">
+                                        {getMonthName(month)}
+                                    </span>
+                                    <span
+                                        className={`text-sm md:text-base font-bold ${summary.saldo_akhir_bulan >= 0 ? "text-teal-700" : "text-red-500"}`}
+                                    >
+                                        {summary.saldo_akhir_bulan >= 0
+                                            ? "+"
+                                            : ""}
+                                        {formatCurrency(
+                                            summary.saldo_akhir_bulan,
+                                        )}
+                                    </span>
+                                </div>
+                            </div>
 
                             {/* Card Rincian Pemasukan */}
                             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">

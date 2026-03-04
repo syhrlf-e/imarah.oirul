@@ -52,11 +52,11 @@ export default function DeleteUserForm({
     return (
         <section className={`space-y-6 ${className}`}>
             <header>
-                <h2 className="text-lg font-medium text-gray-900">
+                <h2 className="text-lg font-medium text-slate-800">
                     Delete Account
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="mt-1 text-sm text-slate-500">
                     Once your account is deleted, all of its resources and data
                     will be permanently deleted. Before deleting your account,
                     please download any data or information that you wish to
@@ -81,11 +81,11 @@ export default function DeleteUserForm({
 
                 <div className="p-6 overflow-y-auto flex-1 bg-white min-h-0">
                     <form id="delete-user-form" onSubmit={deleteUser}>
-                        <h2 className="text-lg font-medium text-gray-900">
+                        <h2 className="text-lg font-medium text-slate-800">
                             Are you sure you want to delete your account?
                         </h2>
 
-                        <p className="mt-1 text-sm text-gray-600">
+                        <p className="mt-1 text-sm text-slate-500">
                             Once your account is deleted, all of its resources
                             and data will be permanently deleted. Please enter
                             your password to confirm you would like to

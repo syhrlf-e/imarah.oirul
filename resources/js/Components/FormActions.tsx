@@ -49,7 +49,7 @@ export default function FormActions({
     // Default layout: flex-end
     return (
         <div
-            className={`flex justify-end space-x-3 pt-4 border-t border-gray-100 ${className}`}
+            className={`flex justify-end space-x-3 pt-4 border-t border-slate-100 ${className}`}
         >
             <SecondaryButton onClick={onCancel} disabled={processing}>
                 {cancelText}

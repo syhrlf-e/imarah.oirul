@@ -27,7 +27,7 @@ export default function SlideOverPanel({
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" />
+                    <div className="fixed inset-0 bg-slate-900 bg-opacity-75 transition-opacity" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 overflow-hidden">
@@ -44,15 +44,15 @@ export default function SlideOverPanel({
                             >
                                 <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
                                     <div className="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
-                                        <div className="px-4 py-6 sm:px-6 border-b border-gray-200">
+                                        <div className="px-4 py-6 sm:px-6 border-b border-slate-200">
                                             <div className="flex items-center justify-between">
-                                                <Dialog.Title className="text-lg font-medium text-gray-900">
+                                                <Dialog.Title className="text-lg font-medium text-slate-800">
                                                     {title}
                                                 </Dialog.Title>
                                                 <div className="ml-3 flex h-7 items-center">
                                                     <button
                                                         type="button"
-                                                        className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                                                        className="rounded-md bg-white text-slate-400 hover:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                                                         onClick={onClose}
                                                     >
                                                         <span className="sr-only">

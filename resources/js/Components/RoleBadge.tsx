@@ -13,7 +13,7 @@ export default function RoleBadge({ role }: Props) {
                 return "bg-green-100 text-green-800";
             case "viewer":
             default:
-                return "bg-gray-100 text-gray-800";
+                return "bg-slate-100 text-slate-800";
         }
     };
 

@@ -136,7 +136,7 @@ export default function MustahiqForm({ isOpen, onClose, mustahiq }: Props) {
                         <textarea
                             id="address"
                             required
-                            className="mt-1 block w-full border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
+                            className="mt-1 block w-full border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
                             value={data.address}
                             onChange={(e) => setData("address", e.target.value)}
                             rows={3}
@@ -152,7 +152,7 @@ export default function MustahiqForm({ isOpen, onClose, mustahiq }: Props) {
                         />
                         <textarea
                             id="description"
-                            className="mt-1 block w-full border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
+                            className="mt-1 block w-full border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
                             value={data.description}
                             onChange={(e) =>
                                 setData("description", e.target.value)

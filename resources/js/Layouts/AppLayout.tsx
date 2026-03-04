@@ -126,7 +126,7 @@ export default function AppLayout({ title, children }: Props) {
     };
 
     return (
-        <div className="h-screen bg-slate-100 font-sans flex text-slate-900 overflow-hidden text-sm">
+        <div className="h-screen bg-slate-50 font-sans flex text-slate-900 overflow-hidden text-sm">
             <Toaster />
             <GlobalToastListener />
 
@@ -169,7 +169,7 @@ export default function AppLayout({ title, children }: Props) {
                 toggleSidebar={toggleSidebar}
             />
 
-            <main className="flex-1 flex flex-col h-[100dvh] overflow-hidden relative bg-slate-50/50">
+            <main className="flex-1 flex flex-col h-[100dvh] overflow-hidden relative bg-slate-50">
                 <MobileHeader
                     auth={auth}
                     url={url}
